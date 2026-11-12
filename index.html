@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Arnav — Inside the Chip</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --background: #101412;
+      --surface: #19201c;
+      --copper: #926346;
+      --amber: #ffc16b;
+      --text: #eeeae0;
+      --muted: #a5aea5;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+    }
+
+    button { font: inherit; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 6%;
+      border-bottom: 1px solid #ffffff15;
+    }
+
+    .brand {
+      font-weight: 650;
+      letter-spacing: -0.04em;
+    }
+
+    .brand span { color: var(--amber); }
+
+    .quiet-button {
+      border: 1px solid #ffffff30;
+      background: transparent;
+      color: var(--text);
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: auto;
+      padding: 48px 24px;
+    }
+
+    .eyebrow {
+      color: var(--amber);
+      font: 11px monospace;
+      letter-spacing: 0.16em;
+    }
+
+    h1 {
+      font-size: clamp(30px, 5vw, 54px);
+      font-weight: 500;
+      letter-spacing: -0.05em;
+      margin: 12px 0;
+    }
+
+    .description {
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 570px;
+    }
+
+    .chip-stage {
+      margin-top: 32px;
+      overflow: hidden;
+      border: 1px solid #ffffff20;
+      border-radius: 12px;
+      background: #111713;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .trace {
+      fill: none;
+      stroke: var(--copper);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .secondary-trace {
+      fill: none;
+      stroke: var(--copper);
+      stroke-width: 1;
+      opacity: 0.35;
+    }
+
+    .block {
+      cursor: pointer;
+      outline: none;
+    }
+
+    .block-body {
+      fill: var(--surface);
+      stroke: #69776b;
+      stroke-width: 1.5;
+      transition: fill 180ms, stroke 180ms;
+    }
+
+    .block:hover .block-body,
+    .block:focus-visible .block-body,
+    .block.active .block-body {
+      fill: #283126;
+      stroke: var(--amber);
+    }
+
+    .block-label {
+      fill: var(--text);
+      font: 600 34px monospace;
+      pointer-events: none;
+    }
+
+    .block-caption {
+      fill: var(--muted);
+      font: 12px monospace;
+      pointer-events: none;
+    }
+
+    .micro-label {
+      fill: #829080;
+      font: 10px monospace;
+      letter-spacing: 2px;
+    }
+
+    #pulse {
+      fill: var(--amber);
+      filter: url(#glow);
+      pointer-events: none;
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 15px 20px;
+      border-top: 1px solid #ffffff15;
+      color: var(--muted);
+      font: 11px monospace;
+    }
+
+    .status-light {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: var(--amber);
+    }
+
+    .content {
+      max-width: 720px;
+      padding: 32px 0;
+    }
+
+    .content h2 {
+      font-size: 30px;
+      font-weight: 500;
+      letter-spacing: -0.03em;
+    }
+
+    .content p {
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .primary-button {
+      background: var(--amber);
+      color: #21170d;
+      border: 0;
+      border-radius: 6px;
+      padding: 13px 20px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: wait;
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: 5px;
+    }
+
+    [hidden] { display: none !important; }
+
+    @media (max-width: 600px) {
+      main { padding: 28px 16px; }
+      header { padding: 20px 16px; }
+      .status-bar { font-size: 10px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="brand">Arnav Srivastava<span>.</span></div>
+    <button id="overview" class="quiet-button">Chip overview</button>
+  </header>
+
+  <main>
+    <p class="eyebrow">COMPUTER ENGINEERING / INTERACTIVE PORTFOLIO</p>
+    <h1>A little closer to the hardware.</h1>
+    <p class="description">
+      Start at the program counter. Follow the traces to explore
+      what I build.
+    </p>
+
+    <div class="chip-stage">
+      <svg
+        id="chip"
+        viewBox="0 0 1000 460"
+        aria-labelledby="chip-title chip-description"
+      >
+        <title id="chip-title">Interactive CPU portfolio</title>
+        <desc id="chip-description">
+          Select the program counter for an introduction, or the
+          ALU to explore my CPU project.
+        </desc>
+
+        <defs>
+          <pattern
+            id="grid"
+            width="24"
+            height="24"
+            patternUnits="userSpaceOnUse"
+          >
+            <path
+              d="M 24 0 H 0 V 24"
+              fill="none"
+              stroke="#ffffff"
+              stroke-opacity="0.035"
+            />
+          </pattern>
+
+          <filter id="glow" x="-200%" y="-200%" width="500%" height="500%">
+            <feGaussianBlur stdDeviation="6" />
+            <feMerge>
+              <feMergeNode />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        <rect width="1000" height="460" fill="url(#grid)" />
+
+        <!-- Decorative traces -->
+        <g class="secondary-trace">
+          <path d="M 40 80 H 430 V 120 H 960" />
+          <path d="M 40 95 H 415 V 135 H 960" />
+          <path d="M 40 370 H 510 V 340 H 960" />
+          <path d="M 40 385 H 525 V 355 H 960" />
+          <path d="M 180 40 V 150" />
+          <path d="M 195 40 V 150" />
+          <path d="M 760 300 V 420" />
+          <path d="M 775 300 V 420" />
+        </g>
+
+        <!-- The pulse follows this exact path. -->
+        <path
+          id="signal-path"
+          class="trace"
+          d="M 340 230 H 455 V 300 H 570 V 230 H 660"
+        />
+
+        <!-- Parallel wires suggest a small bus. -->
+        <path
+          class="secondary-trace"
+          d="M 340 242 H 443 V 312 H 582 V 242 H 660"
+        />
+        <path
+          class="secondary-trace"
+          d="M 340 218 H 467 V 288 H 558 V 218 H 660"
+        />
+
+        <text x="478" y="337" class="micro-label">EXPLORE →</text>
+
+        <g
+          id="pc"
+          class="block active"
+          role="button"
+          tabindex="0"
+          aria-label="Program counter: about Arnav"
+          aria-pressed="true"
+        >
+          <rect
+            class="block-body"
+            x="120" y="150" width="220" height="150" rx="8"
+          />
+          <text x="148" y="182" class="micro-label">00 / START HERE</text>
+          <text x="148" y="230" class="block-label">PC</text>
+          <text x="148" y="265" class="block-caption">About & interests</text>
+        </g>
+
+        <g
+          id="alu"
+          class="block"
+          role="button"
+          tabindex="0"
+          aria-label="ALU: explore the custom CPU project"
+          aria-pressed="false"
+        >
+          <rect
+            class="block-body"
+            x="660" y="150" width="220" height="150" rx="8"
+          />
+          <text x="688" y="182" class="micro-label">01 / PROJECT</text>
+          <text x="688" y="230" class="block-label">ALU</text>
+          <text x="688" y="265" class="block-caption">My 8-bit CPU</text>
+        </g>
+
+        <circle id="pulse" r="6" opacity="0" />
+      </svg>
+
+      <div class="status-bar">
+        <span><span class="status-light"></span>PORTFOLIO / ONLINE</span>
+        <span id="status" role="status">PC · Ready to explore</span>
+      </div>
+    </div>
+
+    <section id="intro" class="content">
+      <p class="eyebrow">PROGRAM COUNTER</p>
+      <h2>Hi, I’m Arnav.</h2>
+      <p>
+        I’m interested in computer architecture, digital design, and
+        how hardware and software fit together. I enjoy understanding
+        computers by building the pieces myself.
+      </p>
+      <button id="execute" class="primary-button">
+        Explore my CPU project →
+      </button>
+    </section>
+
+    <section id="project" class="content" hidden>
+      <p class="eyebrow">ALU / SELECTED PROJECT</p>
+      <h2 id="project-title" tabindex="-1">A CPU, from the ground up.</h2>
+      <p>
+        I built a custom 8-bit processor with a 16-bit instruction set
+        in Digital Logic Sim, starting with gates and building up to
+        registers, an ALU, memory, and a control unit.
+      </p>
+      <p>
+        I also created an assembler and NACAIS, a high-level language
+        frontend, to connect programs to the processor.
+      </p>
+      <button id="return" class="quiet-button">← Return to the PC</button>
+    </section>
+  </main>
+
+  <script>
+    const chip = document.querySelector("#chip");
+    const path = document.querySelector("#signal-path");
+    const pulse = document.querySelector("#pulse");
+    const pc = document.querySelector("#pc");
+    const alu = document.querySelector("#alu");
+    const intro = document.querySelector("#intro");
+    const project = document.querySelector("#project");
+    const status = document.querySelector("#status");
+    const execute = document.querySelector("#execute");
+    const overview = document.querySelector("#overview");
+    const returnButton = document.querySelector("#return");
+
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    );
+
+    const fullView = [0, 0, 1000, 460];
+    const aluView = [540, 110, 460, 212];
+
+    let currentView = [...fullView];
+    let busy = false;
+    let selected = "pc";
+
+    // Run a callback on each animation frame, with progress from 0 to 1.
+    function animate(duration, draw) {
+      if (reducedMotion.matches) {
+        draw(1);
+        return Promise.resolve();
+      }
+
+      return new Promise(resolve => {
+        let start;
+
+        function frame(time) {
+          if (start === undefined) start = time;
+
+          const progress = Math.min((time - start) / duration, 1);
+          draw(progress);
+
+          if (progress < 1) {
+            requestAnimationFrame(frame);
+          } else {
+            resolve();
+          }
+        }
+
+        requestAnimationFrame(frame);
+      });
+    }
+
+    function easeInOut(t) {
+      return t * t * (3 - 2 * t);
+    }
+
+    async function moveCamera(destination) {
+      const origin = [...currentView];
+
+      await animate(700, progress => {
+        const eased = easeInOut(progress);
+
+        currentView = origin.map((value, index) =>
+          value + (destination[index] - value) * eased
+        );
+
+        chip.setAttribute("viewBox", currentView.join(" "));
+      });
+    }
+
+    function setBusy(value) {
+      busy = value;
+
+      for (const button of [execute, overview, returnButton]) {
+        button.disabled = value;
+      }
+
+      for (const block of [pc, alu]) {
+        block.setAttribute("aria-disabled", String(value));
+      }
+    }
+
+    function selectBlock(name) {
+      selected = name;
+
+      for (const [block, blockName] of [[pc, "pc"], [alu, "alu"]]) {
+        const active = name === blockName;
+        block.classList.toggle("active", active);
+        block.setAttribute("aria-pressed", String(active));
+      }
+    }
+
+    async function exploreCPU() {
+      if (busy || selected === "alu") return;
+      setBusy(true);
+
+      try {
+        status.textContent = "Signal travelling · PC → ALU";
+
+        const length = path.getTotalLength();
+
+        // Position the pulse before making it visible.
+        const start = path.getPointAtLength(0);
+        pulse.setAttribute("cx", start.x);
+        pulse.setAttribute("cy", start.y);
+        pulse.setAttribute("opacity", "1");
+
+        await animate(1100, progress => {
+          const point = path.getPointAtLength(length * progress);
+          pulse.setAttribute("cx", point.x);
+          pulse.setAttribute("cy", point.y);
+        });
+
+        pulse.setAttribute("opacity", "0");
+        selectBlock("alu");
+
+        await moveCamera(aluView);
+
+        intro.hidden = true;
+        project.hidden = false;
+        status.textContent = "ALU · CPU project";
+
+        // Move keyboard focus to the newly opened content.
+        document.querySelector("#project-title").focus({
+          preventScroll: true
+        });
+      } finally {
+        pulse.setAttribute("opacity", "0");
+        setBusy(false);
+      }
+    }
+
+    async function showOverview() {
+      if (busy || selected === "pc") return;
+      setBusy(true);
+
+      try {
+        await moveCamera(fullView);
+
+        selectBlock("pc");
+        project.hidden = true;
+        intro.hidden = false;
+        status.textContent = "PC · Ready to explore";
+        pc.focus({ preventScroll: true });
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    // SVG buttons need explicit keyboard handling.
+    function bindBlock(block, action) {
+      block.addEventListener("click", action);
+      block.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          action();
+        }
+      });
+    }
+
+    bindBlock(pc, showOverview);
+    bindBlock(alu, exploreCPU);
+
+    execute.addEventListener("click", exploreCPU);
+    overview.addEventListener("click", showOverview);
+    returnButton.addEventListener("click", showOverview);
+  </script>
+</body>
+</html>
