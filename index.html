@@ -121,7 +121,7 @@
 
     .chip-index {
       fill: var(--chip-accent);
-      font: 10px monospace;
+      font: 9px monospace;
       letter-spacing: 2px;
     }
 
@@ -130,8 +130,12 @@
       font: 500 28px monospace;
     }
 
-    .chip-name-small {
-      font-size: 21px;
+    .chip-name-smallA {
+      font-size: 23px;
+    }
+
+    .chip-name-smallB {
+      font-size: 25px;
     }
 
     .chip-description {
@@ -482,10 +486,86 @@
       font: 13px/1.6 system-ui, sans-serif;
       text-align: center;
     }
+
+    /* Two-second welcome screen */
+    #welcome-screen {
+      position: fixed;
+      inset: 0;
+
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      max-height: none;
+
+      margin: 0;
+      padding: 24px;
+      border: none;
+
+      background: #b8dce9;
+      color: #294653;
+    }
+
+    #welcome-screen[open] {
+      display: grid;
+      place-items: center;
+    }
+
+    #welcome-screen::backdrop {
+      background: #b8dce9;
+    }
+
+    #welcome-screen h1 {
+      margin: 0;
+      padding-left: 0.18em;
+
+      font: 500 clamp(30px, 7vw, 80px) monospace;
+      letter-spacing: 0.18em;
+    }
+
+    /* Decorative animation layer inside the expanded chip */
+    #chip-background {
+      position: absolute;
+      inset: 0;
+
+      width: 100%;
+      height: 100%;
+
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    /* Keep text and controls above the animation. */
+    #chip-panel .chip-toolbar,
+    #chip-panel .panel-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .background-track,
+    .background-signal {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .background-track {
+      stroke-width: 1;
+      opacity: 0.045;
+    }
+
+    .background-signal {
+      stroke-width: 2;
+      opacity: 0.22;
+    }
   </style>
 </head>
 
 <body>
+  <dialog id="welcome-screen" aria-label="Welcome">
+    <h1>WELCOME</h1>
+  </dialog>
   <svg
     class="circuit"
     viewBox="-24 -12 1224 812"
@@ -668,8 +748,8 @@
 
       <circle class="orientation-dot" cx="221" cy="19" r="3" />
 
-      <text class="chip-index" x="24" y="35">01 / START</text>
-      <text class="chip-name" x="24" y="82">PC</text>
+      <text class="chip-index" x="24" y="35">ALIAS: PROGRAM COUNTER</text>
+      <text class="chip-name" x="24" y="82">ABOUT ME</text>
       <text class="chip-description" x="24" y="119">
         Intro & interests
       </text>
@@ -687,8 +767,8 @@
 
       <circle class="orientation-dot" cx="221" cy="19" r="3" />
 
-      <text class="chip-index" x="24" y="35">02 / REGISTER FILE</text>
-      <text class="chip-name" x="24" y="82">RF</text>
+      <text class="chip-index" x="24" y="35">ALIAS: REGISTER FILE</text>
+      <text class="chip-name chip-name-smallB" x="24" y="82">PAST PROJECTS</text>
       <text class="chip-description" x="24" y="119">
         Older & smaller projects
       </text>
@@ -706,8 +786,8 @@
 
       <circle class="orientation-dot" cx="221" cy="19" r="3" />
 
-      <text class="chip-index" x="24" y="35">03 / CONTROL UNIT</text>
-      <text class="chip-name" x="24" y="82">CU</text>
+      <text class="chip-index" x="24" y="35">ALIAS: CONTROL UNIT</text>
+      <text class="chip-name" x="24" y="82">CUSTOM CPU</text>
       <text class="chip-description" x="24" y="119">
         Custom CPU & assembler
       </text>
@@ -725,8 +805,8 @@
 
       <circle class="orientation-dot" cx="221" cy="19" r="3" />
 
-      <text class="chip-index" x="24" y="35">04 / ALU</text>
-      <text class="chip-name" x="24" y="82">ALU</text>
+      <text class="chip-index" x="24" y="35">ALIAS: ARITHMETIC LOGIC UNIT</text>
+      <text class="chip-name chip-name-smallA" x="24" y="82">CUSTOM COMPILER</text>
       <text class="chip-description" x="24" y="119">
         NACAIS & optimizer
       </text>
@@ -744,10 +824,8 @@
 
       <circle class="orientation-dot" cx="221" cy="19" r="3" />
 
-      <text class="chip-index" x="24" y="35">05 / MEMORY & CACHE</text>
-      <text class="chip-name chip-name-small" x="24" y="82">
-        MEMORY
-      </text>
+      <text class="chip-index" x="24" y="35">ALIAS: CACHE HIERARCHY</text>
+      <text class="chip-name chip-name" x="24" y="82">VM SIMULATOR</text>
       <text class="chip-description" x="24" y="119">
         OS virtual memory sim
       </text>
@@ -765,8 +843,8 @@
 
       <circle class="orientation-dot" cx="221" cy="19" r="3" />
 
-      <text class="chip-index" x="24" y="35">06 / INPUT & OUTPUT</text>
-      <text class="chip-name" x="24" y="82">I/O</text>
+      <text class="chip-index" x="24" y="35">ALIAS: I/O CONTROLLER</text>
+      <text class="chip-name" x="24" y="82">CONNECT</text>
       <text class="chip-description" x="24" y="119">
         Links & contact
       </text>
@@ -774,6 +852,12 @@
   </svg>
   <p id="route-status" class="route-status" role="status"></p>
   <dialog id="chip-panel" aria-labelledby="chip-heading">
+    <svg
+      id="chip-background"
+      viewBox="0 0 1000 700"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    ></svg>
     <div class="chip-toolbar">
       <span id="panel-label" class="panel-eyebrow"></span>
 
@@ -861,7 +945,7 @@
     // These strings contain HTML written by you, not visitor input.
     const chipPages = {
       pc: {
-        label: "01 / PROGRAM COUNTER",
+        label: "PROGRAM COUNTER",
         html: `
           <p class="panel-eyebrow">INTRODUCTION</p>
           <h1 id="chip-heading">Hi, I’m Arnav.</h1>
@@ -916,7 +1000,7 @@
       },
 
       rf: {
-        label: "02 / REGISTER FILE",
+        label: "REGISTER FILE",
         html: `
           <p class="panel-eyebrow">PROJECT COLLECTION</p>
           <h1 id="chip-heading">Smaller builds.</h1>
@@ -932,7 +1016,7 @@
       },
 
       control: {
-        label: "03 / CONTROL UNIT",
+        label: "CONTROL UNIT",
         html: `
           <p class="panel-eyebrow">CUSTOM CPU & ASSEMBLER</p>
           <h1 id="chip-heading">From gates to instructions.</h1>
@@ -971,7 +1055,7 @@
       },
 
       alu: {
-        label: "04 / ARITHMETIC LOGIC UNIT",
+        label: "ARITHMETIC LOGIC UNIT",
         html: `
           <p class="panel-eyebrow">NACAIS & OPTIMIZATION</p>
           <h1 id="chip-heading">Giving the CPU a language.</h1>
@@ -999,7 +1083,7 @@
       },
 
       memory: {
-        label: "05 / MEMORY & CACHE",
+        label: "CACHE HIERARCHY",
         html: `
           <p class="panel-eyebrow">OPERATING SYSTEMS</p>
           <h1 id="chip-heading">Making memory visible.</h1>
@@ -1028,7 +1112,7 @@
       },
 
       io: {
-        label: "06 / INPUT & OUTPUT",
+        label: "I/O CONTROLLER",
         html: `
           <p class="panel-eyebrow">LINKS & CONTACT</p>
           <h1 id="chip-heading">Let’s connect.</h1>
@@ -1141,6 +1225,191 @@
       await animation.finished;
     }
 
+    const chipBackground = document.querySelector("#chip-background");
+
+    const backgroundColors = [
+      "#a4d5ef", // Light blue
+      "#a8c7b0", // Soft green
+      "#c4b4dc", // Lavender
+      "#d5c39c", // Pale gold
+      "#a8d3ce"  // Muted turquoise
+    ];
+
+    let backgroundFrame = null;
+    let backgroundSignals = [];
+
+    function randomBetween(min, max) {
+      return min + Math.random() * (max - min);
+    }
+
+    function createBackgroundPath() {
+      const width = 1000;
+      const height = 700;
+
+      const horizontal = Math.random() < 0.5;
+      const bent = Math.random() < 0.7;
+
+      let points;
+
+      if (horizontal) {
+        const startY = randomBetween(40, height - 40);
+        const endY = randomBetween(40, height - 40);
+        const bendX = randomBetween(200, width - 200);
+
+        points = bent
+          ? [
+              [0, startY],
+              [bendX, startY],
+              [bendX, endY],
+              [width, endY]
+            ]
+          : [
+              [0, startY],
+              [width, startY]
+            ];
+      } else {
+        const startX = randomBetween(40, width - 40);
+        const endX = randomBetween(40, width - 40);
+        const bendY = randomBetween(140, height - 140);
+
+        points = bent
+          ? [
+              [startX, 0],
+              [startX, bendY],
+              [endX, bendY],
+              [endX, height]
+            ]
+          : [
+              [startX, 0],
+              [startX, height]
+            ];
+      }
+
+      // Allow travel in either direction.
+      if (Math.random() < 0.5) {
+        points.reverse();
+      }
+
+      return points
+        .map(([x, y], index) =>
+          `${index === 0 ? "M" : "L"} ${x} ${y}`
+        )
+        .join(" ");
+    }
+
+    function resetBackgroundSignal(signal, time, scatter = false) {
+      const pathData = createBackgroundPath();
+
+      const color = backgroundColors[
+        Math.floor(Math.random() * backgroundColors.length)
+      ];
+
+      for (const path of [signal.track, signal.pulse]) {
+        path.setAttribute("d", pathData);
+        path.setAttribute("stroke", color);
+      }
+
+      signal.length = signal.pulse.getTotalLength();
+      signal.duration = randomBetween(4500, 8500);
+      signal.tail = randomBetween(25, 55);
+
+      // Scatter initial positions so they don't all enter together.
+      signal.start = scatter
+        ? time - Math.random() * signal.duration
+        : time + randomBetween(300, 1800);
+
+      signal.pulse.setAttribute(
+        "stroke-dasharray",
+        `${signal.tail} ${signal.length + signal.tail * 2}`
+      );
+    }
+
+    function stopChipBackground() {
+      if (backgroundFrame !== null) {
+        cancelAnimationFrame(backgroundFrame);
+        backgroundFrame = null;
+      }
+
+      backgroundSignals = [];
+      chipBackground.replaceChildren();
+    }
+
+    function startChipBackground() {
+      stopChipBackground();
+
+      if (reducedMotion.matches || !chipPanel.open) return;
+
+      const namespace = "http://www.w3.org/2000/svg";
+      const now = performance.now();
+
+      // Six independent signals, each with its own path and speed.
+      for (let i = 0; i < 6; i++) {
+        const track = document.createElementNS(namespace, "path");
+        const pulse = document.createElementNS(namespace, "path");
+
+        track.setAttribute("class", "background-track");
+        pulse.setAttribute("class", "background-signal");
+
+        // Prevent an unstyled/full-path flash before the first frame.
+        pulse.style.visibility = "hidden";
+
+        chipBackground.append(track, pulse);
+
+        const signal = { track, pulse };
+        resetBackgroundSignal(signal, now, true);
+        backgroundSignals.push(signal);
+      }
+
+      function frame(time) {
+        if (!chipPanel.open) {
+          stopChipBackground();
+          return;
+        }
+
+        for (const signal of backgroundSignals) {
+          if (time < signal.start) {
+            signal.pulse.style.visibility = "hidden";
+            continue;
+          }
+
+          const progress = (time - signal.start) / signal.duration;
+
+          if (progress >= 1) {
+            signal.pulse.style.visibility = "hidden";
+            resetBackgroundSignal(signal, time);
+            continue;
+          }
+
+          signal.pulse.style.visibility = "visible";
+
+          // Move a short illuminated segment along the path.
+          const distance =
+            progress * (signal.length + signal.tail * 2);
+
+          signal.pulse.setAttribute(
+            "stroke-dashoffset",
+            signal.tail - distance
+          );
+        }
+
+        backgroundFrame = requestAnimationFrame(frame);
+      }
+
+      backgroundFrame = requestAnimationFrame(frame);
+    }
+
+    // Stop rendering when the chip is closed.
+    chipPanel.addEventListener("close", stopChipBackground);
+
+    // Respect a motion-preference change while the page is open.
+    reducedMotion.addEventListener("change", () => {
+      if (reducedMotion.matches) {
+        stopChipBackground();
+      } else if (chipPanel.open) {
+        startChipBackground();
+      }
+    });
+
     async function openChip(id) {
       if (openChipId !== null || cameraMoving) return;
 
@@ -1179,6 +1448,7 @@
         chipPanel.showModal();
         openChipId = id;
         panelContent.scrollTop = 0;
+        startChipBackground();
 
         // Fade in the full content after arriving.
         await fadeChipPanel(true);
@@ -1530,48 +1800,34 @@
       imageOpener = null;
     });
     
-    const INTRO_DELAY = 1500; // Time to show the circuit before entering PC
+    const welcomeScreen = document.querySelector("#welcome-screen");
+    const WELCOME_TIME = 2000;
 
-    let introTimer;
-    let introCancelled = false;
+    welcomeScreen.showModal();
 
-    function removeIntroListeners() {
-      window.removeEventListener("pointerdown", cancelAutoIntro);
-      window.removeEventListener("keydown", cancelAutoIntro);
-    }
+    // Keep Escape from dismissing the timed introduction early.
+    welcomeScreen.addEventListener("cancel", event => {
+      event.preventDefault();
+    });
 
-    function cancelAutoIntro() {
-      introCancelled = true;
-      clearTimeout(introTimer);
-      removeIntroListeners();
-    }
+    setTimeout(() => {
+      welcomeScreen.close();
+      welcomeScreen.remove();
 
-    function scheduleAutoIntro() {
-      if (introCancelled) return;
-
-      introTimer = setTimeout(() => {
-        removeIntroListeners();
-
-        if (
-          !travelling &&
-          !cameraMoving &&
-          openChipId === null &&
-          currentChip === "pc"
-        ) {
-          travelTo("pc");
-        }
-      }, INTRO_DELAY);
-    }
-
-    // If someone starts navigating immediately, let them take control.
-    window.addEventListener("pointerdown", cancelAutoIntro);
-    window.addEventListener("keydown", cancelAutoIntro);
-
-    if (document.readyState === "complete") {
-      scheduleAutoIntro();
-    } else {
-      window.addEventListener("load", scheduleAutoIntro, { once: true });
-    }
+      // Let the circuit render before starting the PC zoom.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (
+            !travelling &&
+            !cameraMoving &&
+            openChipId === null &&
+            currentChip === "pc"
+          ) {
+            travelTo("pc");
+          }
+        });
+      });
+    }, WELCOME_TIME);
   </script>
 </body>
 </html>
