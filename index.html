@@ -209,8 +209,20 @@
     }
 
     /* Hide a chip's small labels while its full content is open. */
+    /* Small labels on the circuit chips */
+    .circuit > g[role="button"] text {
+      opacity: 1;
+      transition: opacity 350ms ease;
+    }
+
     .circuit > g.content-open text {
-      visibility: hidden;
+      opacity: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .circuit > g[role="button"] text {
+        transition: none;
+      }
     }
 
     /* Shared content viewer */
@@ -1112,6 +1124,23 @@
         `${Math.max(0, bounds.height - inset * 2)}px`;
     }
 
+    async function fadeChipPanel(opening) {
+      if (reducedMotion.matches) return;
+
+      const animation = chipPanel.animate(
+        [
+          { opacity: opening ? 0 : 1 },
+          { opacity: opening ? 1 : 0 }
+        ],
+        {
+          duration: opening ? 350 : 200,
+          easing: "ease-in-out"
+        }
+      );
+
+      await animation.finished;
+    }
+
     async function openChip(id) {
       if (openChipId !== null || cameraMoving) return;
 
@@ -1121,7 +1150,6 @@
         const page = chipPages[id];
         const colors = getComputedStyle(chips[id]);
 
-        // Match the viewer to this chip's existing colors.
         chipPanel.style.setProperty(
           "--panel-fill",
           colors.getPropertyValue("--chip-fill").trim()
@@ -1140,19 +1168,32 @@
         panelLabel.textContent = page.label;
         panelContent.innerHTML = page.html;
 
+        // Fade out the small labels while zooming toward the chip.
+        chips[id].classList.add("content-open");
+
         await animateViewBox(getChipView(id));
 
-        // Account for a resize during the animation.
         svg.setAttribute("viewBox", getChipView(id).join(" "));
-
         positionChipPanel(id);
-        chips[id].classList.add("content-open");
 
         chipPanel.showModal();
         openChipId = id;
         panelContent.scrollTop = 0;
+
+        // Fade in the full content after arriving.
+        await fadeChipPanel(true);
       } finally {
         cameraMoving = false;
+
+        // Keep the panel aligned if the window resized during the fade.
+        if (openChipId !== null) {
+          svg.setAttribute(
+            "viewBox",
+            getChipView(openChipId).join(" ")
+          );
+
+          positionChipPanel(openChipId);
+        }
       }
     }
 
@@ -1163,8 +1204,13 @@
       const id = openChipId;
 
       try {
+        // Fade away the full content first.
+        await fadeChipPanel(false);
+
         chipPanel.close();
         openChipId = null;
+
+        // Restore the small labels as we zoom back out.
         chips[id].classList.remove("content-open");
 
         await animateViewBox(overviewView);
@@ -1483,6 +1529,49 @@
       enlargedImage.removeAttribute("src");
       imageOpener = null;
     });
+    
+    const INTRO_DELAY = 1500; // Time to show the circuit before entering PC
+
+    let introTimer;
+    let introCancelled = false;
+
+    function removeIntroListeners() {
+      window.removeEventListener("pointerdown", cancelAutoIntro);
+      window.removeEventListener("keydown", cancelAutoIntro);
+    }
+
+    function cancelAutoIntro() {
+      introCancelled = true;
+      clearTimeout(introTimer);
+      removeIntroListeners();
+    }
+
+    function scheduleAutoIntro() {
+      if (introCancelled) return;
+
+      introTimer = setTimeout(() => {
+        removeIntroListeners();
+
+        if (
+          !travelling &&
+          !cameraMoving &&
+          openChipId === null &&
+          currentChip === "pc"
+        ) {
+          travelTo("pc");
+        }
+      }, INTRO_DELAY);
+    }
+
+    // If someone starts navigating immediately, let them take control.
+    window.addEventListener("pointerdown", cancelAutoIntro);
+    window.addEventListener("keydown", cancelAutoIntro);
+
+    if (document.readyState === "complete") {
+      scheduleAutoIntro();
+    } else {
+      window.addEventListener("load", scheduleAutoIntro, { once: true });
+    }
   </script>
 </body>
 </html>
