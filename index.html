@@ -1814,19 +1814,18 @@
       welcomeScreen.close();
       welcomeScreen.remove();
 
-      // Let the circuit render before starting the PC zoom.
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (
-            !travelling &&
-            !cameraMoving &&
-            openChipId === null &&
-            currentChip === "pc"
-          ) {
-            travelTo("pc");
-          }
-        });
-      });
+      // Show the circuit for another two seconds.
+      setTimeout(() => {
+        if (
+          !travelling &&
+          !cameraMoving &&
+          openChipId === null &&
+          currentChip === "pc"
+        ) {
+          travelTo("pc");
+        }
+      }, 1500);
+
     }, WELCOME_TIME);
   </script>
 </body>
