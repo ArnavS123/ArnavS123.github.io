@@ -6,413 +6,687 @@
   <title>Arnav — Inside the Chip</title>
 
   <style>
-    :root {
-      color-scheme: dark;
-      --background: #101412;
-      --surface: #19201c;
-      --copper: #926346;
-      --amber: #ffc16b;
-      --text: #eeeae0;
-      --muted: #a5aea5;
+    * {
+      box-sizing: border-box;
     }
 
-    * { box-sizing: border-box; }
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
 
     body {
-      margin: 0;
-      background: var(--background);
-      color: var(--text);
-      font-family: system-ui, sans-serif;
+      background-color: #111713;
+
+      background-image:
+        linear-gradient(
+          to right,
+          rgba(255, 255, 255, 0.035) 1px,
+          transparent 1px
+        ),
+        linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.035) 1px,
+          transparent 1px
+        );
+
+      background-size: 24px 24px;
     }
 
-    button { font: inherit; }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 24px 6%;
-      border-bottom: 1px solid #ffffff15;
-    }
-
-    .brand {
-      font-weight: 650;
-      letter-spacing: -0.04em;
-    }
-
-    .brand span { color: var(--amber); }
-
-    .quiet-button {
-      border: 1px solid #ffffff30;
-      background: transparent;
-      color: var(--text);
-      padding: 10px 15px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    main {
-      max-width: 1200px;
-      margin: auto;
-      padding: 48px 24px;
-    }
-
-    .eyebrow {
-      color: var(--amber);
-      font: 11px monospace;
-      letter-spacing: 0.16em;
-    }
-
-    h1 {
-      font-size: clamp(30px, 5vw, 54px);
-      font-weight: 500;
-      letter-spacing: -0.05em;
-      margin: 12px 0;
-    }
-
-    .description {
-      color: var(--muted);
-      line-height: 1.7;
-      max-width: 570px;
-    }
-
-    .chip-stage {
-      margin-top: 32px;
-      overflow: hidden;
-      border: 1px solid #ffffff20;
-      border-radius: 12px;
-      background: #111713;
-    }
-
-    svg {
+    .circuit {
       display: block;
       width: 100%;
-      height: auto;
+      height: 100%;
     }
 
-    .trace {
+    /* Copper wiring */
+    .wire {
       fill: none;
-      stroke: var(--copper);
+      stroke: #78583e;
       stroke-width: 3;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
 
-    .secondary-trace {
+    .wire-secondary {
+      stroke: #4d4032;
+      stroke-width: 2;
+    }
+
+    .wire-ternary {
+      stroke: #536e7c;
+      stroke-width: 2;
+    }
+
+    /* Chip contacts */
+    .pins {
       fill: none;
-      stroke: var(--copper);
+      stroke: #76776b;
+      stroke-width: 5;
+      stroke-linecap: butt;
+    }
+
+    /* Each chip supplies its own muted colors. */
+    .pc {
+      --chip-fill: #1c2b25;
+      --chip-border: #526d5c;
+      --chip-accent: #94aa98;
+    }
+
+    .rf {
+      --chip-fill: #202934;
+      --chip-border: #506378;
+      --chip-accent: #91a4bb;
+    }
+
+    .control {
+      --chip-fill: #2b2532;
+      --chip-border: #685975;
+      --chip-accent: #aa99b7;
+    }
+
+    .alu {
+      --chip-fill: #302620;
+      --chip-border: #78604a;
+      --chip-accent: #b29b80;
+    }
+
+    .memory {
+      --chip-fill: #1d2c2e;
+      --chip-border: #4c7073;
+      --chip-accent: #8badae;
+    }
+
+    .io {
+      --chip-fill: #2c2c21;
+      --chip-border: #6c6d4f;
+      --chip-accent: #a8aa87;
+    }
+
+    .chip-body {
+      fill: var(--chip-fill);
+      stroke: var(--chip-border);
+      stroke-width: 1.5;
+    }
+
+    .chip-inset {
+      fill: none;
+      stroke: var(--chip-border);
       stroke-width: 1;
       opacity: 0.35;
     }
 
-    .block {
-      cursor: pointer;
-      outline: none;
-    }
-
-    .block-body {
-      fill: var(--surface);
-      stroke: #69776b;
-      stroke-width: 1.5;
-      transition: fill 180ms, stroke 180ms;
-    }
-
-    .block:hover .block-body,
-    .block:focus-visible .block-body,
-    .block.active .block-body {
-      fill: #283126;
-      stroke: var(--amber);
-    }
-
-    .block-label {
-      fill: var(--text);
-      font: 600 34px monospace;
-      pointer-events: none;
-    }
-
-    .block-caption {
-      fill: var(--muted);
-      font: 12px monospace;
-      pointer-events: none;
-    }
-
-    .micro-label {
-      fill: #829080;
+    .chip-index {
+      fill: var(--chip-accent);
       font: 10px monospace;
       letter-spacing: 2px;
     }
 
-    #pulse {
-      fill: var(--amber);
-      filter: url(#glow);
-      pointer-events: none;
+    .chip-name {
+      fill: #d4d8cf;
+      font: 500 28px monospace;
     }
 
-    .status-bar {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 15px 20px;
-      border-top: 1px solid #ffffff15;
-      color: var(--muted);
+    .chip-name-small {
+      font-size: 21px;
+    }
+
+    .chip-description {
+      fill: var(--chip-accent);
       font: 11px monospace;
     }
 
-    .status-light {
-      display: inline-block;
-      width: 7px;
-      height: 7px;
-      margin-right: 8px;
-      border-radius: 50%;
-      background: var(--amber);
+    .orientation-dot {
+      fill: var(--chip-accent);
+      opacity: 0.6;
     }
 
-    .content {
-      max-width: 720px;
-      padding: 32px 0;
-    }
-
-    .content h2 {
-      font-size: 30px;
-      font-weight: 500;
-      letter-spacing: -0.03em;
-    }
-
-    .content p {
-      color: var(--muted);
-      line-height: 1.8;
-    }
-
-    .primary-button {
-      background: var(--amber);
-      color: #21170d;
-      border: 0;
-      border-radius: 6px;
-      padding: 13px 20px;
-      font-weight: 600;
+    /* Make chips show a hand cursor */
+    .circuit > g[role="button"] {
       cursor: pointer;
-      margin-top: 10px;
     }
 
-    button:disabled {
-      opacity: 0.5;
-      cursor: wait;
+    /* Highlight the selected chip and keyboard-focused chip */
+    .circuit > g[role="button"]:focus-visible {
+      outline: none;
     }
 
-    button:focus-visible {
-      outline: 2px solid var(--amber);
-      outline-offset: 5px;
+    .circuit > g[role="button"]:focus-visible .chip-body,
+    .circuit > g.is-current .chip-body {
+      stroke: var(--chip-accent);
+      stroke-width: 2.5;
     }
 
-    [hidden] { display: none !important; }
+    /* Moving signal dots */
+    .signal-pulse {
+      stroke: none;
+      pointer-events: none;
+    }
 
-    @media (max-width: 600px) {
-      main { padding: 28px 16px; }
-      header { padding: 20px 16px; }
-      .status-bar { font-size: 10px; }
+    .signal-pulse.primary {
+      fill: #ffc16b;
+      filter: drop-shadow(0 0 5px #ffc16b);
+    }
+
+    .signal-pulse.secondary {
+      fill: #d1a277;
+      filter: drop-shadow(0 0 5px #d1a277);
+    }
+
+    .signal-pulse.ternary {
+      fill: #a4d5ef;
+      filter: drop-shadow(0 0 5px #a4d5ef);
+    }
+
+    /* Status text in the top-left corner */
+    .route-status {
+      position: fixed;
+      top: 18px;
+      left: 20px;
+      margin: 0;
+      padding: 10px 14px;
+      border: 1px solid #ffffff18;
+      border-radius: 6px;
+      background: #111713e8;
+      color: #a5aea5;
+      font: 12px monospace;
+      pointer-events: none;
+    }
+
+    /* Hide the status textbox */
+    .route-status {
+      display: none;
+    }
+
+    /* Remove the browser's rectangular focus outline */
+    .circuit > g[role="button"],
+    .circuit > g[role="button"]:focus,
+    .circuit > g[role="button"]:focus-visible {
+      outline: none;
     }
   </style>
 </head>
 
 <body>
-  <header>
-    <div class="brand">Arnav Srivastava<span>.</span></div>
-    <button id="overview" class="quiet-button">Chip overview</button>
-  </header>
+  <svg
+    class="circuit"
+    viewBox="-24 -12 1224 812"
+    preserveAspectRatio="xMidYMid meet"
+    role="group"
+    aria-labelledby="circuit-title circuit-description"
+  >
+    <title id="circuit-title">Arnav's CPU portfolio circuit</title>
 
-  <main>
-    <p class="eyebrow">COMPUTER ENGINEERING / INTERACTIVE PORTFOLIO</p>
-    <h1>A little closer to the hardware.</h1>
-    <p class="description">
-      Start at the program counter. Follow the traces to explore
-      what I build.
-    </p>
+    <desc id="circuit-description">
+      An interactive circuit connecting PC, RF, CU, ALU, memory,
+      and I/O. Select a connected chip to send three synchronized
+      signal pulses toward it. Connections work in both directions.
+    </desc>
 
-    <div class="chip-stage">
-      <svg
-        id="chip"
-        viewBox="0 0 1000 460"
-        aria-labelledby="chip-title chip-description"
-      >
-        <title id="chip-title">Interactive CPU portfolio</title>
-        <desc id="chip-description">
-          Select the program counter for an introduction, or the
-          ALU to explore my CPU project.
-        </desc>
+    <defs>
+      <!--
+        Reusable contacts for a 240 × 160 chip.
+        Coordinates are relative to the chip's top-left corner.
+      -->
+      <g id="chip-pins" class="pins">
+        <!-- Left -->
+        <path d="
+          M -14 48 H 0
+          M -14 80 H 0
+          M -14 112 H 0
+        " />
 
-        <defs>
-          <pattern
-            id="grid"
-            width="24"
-            height="24"
-            patternUnits="userSpaceOnUse"
-          >
-            <path
-              d="M 24 0 H 0 V 24"
-              fill="none"
-              stroke="#ffffff"
-              stroke-opacity="0.035"
-            />
-          </pattern>
+        <!-- Right -->
+        <path d="
+          M 240 48 H 254
+          M 240 80 H 254
+          M 240 112 H 254
+        " />
 
-          <filter id="glow" x="-200%" y="-200%" width="500%" height="500%">
-            <feGaussianBlur stdDeviation="6" />
-            <feMerge>
-              <feMergeNode />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
+        <!-- Top -->
+        <path d="
+          M 48 -14 V 0
+          M 80 -14 V 0
+          M 120 -14 V 0
+          M 160 -14 V 0
+          M 192 -14 V 0
+        " />
 
-        <rect width="1000" height="460" fill="url(#grid)" />
+        <!-- Bottom -->
+        <path d="
+          M 48 160 V 174
+          M 80 160 V 174
+          M 120 160 V 174
+          M 160 160 V 174
+          M 192 160 V 174
+        " />
+      </g>
+    </defs>
 
-        <!-- Decorative traces -->
-        <g class="secondary-trace">
-          <path d="M 40 80 H 430 V 120 H 960" />
-          <path d="M 40 95 H 415 V 135 H 960" />
-          <path d="M 40 370 H 510 V 340 H 960" />
-          <path d="M 40 385 H 525 V 355 H 960" />
-          <path d="M 180 40 V 150" />
-          <path d="M 195 40 V 150" />
-          <path d="M 760 300 V 420" />
-          <path d="M 775 300 V 420" />
-        </g>
+    <!--
+      WIRES
+      Drawn before the chips so their ends sit behind the contacts.
+    -->
 
-        <!-- The pulse follows this exact path. -->
-        <path
-          id="signal-path"
-          class="trace"
-          d="M 340 230 H 455 V 300 H 570 V 230 H 660"
-        />
+    <g class="wire">
+      <g data-from="pc" data-to="rf">
+        <path d="M 300 360 H 410 V 540 H 510" />
+        <path class="wire-secondary"
+              d="M 300 328 H 422 V 508 H 510" />
+        <path class="wire-ternary"
+              d="M 300 392 H 398 V 572 H 510" />
+      </g>
 
-        <!-- Parallel wires suggest a small bus. -->
-        <path
-          class="secondary-trace"
-          d="M 340 242 H 443 V 312 H 582 V 242 H 660"
-        />
-        <path
-          class="secondary-trace"
-          d="M 340 218 H 467 V 288 H 558 V 218 H 660"
-        />
+      <g data-from="rf" data-to="control">
+        <path d="M 630 460 V 360 H 540 V 230" />
+        <path class="wire-secondary"
+              d="M 590 460 V 372 H 500 V 230" />
+        <path class="wire-ternary"
+              d="M 670 460 V 348 H 580 V 230" />
+      </g>
 
-        <text x="478" y="337" class="micro-label">EXPLORE →</text>
+      <g data-from="control" data-to="alu">
+        <path d="M 660 150 H 755 V 230 H 850" />
+        <path class="wire-secondary"
+              d="M 660 118 H 767 V 198 H 850" />
+        <path class="wire-ternary"
+              d="M 660 182 H 743 V 262 H 850" />
+      </g>
 
-        <g
-          id="pc"
-          class="block active"
-          role="button"
-          tabindex="0"
-          aria-label="Program counter: about Arnav"
-          aria-pressed="true"
-        >
-          <rect
-            class="block-body"
-            x="120" y="150" width="220" height="150" rx="8"
-          />
-          <text x="148" y="182" class="micro-label">00 / START HERE</text>
-          <text x="148" y="230" class="block-label">PC</text>
-          <text x="148" y="265" class="block-caption">About & interests</text>
-        </g>
+      <g data-from="alu" data-to="memory">
+        <path d="M 970 310 V 365 H 1010 V 420" />
+        <path class="wire-secondary"
+              d="M 930 310 V 377 H 970 V 420" />
+        <path class="wire-ternary"
+              d="M 1010 310 V 353 H 1050 V 420" />
+      </g>
 
-        <g
-          id="alu"
-          class="block"
-          role="button"
-          tabindex="0"
-          aria-label="ALU: explore the custom CPU project"
-          aria-pressed="false"
-        >
-          <rect
-            class="block-body"
-            x="660" y="150" width="220" height="150" rx="8"
-          />
-          <text x="688" y="182" class="micro-label">01 / PROJECT</text>
-          <text x="688" y="230" class="block-label">ALU</text>
-          <text x="688" y="265" class="block-caption">My 8-bit CPU</text>
-        </g>
+      <g data-from="memory" data-to="io">
+        <path d="M 1010 580 V 750 H 250 V 710" />
+        <path class="wire-secondary"
+              d="M 970 580 V 738 H 290 V 710" />
+        <path class="wire-ternary"
+              d="M 1050 580 V 762 H 210 V 710" />
+      </g>
 
-        <circle id="pulse" r="6" opacity="0" />
-      </svg>
+      <g data-from="rf" data-to="io">
+        <path d="M 630 620 V 666 H 434 V 630 H 370" />
+        <path class="wire-secondary"
+              d="M 590 620 V 650 H 450 V 598 H 370" />
+        <path class="wire-ternary"
+              d="M 670 620 V 682 H 418 V 662 H 370" />
+      </g>
 
-      <div class="status-bar">
-        <span><span class="status-light"></span>PORTFOLIO / ONLINE</span>
-        <span id="status" role="status">PC · Ready to explore</span>
-      </div>
-    </div>
+      <g data-from="rf" data-to="memory">
+        <path d="M 750 540 H 812 V 500 H 890" />
+        <path class="wire-secondary"
+              d="M 750 508 H 800 V 468 H 890" />
+        <path class="wire-ternary"
+              d="M 750 572 H 824 V 532 H 890" />
+      </g>
 
-    <section id="intro" class="content">
-      <p class="eyebrow">PROGRAM COUNTER</p>
-      <h2>Hi, I’m Arnav.</h2>
-      <p>
-        I’m interested in computer architecture, digital design, and
-        how hardware and software fit together. I enjoy understanding
-        computers by building the pieces myself.
-      </p>
-      <button id="execute" class="primary-button">
-        Explore my CPU project →
-      </button>
-    </section>
+      <g data-from="io" data-to="pc">
+        <path d="M 250 550 V 498 H 180 V 440" />
+        <path class="wire-secondary"
+              d="M 210 550 V 510 H 140 V 440" />
+        <path class="wire-ternary"
+              d="M 290 550 V 486 H 220 V 440" />
+      </g>
 
-    <section id="project" class="content" hidden>
-      <p class="eyebrow">ALU / SELECTED PROJECT</p>
-      <h2 id="project-title" tabindex="-1">A CPU, from the ground up.</h2>
-      <p>
-        I built a custom 8-bit processor with a 16-bit instruction set
-        in Digital Logic Sim, starting with gates and building up to
-        registers, an ALU, memory, and a control unit.
-      </p>
-      <p>
-        I also created an assembler and NACAIS, a high-level language
-        frontend, to connect programs to the processor.
-      </p>
-      <button id="return" class="quiet-button">← Return to the PC</button>
-    </section>
-  </main>
+      <g data-from="pc" data-to="control">
+        <path d="M 180 280 V 150 H 420" />
+        <path class="wire-secondary"
+              d="M 140 280 V 118 H 420" />
+        <path class="wire-ternary"
+              d="M 220 280 V 182 H 420" />
+      </g>
 
+      <!--
+        I/O → CU
+
+        I/O upper pin  → CU left pin   (inner route)
+        I/O middle pin → CU middle pin (middle route)
+        I/O lower pin  → CU right pin  (outer route)
+      -->
+      <g data-from="io" data-to="control">
+        <!-- Middle wire -->
+        <path d="
+          M 130 630
+          H 20
+          V 32
+          H 540
+          V 70
+        " />
+
+        <!-- Inner wire -->
+        <path class="wire-secondary" d="
+          M 130 598
+          H 32
+          V 44
+          H 500
+          V 70
+        " />
+
+        <!-- Outer wire -->
+        <path class="wire-ternary" d="
+          M 130 662
+          H 8
+          V 20
+          H 580
+          V 70
+        " />
+      </g>
+    </g>
+
+    <!-- PC -->
+    <g class="pc" transform="translate(60 280)">
+      <use href="#chip-pins" />
+
+      <rect class="chip-body" width="240" height="160" rx="7" />
+      <rect
+        class="chip-inset"
+        x="9" y="9" width="222" height="142" rx="3"
+      />
+
+      <circle class="orientation-dot" cx="221" cy="19" r="3" />
+
+      <text class="chip-index" x="24" y="35">01 / START</text>
+      <text class="chip-name" x="24" y="82">PC</text>
+      <text class="chip-description" x="24" y="119">
+        Intro & interests
+      </text>
+    </g>
+
+    <!-- Register File -->
+    <g class="rf" transform="translate(510 460)">
+      <use href="#chip-pins" />
+
+      <rect class="chip-body" width="240" height="160" rx="7" />
+      <rect
+        class="chip-inset"
+        x="9" y="9" width="222" height="142" rx="3"
+      />
+
+      <circle class="orientation-dot" cx="221" cy="19" r="3" />
+
+      <text class="chip-index" x="24" y="35">02 / REGISTER FILE</text>
+      <text class="chip-name" x="24" y="82">RF</text>
+      <text class="chip-description" x="24" y="119">
+        Older & smaller projects
+      </text>
+    </g>
+
+    <!-- Control Unit -->
+    <g class="control" transform="translate(420 70)">
+      <use href="#chip-pins" />
+
+      <rect class="chip-body" width="240" height="160" rx="7" />
+      <rect
+        class="chip-inset"
+        x="9" y="9" width="222" height="142" rx="3"
+      />
+
+      <circle class="orientation-dot" cx="221" cy="19" r="3" />
+
+      <text class="chip-index" x="24" y="35">03 / CONTROL UNIT</text>
+      <text class="chip-name" x="24" y="82">CU</text>
+      <text class="chip-description" x="24" y="119">
+        Custom CPU & assembler
+      </text>
+    </g>
+
+    <!-- ALU -->
+    <g class="alu" transform="translate(850 150)">
+      <use href="#chip-pins" />
+
+      <rect class="chip-body" width="240" height="160" rx="7" />
+      <rect
+        class="chip-inset"
+        x="9" y="9" width="222" height="142" rx="3"
+      />
+
+      <circle class="orientation-dot" cx="221" cy="19" r="3" />
+
+      <text class="chip-index" x="24" y="35">04 / ALU</text>
+      <text class="chip-name" x="24" y="82">ALU</text>
+      <text class="chip-description" x="24" y="119">
+        NACAIS & optimizer
+      </text>
+    </g>
+
+    <!-- Memory / Cache -->
+    <g class="memory" transform="translate(890 420)">
+      <use href="#chip-pins" />
+
+      <rect class="chip-body" width="240" height="160" rx="7" />
+      <rect
+        class="chip-inset"
+        x="9" y="9" width="222" height="142" rx="3"
+      />
+
+      <circle class="orientation-dot" cx="221" cy="19" r="3" />
+
+      <text class="chip-index" x="24" y="35">05 / MEMORY & CACHE</text>
+      <text class="chip-name chip-name-small" x="24" y="82">
+        MEMORY
+      </text>
+      <text class="chip-description" x="24" y="119">
+        OS virtual memory sim
+      </text>
+    </g>
+
+    <!-- I/O -->
+    <g class="io" transform="translate(130 550)">
+      <use href="#chip-pins" />
+
+      <rect class="chip-body" width="240" height="160" rx="7" />
+      <rect
+        class="chip-inset"
+        x="9" y="9" width="222" height="142" rx="3"
+      />
+
+      <circle class="orientation-dot" cx="221" cy="19" r="3" />
+
+      <text class="chip-index" x="24" y="35">06 / INPUT & OUTPUT</text>
+      <text class="chip-name" x="24" y="82">I/O</text>
+      <text class="chip-description" x="24" y="119">
+        Links & contact
+      </text>
+    </g>
+  </svg>
+  <p id="route-status" class="route-status" role="status"></p>
   <script>
-    const chip = document.querySelector("#chip");
-    const path = document.querySelector("#signal-path");
-    const pulse = document.querySelector("#pulse");
-    const pc = document.querySelector("#pc");
-    const alu = document.querySelector("#alu");
-    const intro = document.querySelector("#intro");
-    const project = document.querySelector("#project");
-    const status = document.querySelector("#status");
-    const execute = document.querySelector("#execute");
-    const overview = document.querySelector("#overview");
-    const returnButton = document.querySelector("#return");
+    const svg = document.querySelector(".circuit");
+    const status = document.querySelector("#route-status");
+
+    const SVG_NS = "http://www.w3.org/2000/svg";
+    const TRAVEL_TIME = 1200; // milliseconds for all three pulses
 
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     );
 
-    const fullView = [0, 0, 1000, 460];
-    const aluView = [540, 110, 460, 212];
+    const names = {
+      pc: "PC",
+      rf: "RF",
+      control: "CU",
+      alu: "ALU",
+      memory: "Memory",
+      io: "I/O"
+    };
 
-    let currentView = [...fullView];
-    let busy = false;
-    let selected = "pc";
+    const chips = {};
 
-    // Run a callback on each animation frame, with progress from 0 to 1.
-    function animate(duration, draw) {
-      if (reducedMotion.matches) {
-        draw(1);
-        return Promise.resolve();
+    for (const id of Object.keys(names)) {
+      chips[id] = svg.querySelector(`g.${id}`);
+    }
+
+    // Read the connections directly from the SVG.
+    const connections = Array.from(
+      svg.querySelectorAll("g[data-from][data-to]")
+    ).map(group => ({
+      from: group.dataset.from,
+      to: group.dataset.to,
+      paths: Array.from(group.querySelectorAll("path"))
+    }));
+
+    // Place pulses over wires, but underneath the chips and their pins.
+    const pulseLayer = document.createElementNS(SVG_NS, "g");
+    pulseLayer.setAttribute("aria-hidden", "true");
+    pulseLayer.style.pointerEvents = "none";
+
+    const wires = svg.querySelector("g.wire");
+    wires.after(pulseLayer);
+
+    let currentChip = "pc";
+    let travelling = false;
+
+    function findConnection(from, to) {
+      return connections.find(connection =>
+        (connection.from === from && connection.to === to) ||
+        (connection.from === to && connection.to === from)
+      );
+    }
+
+    function findRoute(start, destination) {
+      const queue = [[start]];
+      const visited = new Set([start]);
+
+      while (queue.length > 0) {
+        const route = queue.shift();
+        const current = route[route.length - 1];
+
+        if (current === destination) {
+          return route;
+        }
+
+        // Every wired connection can be used in either direction.
+        for (const connection of connections) {
+          let neighbor;
+
+          if (connection.from === current) {
+            neighbor = connection.to;
+          } else if (connection.to === current) {
+            neighbor = connection.from;
+          } else {
+            continue;
+          }
+
+          if (!visited.has(neighbor)) {
+            visited.add(neighbor);
+            queue.push([...route, neighbor]);
+          }
+        }
       }
 
+      return null;
+    }
+
+    function showCurrentChip() {
+      for (const [id, chip] of Object.entries(chips)) {
+        const selected = id === currentChip;
+
+        chip.classList.toggle("is-current", selected);
+        chip.setAttribute("aria-pressed", String(selected));
+      }
+
+      const neighbors = connections
+        .filter(connection =>
+          connection.from === currentChip ||
+          connection.to === currentChip
+        )
+        .map(connection =>
+          connection.from === currentChip
+            ? connection.to
+            : connection.from
+        );
+
+      status.textContent =
+        `${names[currentChip]} · Connected to: ` +
+        neighbors.map(id => names[id]).join(", ");
+    }
+
+    function setTravelling(value) {
+      travelling = value;
+
+      for (const chip of Object.values(chips)) {
+        chip.setAttribute("aria-disabled", String(value));
+      }
+    }
+
+    function makePulse(path) {
+      const circle = document.createElementNS(SVG_NS, "circle");
+
+      const color = path.classList.contains("wire-ternary")
+        ? "ternary"
+        : path.classList.contains("wire-secondary")
+          ? "secondary"
+          : "primary";
+
+      circle.setAttribute("class", `signal-pulse ${color}`);
+      circle.setAttribute("r", color === "primary" ? "4" : "3");
+
+      return {
+        circle,
+        path,
+        length: path.getTotalLength()
+      };
+    }
+
+    function positionPulse(signal, progress, reverse) {
+      // Reverse travel counts down from 100% to 0%.
+      const fraction = reverse ? 1 - progress : progress;
+
+      const point = signal.path.getPointAtLength(
+        signal.length * fraction
+      );
+
+      signal.circle.setAttribute("cx", point.x);
+      signal.circle.setAttribute("cy", point.y);
+    }
+
+    function animateConnection(connection, reverse) {
+      const signals = connection.paths.map(makePulse);
+
+      // Position every pulse before displaying any of them.
+      for (const signal of signals) {
+        positionPulse(signal, 0, reverse);
+      }
+
+      pulseLayer.append(...signals.map(signal => signal.circle));
+
       return new Promise(resolve => {
-        let start;
+        let startTime;
 
         function frame(time) {
-          if (start === undefined) start = time;
+          if (startTime === undefined) {
+            startTime = time;
+          }
 
-          const progress = Math.min((time - start) / duration, 1);
-          draw(progress);
+          const progress = Math.min(
+            (time - startTime) / TRAVEL_TIME,
+            1
+          );
+
+          // One shared clock updates all three signals.
+          for (const signal of signals) {
+            positionPulse(signal, progress, reverse);
+          }
 
           if (progress < 1) {
             requestAnimationFrame(frame);
           } else {
-            resolve();
+            // Leave the final positions for one rendered frame.
+            requestAnimationFrame(() => {
+              for (const signal of signals) {
+                signal.circle.remove();
+              }
+
+              resolve();
+            });
           }
         }
 
@@ -420,120 +694,63 @@
       });
     }
 
-    function easeInOut(t) {
-      return t * t * (3 - 2 * t);
-    }
+    async function travelTo(destination) {
+      if (travelling || destination === currentChip) return;
 
-    async function moveCamera(destination) {
-      const origin = [...currentView];
+      const route = findRoute(currentChip, destination);
 
-      await animate(700, progress => {
-        const eased = easeInOut(progress);
+      if (!route) {
+        status.textContent =
+          `No route from ${names[currentChip]} to ${names[destination]}.`;
 
-        currentView = origin.map((value, index) =>
-          value + (destination[index] - value) * eased
-        );
-
-        chip.setAttribute("viewBox", currentView.join(" "));
-      });
-    }
-
-    function setBusy(value) {
-      busy = value;
-
-      for (const button of [execute, overview, returnButton]) {
-        button.disabled = value;
+        return;
       }
 
-      for (const block of [pc, alu]) {
-        block.setAttribute("aria-disabled", String(value));
-      }
-    }
-
-    function selectBlock(name) {
-      selected = name;
-
-      for (const [block, blockName] of [[pc, "pc"], [alu, "alu"]]) {
-        const active = name === blockName;
-        block.classList.toggle("active", active);
-        block.setAttribute("aria-pressed", String(active));
-      }
-    }
-
-    async function exploreCPU() {
-      if (busy || selected === "alu") return;
-      setBusy(true);
+      setTravelling(true);
 
       try {
-        status.textContent = "Signal travelling · PC → ALU";
+        for (let i = 0; i < route.length - 1; i++) {
+          const from = route[i];
+          const to = route[i + 1];
 
-        const length = path.getTotalLength();
+          const connection = findConnection(from, to);
+          const reverse = connection.to === from;
 
-        // Position the pulse before making it visible.
-        const start = path.getPointAtLength(0);
-        pulse.setAttribute("cx", start.x);
-        pulse.setAttribute("cy", start.y);
-        pulse.setAttribute("opacity", "1");
+          status.textContent =
+            route.map(id => names[id]).join(" → ") +
+            ` · Step ${i + 1} of ${route.length - 1}`;
 
-        await animate(1100, progress => {
-          const point = path.getPointAtLength(length * progress);
-          pulse.setAttribute("cx", point.x);
-          pulse.setAttribute("cy", point.y);
-        });
+          if (!reducedMotion.matches) {
+            await animateConnection(connection, reverse);
+          }
 
-        pulse.setAttribute("opacity", "0");
-        selectBlock("alu");
-
-        await moveCamera(aluView);
-
-        intro.hidden = true;
-        project.hidden = false;
-        status.textContent = "ALU · CPU project";
-
-        // Move keyboard focus to the newly opened content.
-        document.querySelector("#project-title").focus({
-          preventScroll: true
-        });
+          // Highlight each chip as the signals reach it.
+          currentChip = to;
+          showCurrentChip();
+        }
       } finally {
-        pulse.setAttribute("opacity", "0");
-        setBusy(false);
+        pulseLayer.replaceChildren();
+        setTravelling(false);
       }
     }
 
-    async function showOverview() {
-      if (busy || selected === "pc") return;
-      setBusy(true);
+    // Support both clicking and keyboard navigation.
+    for (const [id, chip] of Object.entries(chips)) {
+      chip.setAttribute("role", "button");
+      chip.setAttribute("tabindex", "0");
+      chip.setAttribute("aria-label", `Go to ${names[id]}`);
 
-      try {
-        await moveCamera(fullView);
+      chip.addEventListener("click", () => travelTo(id));
 
-        selectBlock("pc");
-        project.hidden = true;
-        intro.hidden = false;
-        status.textContent = "PC · Ready to explore";
-        pc.focus({ preventScroll: true });
-      } finally {
-        setBusy(false);
-      }
-    }
-
-    // SVG buttons need explicit keyboard handling.
-    function bindBlock(block, action) {
-      block.addEventListener("click", action);
-      block.addEventListener("keydown", event => {
+      chip.addEventListener("keydown", event => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          action();
+          travelTo(id);
         }
       });
     }
 
-    bindBlock(pc, showOverview);
-    bindBlock(alu, exploreCPU);
-
-    execute.addEventListener("click", exploreCPU);
-    overview.addEventListener("click", showOverview);
-    returnButton.addEventListener("click", showOverview);
+    showCurrentChip();
   </script>
 </body>
 </html>
