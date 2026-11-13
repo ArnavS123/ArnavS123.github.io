@@ -207,6 +207,269 @@
     .circuit > g[role="button"]:focus-visible {
       outline: none;
     }
+
+    /* Hide a chip's small labels while its full content is open. */
+    .circuit > g.content-open text {
+      visibility: hidden;
+    }
+
+    /* Shared content viewer */
+    #chip-panel {
+      position: fixed;
+      inset: auto;
+      margin: 0;
+      padding: 0;
+
+      max-width: none;
+      max-height: none;
+
+      border: none;
+      background: var(--panel-fill);
+      color: #d4d8cf;
+
+      font-family: system-ui, sans-serif;
+      overflow: hidden;
+    }
+
+    #chip-panel[open] {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #chip-panel::backdrop {
+      background: transparent;
+    }
+
+    .chip-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    .panel-eyebrow {
+      color: var(--panel-accent);
+      font: 11px monospace;
+      letter-spacing: 0.12em;
+    }
+
+    #close-chip {
+      padding: 9px 12px;
+
+      border: 1px solid var(--panel-border);
+      border-radius: 5px;
+
+      background: transparent;
+      color: #d4d8cf;
+      font: 12px monospace;
+      cursor: pointer;
+    }
+
+    #close-chip:hover {
+      background: #ffffff0a;
+    }
+
+    #close-chip:focus-visible,
+    .panel-content a:focus-visible {
+      outline: 2px solid var(--panel-accent);
+      outline-offset: 3px;
+    }
+
+    .panel-content {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+
+      padding: 24px clamp(20px, 4vw, 64px) 40px;
+      scrollbar-color: var(--panel-border) var(--panel-fill);
+    }
+
+    .panel-content h1 {
+      margin: 14px 0 20px;
+      font-size: clamp(32px, 5vw, 64px);
+      font-weight: 500;
+      letter-spacing: -0.045em;
+      line-height: 1.1;
+    }
+
+    .panel-content h2 {
+      margin-top: 32px;
+      font-size: 20px;
+      font-weight: 500;
+    }
+
+    .panel-content p,
+    .panel-content li {
+      max-width: 680px;
+      color: #c0c4c0;
+      font-size: 16px;
+      line-height: 1.8;
+    }
+
+    .panel-content .panel-lead {
+      color: #e0e3dc;
+      font-size: clamp(18px, 2vw, 24px);
+      line-height: 1.5;
+    }
+
+    .panel-content .panel-eyebrow {
+      color: var(--panel-accent);
+      font-size: 11px;
+    }
+
+    .panel-content ul {
+      padding-left: 20px;
+    }
+
+    .panel-content li {
+      margin-bottom: 8px;
+    }
+
+    .panel-content a {
+      color: var(--panel-accent);
+      text-underline-offset: 4px;
+    }
+
+    .panel-content figure {
+      width: 100%;
+      max-width: none;
+      margin: 28px 0;
+    }
+
+    .panel-content img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+    }
+
+    .panel-content figcaption {
+      margin-top: 10px;
+      color: var(--panel-accent);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    /* Clickable images inside project write-ups */
+    .image-expand {
+      display: block;
+      width: 100%;
+      padding: 0;
+
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+
+      cursor: zoom-in;
+    }
+
+    .image-expand:focus-visible {
+      outline: 2px solid var(--panel-accent);
+      outline-offset: 5px;
+    }
+
+    /* Large image viewer */
+    #image-viewer {
+      position: fixed;
+      inset: 0;
+      margin: auto;
+      padding: 0;
+
+      width: 94vw;
+      height: 92dvh;
+      max-width: none;
+      max-height: none;
+
+      border: 1px solid #526d5c;
+      border-radius: 10px;
+      background: #111713;
+      color: #d4d8cf;
+
+      overflow: hidden;
+    }
+
+    #image-viewer[open] {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #image-viewer::backdrop {
+      background: rgba(0, 0, 0, 0.82);
+    }
+
+    .image-viewer-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+
+      padding: 14px 20px;
+      border-bottom: 1px solid #ffffff18;
+
+      color: #94aa98;
+      font: 11px monospace;
+      letter-spacing: 0.1em;
+    }
+
+    #close-image {
+      padding: 9px 14px;
+
+      border: 1px solid #526d5c;
+      border-radius: 5px;
+      background: transparent;
+
+      color: #d4d8cf;
+      font: 12px monospace;
+      cursor: pointer;
+    }
+
+    #close-image:hover {
+      background: #ffffff0a;
+    }
+
+    #close-image:focus-visible {
+      outline: 2px solid #94aa98;
+      outline-offset: 3px;
+    }
+
+    #image-viewer figure {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+
+      flex: 1;
+      min-height: 0;
+      margin: 0;
+      padding: 20px;
+    }
+
+    #enlarged-image {
+      display: block;
+      flex: 1;
+      min-height: 0;
+
+      width: 100%;
+      object-fit: contain;
+    }
+
+    #enlarged-caption {
+      flex-shrink: 0;
+      max-width: 900px;
+      max-height: 20%;
+      overflow-y: auto;
+
+      color: #a5aea5;
+      font: 13px/1.6 system-ui, sans-serif;
+      text-align: center;
+    }
   </style>
 </head>
 
@@ -498,6 +761,30 @@
     </g>
   </svg>
   <p id="route-status" class="route-status" role="status"></p>
+  <dialog id="chip-panel" aria-labelledby="chip-heading">
+    <div class="chip-toolbar">
+      <span id="panel-label" class="panel-eyebrow"></span>
+
+      <button id="close-chip" type="button" autofocus>
+        Back to circuit ↗
+      </button>
+    </div>
+
+    <div id="panel-content" class="panel-content"></div>
+  </dialog>
+  <dialog id="image-viewer" aria-label="Enlarged project image">
+    <div class="image-viewer-toolbar">
+      <span>IMAGE VIEWER</span>
+      <button id="close-image" type="button" autofocus>
+        Close ✕
+      </button>
+    </div>
+
+    <figure>
+      <img id="enlarged-image" alt="" />
+      <figcaption id="enlarged-caption"></figcaption>
+    </figure>
+  </dialog>
   <script>
     const svg = document.querySelector(".circuit");
     const status = document.querySelector("#route-status");
@@ -543,6 +830,364 @@
 
     let currentChip = "pc";
     let travelling = false;
+
+    const chipPanel = document.querySelector("#chip-panel");
+    const panelLabel = document.querySelector("#panel-label");
+    const panelContent = document.querySelector("#panel-content");
+    const closeChipButton = document.querySelector("#close-chip");
+
+    const overviewView = svg
+      .getAttribute("viewBox")
+      .trim()
+      .split(/[\s,]+/)
+      .map(Number);
+
+    let openChipId = null;
+    let cameraMoving = false;
+
+    // Edit the content for each chip here.
+    // These strings contain HTML written by you, not visitor input.
+    const chipPages = {
+      pc: {
+        label: "01 / PROGRAM COUNTER",
+        html: `
+          <p class="panel-eyebrow">INTRODUCTION</p>
+          <h1 id="chip-heading">Hi, I’m Arnav.</h1>
+
+          <p class="panel-lead">
+            I like understanding computers all the way down
+            to the hardware.
+          </p>
+
+          <p>
+            I studied Computer Engineering at Purdue University,
+            where I developed an interest in computer architecture
+            and digital design.
+          </p>
+
+          <p>
+            I enjoy exploring how logic gates, registers,
+            instructions, and programs come together to form
+            a working system.
+          </p>
+
+          <h2>What interests me</h2>
+          <ul>
+            <li>Computer architecture and processor design</li>
+            <li>Digital logic and hardware design</li>
+            <li>The connection between hardware and software</li>
+          </ul>
+
+          <p>
+            This website is a way to share what I’m building,
+            the decisions behind it, and what I learn along the way.
+          </p>
+
+          <figure>
+            <button
+              class="image-expand"
+              type="button"
+              aria-label="Enlarge CPU overview"
+            >
+              <img
+                src="images/cpu-overview.png"
+                alt="My custom CPU in Digital Logic Sim"
+                loading="lazy"
+              />
+            </button>
+
+            <figcaption>
+              The processor’s main components.
+            </figcaption>
+          </figure>
+        `
+      },
+
+      rf: {
+        label: "02 / REGISTER FILE",
+        html: `
+          <p class="panel-eyebrow">PROJECT COLLECTION</p>
+          <h1 id="chip-heading">Smaller builds.</h1>
+
+          <p class="panel-lead">
+            A place for older projects, experiments,
+            and focused design exercises.
+          </p>
+
+          <!-- Add individual projects here.
+              Each can have an h2, a paragraph, and an image or link. -->
+        `
+      },
+
+      control: {
+        label: "03 / CONTROL UNIT",
+        html: `
+          <p class="panel-eyebrow">CUSTOM CPU & ASSEMBLER</p>
+          <h1 id="chip-heading">From gates to instructions.</h1>
+
+          <p class="panel-lead">
+            A custom 8-bit processor with a 16-bit instruction set,
+            built at the gate level.
+          </p>
+
+          <p>
+            I built this processor in Digital Logic Sim, starting
+            with basic circuits and working up to registers,
+            an ALU, memory, and a control unit.
+          </p>
+
+          <h2>The hardware</h2>
+          <p>
+            The design brings together an 8-bit datapath,
+            a register file, 256 bytes of RAM, and the control
+            logic needed to execute its instruction set.
+          </p>
+
+          <h2>The assembler</h2>
+          <p>
+            A custom Python assembler translates assembly
+            instructions into machine code for the processor.
+          </p>
+
+          <h2>Working within constraints</h2>
+          <p>
+            One interesting design decision was using the
+            wraparound behavior of the 8-bit program counter
+            to encode backward jumps.
+          </p>
+        `
+      },
+
+      alu: {
+        label: "04 / ARITHMETIC LOGIC UNIT",
+        html: `
+          <p class="panel-eyebrow">NACAIS & OPTIMIZATION</p>
+          <h1 id="chip-heading">Giving the CPU a language.</h1>
+
+          <p class="panel-lead">
+            NACAIS: Not As Cool As It Sounds.
+          </p>
+
+          <p>
+            NACAIS is a high-level language frontend that
+            translates programs into assembly for my custom CPU.
+          </p>
+
+          <h2>From source to assembly</h2>
+          <p>
+            The language supports variables, arithmetic,
+            conditionals, and loops. The frontend handles
+            the translation into operations the processor
+            can execute.
+          </p>
+
+          <!-- Add your optimizer's design, examples,
+              and results here when you are ready. -->
+        `
+      },
+
+      memory: {
+        label: "05 / MEMORY & CACHE",
+        html: `
+          <p class="panel-eyebrow">OPERATING SYSTEMS</p>
+          <h1 id="chip-heading">Making memory visible.</h1>
+
+          <p class="panel-lead">
+            A virtual memory simulator for exploring
+            how address translation and paging work.
+          </p>
+
+          <p>
+            This project models the relationship between
+            virtual pages and physical frames, making
+            memory-management behavior easier to observe.
+          </p>
+
+          <h2>What happens during an access?</h2>
+          <p>
+            The simulator provides a way to explore address
+            translation, page faults, and the movement of
+            pages into physical memory.
+          </p>
+
+          <!-- Add implementation details, screenshots,
+              and measured results here. -->
+        `
+      },
+
+      io: {
+        label: "06 / INPUT & OUTPUT",
+        html: `
+          <p class="panel-eyebrow">LINKS & CONTACT</p>
+          <h1 id="chip-heading">Let’s connect.</h1>
+
+          <p class="panel-lead">
+            Interested in computer architecture,
+            digital design, or something I’ve built?
+          </p>
+
+          <!-- Add your actual GitHub, LinkedIn,
+              résumé, and email links here. -->
+        `
+      }
+    };
+
+    function getChipView(id) {
+      const viewport = svg.getBoundingClientRect();
+      const aspect = viewport.width / viewport.height;
+
+      const matrix = chips[id].transform.baseVal.consolidate().matrix;
+      const body = chips[id].querySelector(".chip-body");
+
+      const centerX =
+        matrix.e + Number(body.getAttribute("width")) / 2;
+
+      const centerY =
+        matrix.f + Number(body.getAttribute("height")) / 2;
+
+      const width = Math.max(300, 220 * aspect);
+      const height = width / aspect;
+
+      return [
+        centerX - width / 2,
+        centerY - height / 2,
+        width,
+        height
+      ];
+    }
+
+    function animateViewBox(destination) {
+      const origin = svg
+        .getAttribute("viewBox")
+        .trim()
+        .split(/[\s,]+/)
+        .map(Number);
+
+      if (reducedMotion.matches) {
+        svg.setAttribute("viewBox", destination.join(" "));
+        return Promise.resolve();
+      }
+
+      return new Promise(resolve => {
+        let startTime;
+        const duration = 850;
+
+        function frame(time) {
+          if (startTime === undefined) {
+            startTime = time;
+          }
+
+          const progress = Math.min((time - startTime) / duration, 1);
+          const eased = progress * progress * (3 - 2 * progress);
+
+          const view = origin.map((value, index) =>
+            value + (destination[index] - value) * eased
+          );
+
+          svg.setAttribute("viewBox", view.join(" "));
+
+          if (progress < 1) {
+            requestAnimationFrame(frame);
+          } else {
+            resolve();
+          }
+        }
+
+        requestAnimationFrame(frame);
+      });
+    }
+
+    function positionChipPanel(id) {
+      const bounds = chips[id]
+        .querySelector(".chip-inset")
+        .getBoundingClientRect();
+
+      const inset = 3;
+
+      chipPanel.style.left = `${bounds.left + inset}px`;
+      chipPanel.style.top = `${bounds.top + inset}px`;
+      chipPanel.style.width =
+        `${Math.max(0, bounds.width - inset * 2)}px`;
+      chipPanel.style.height =
+        `${Math.max(0, bounds.height - inset * 2)}px`;
+    }
+
+    async function openChip(id) {
+      if (openChipId !== null || cameraMoving) return;
+
+      cameraMoving = true;
+
+      try {
+        const page = chipPages[id];
+        const colors = getComputedStyle(chips[id]);
+
+        // Match the viewer to this chip's existing colors.
+        chipPanel.style.setProperty(
+          "--panel-fill",
+          colors.getPropertyValue("--chip-fill").trim()
+        );
+
+        chipPanel.style.setProperty(
+          "--panel-border",
+          colors.getPropertyValue("--chip-border").trim()
+        );
+
+        chipPanel.style.setProperty(
+          "--panel-accent",
+          colors.getPropertyValue("--chip-accent").trim()
+        );
+
+        panelLabel.textContent = page.label;
+        panelContent.innerHTML = page.html;
+
+        await animateViewBox(getChipView(id));
+
+        // Account for a resize during the animation.
+        svg.setAttribute("viewBox", getChipView(id).join(" "));
+
+        positionChipPanel(id);
+        chips[id].classList.add("content-open");
+
+        chipPanel.showModal();
+        openChipId = id;
+        panelContent.scrollTop = 0;
+      } finally {
+        cameraMoving = false;
+      }
+    }
+
+    async function closeChip() {
+      if (openChipId === null || cameraMoving) return;
+
+      cameraMoving = true;
+      const id = openChipId;
+
+      try {
+        chipPanel.close();
+        openChipId = null;
+        chips[id].classList.remove("content-open");
+
+        await animateViewBox(overviewView);
+
+        chips[id].focus({ preventScroll: true });
+      } finally {
+        cameraMoving = false;
+      }
+    }
+
+    closeChipButton.addEventListener("click", closeChip);
+
+    chipPanel.addEventListener("cancel", event => {
+      event.preventDefault();
+      closeChip();
+    });
+
+    window.addEventListener("resize", () => {
+      if (openChipId === null || cameraMoving) return;
+
+      svg.setAttribute("viewBox", getChipView(openChipId).join(" "));
+      positionChipPanel(openChipId);
+    });
 
     function findConnection(from, to) {
       return connections.find(connection =>
@@ -695,7 +1340,13 @@
     }
 
     async function travelTo(destination) {
-      if (travelling || destination === currentChip) return;
+      if (travelling || cameraMoving || openChipId !== null) return;
+
+      // Reopen the current chip without sending another pulse.
+      if (destination === currentChip) {
+        await openChip(destination);
+        return;
+      }
 
       const route = findRoute(currentChip, destination);
 
@@ -724,10 +1375,12 @@
             await animateConnection(connection, reverse);
           }
 
-          // Highlight each chip as the signals reach it.
           currentChip = to;
           showCurrentChip();
         }
+
+        // Open only the final destination, not intermediate chips.
+        await openChip(destination);
       } finally {
         pulseLayer.replaceChildren();
         setTravelling(false);
@@ -751,6 +1404,85 @@
     }
 
     showCurrentChip();
+
+    const imageViewer = document.querySelector("#image-viewer");
+    const enlargedImage = document.querySelector("#enlarged-image");
+    const enlargedCaption = document.querySelector("#enlarged-caption");
+    const closeImageButton = document.querySelector("#close-image");
+
+    let imageOpener = null;
+    let savedPanelScroll = 0;
+
+    panelContent.addEventListener("click", event => {
+      const button = event.target.closest(".image-expand");
+
+      if (!button || imageViewer.open) return;
+
+      const image = button.querySelector("img");
+      if (!image) return;
+
+      imageOpener = button;
+      savedPanelScroll = panelContent.scrollTop;
+
+      // Optional data-full lets you supply a higher-resolution image.
+      enlargedImage.src =
+        image.dataset.full || image.currentSrc || image.src;
+
+      enlargedImage.alt = image.alt;
+
+      const caption = button
+        .closest("figure")
+        ?.querySelector("figcaption");
+
+      enlargedCaption.textContent =
+        caption?.textContent.trim() || image.alt;
+
+      enlargedCaption.hidden = !enlargedCaption.textContent;
+
+      imageViewer.showModal();
+    });
+
+    function closeImageViewer() {
+      if (imageViewer.open) {
+        imageViewer.close();
+      }
+    }
+
+    closeImageButton.addEventListener("click", closeImageViewer);
+
+    // Escape closes only the image viewer, leaving the chip open.
+    imageViewer.addEventListener("cancel", event => {
+      event.preventDefault();
+      closeImageViewer();
+    });
+
+    // Clicking the dark backdrop also closes the viewer.
+    imageViewer.addEventListener("click", event => {
+      if (event.target !== imageViewer) return;
+
+      const bounds = imageViewer.getBoundingClientRect();
+
+      const outside =
+        event.clientX < bounds.left ||
+        event.clientX > bounds.right ||
+        event.clientY < bounds.top ||
+        event.clientY > bounds.bottom;
+
+      if (outside) {
+        closeImageViewer();
+      }
+    });
+
+    // Restore focus and the write-up's scroll position.
+    imageViewer.addEventListener("close", () => {
+      if (imageOpener?.isConnected) {
+        imageOpener.focus({ preventScroll: true });
+      }
+
+      panelContent.scrollTop = savedPanelScroll;
+      enlargedImage.removeAttribute("src");
+      imageOpener = null;
+    });
   </script>
 </body>
 </html>
