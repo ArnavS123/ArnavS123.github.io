@@ -1280,6 +1280,36 @@
         background-size: 10px 10px;
       }
     }
+
+    @media (max-width: 700px) {
+      /* Dim the entire patch layer on phones. */
+      #board-grid-patches.visible {
+        opacity: 0.5;
+      }
+
+      /* Highlight the chip border as the wave reaches it. */
+      .circuit .power-arrival .chip-body {
+        animation: mobile-chip-power 700ms ease-out;
+      }
+    }
+
+    @keyframes mobile-chip-power {
+      from {
+        stroke: var(--chip-accent);
+        stroke-width: 3;
+      }
+
+      to {
+        stroke: var(--chip-border);
+        stroke-width: 1.5;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .circuit .power-arrival .chip-body {
+        animation: none;
+      }
+    }
   </style>
 </head>
 
@@ -3104,9 +3134,10 @@
       });
 
       const duration = 2000;
-      const start = performance.now();
+      let start;
 
       function frame(now) {
+        if (start === undefined) start = now;
         if (!boardIsIdle()) {
           layer.remove();
           return;
