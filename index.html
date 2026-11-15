@@ -1217,7 +1217,7 @@
       z-index: 5;
 
       color: #b3bfb5;
-      font-family: var(--font-mono, "Courier New", monospace);
+	    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
       font-size: clamp(10px, 1.0vw, 14px);
       letter-spacing: 0.06em;
 
@@ -1249,7 +1249,7 @@
 
     /* Chip outline */
     #circuit-builder .build-core {
-      stroke: #1d4251;
+      stroke: #204954;
     }
 
     /* Inner core */
@@ -1259,12 +1259,26 @@
 
     /* Wires */
     #circuit-builder .build-traces {
-      stroke: #934558;
+      stroke: #8b5942;
     }
 
     /* Connection points */
     #circuit-builder .build-nodes {
       fill: #d09b40;
+    }
+
+    /* Remove the six mobile navigation buttons. */
+    .mobile-chip-nav {
+      display: none !important;
+    }
+
+    /* Smaller grid on phones.
+      Update both layers so the glowing patches stay aligned. */
+    @media (max-width: 700px) {
+      body,
+      #board-grid-patches .grid-patch {
+        background-size: 14px 14px;
+      }
     }
   </style>
 </head>
@@ -3392,7 +3406,6 @@
     function updateBoardDecoration() {
       const visible =
         boardDecorationStarted &&
-        !chipPanel.open &&
         !document.hidden;
 
       gridPatchLayer.classList.toggle("visible", visible);
