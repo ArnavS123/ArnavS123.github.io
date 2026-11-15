@@ -1209,10 +1209,70 @@
         var(--grid-offset-x, 0px)
         var(--grid-offset-y, 0px);
     }
+
+    .site-signature {
+      position: fixed;
+      top: max(18px, env(safe-area-inset-top));
+      left: max(20px, env(safe-area-inset-left));
+      z-index: 5;
+
+      color: #b3bfb5;
+      font-family: var(--font-mono, "Courier New", monospace);
+      font-size: clamp(10px, 1.0vw, 14px);
+      letter-spacing: 0.06em;
+
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Allow the intro chip to expand beyond its original bounds. */
+    #welcome-screen.zooming-into-board {
+      overflow: hidden;
+    }
+
+    #welcome-screen.zooming-into-board .welcome-content,
+    #welcome-screen.zooming-into-board #welcome-status {
+      overflow: visible;
+    }
+
+    #welcome-screen.zooming-into-board #circuit-builder {
+      position: relative;
+      z-index: 2;
+      transform-origin: center;
+      will-change: transform, opacity;
+    }
+
+    #welcome-screen.zooming-into-board::backdrop {
+      animation: none;
+      background: transparent;
+    }
+
+    /* Chip outline: dark blue */
+    #circuit-builder .build-core {
+      stroke: #1d4251;
+    }
+
+    /* Inner core: muted gold */
+    #circuit-builder .build-core + .build-core {
+      stroke: #9a7026;
+    }
+
+    /* Wires: blue-teal */
+    #circuit-builder .build-traces {
+      stroke: #934558;
+    }
+
+    /* Connection points: muted gold */
+    #circuit-builder .build-nodes {
+      fill: #d09b40;
+    }
   </style>
 </head>
 
 <body>
+  <div class="site-signature">
+    Arnav Srivastava
+  </div>
   <dialog id="welcome-screen" aria-label="Welcome">
     <div class="welcome-content">
       <h1 id="welcome-title" aria-label="WELCOME">
@@ -1571,7 +1631,10 @@
       <circle class="orientation-dot" cx="221" cy="19" r="3" />
 
       <text class="chip-index" x="24" y="35">ALIAS: CACHE HIERARCHY</text>
-      <text class="chip-name chip-name" x="24" y="82">VM SIMULATOR</text>
+      <text class="chip-name" x="24" y="70" style="font-size: 22px;">
+        <tspan x="24" dy="0">VIRTUAL MEMORY</tspan>
+        <tspan x="24" dy="26">SIMULATOR</tspan>
+      </text>
       <text class="chip-description" x="24" y="119">
         OS virtual memory sim
       </text>
@@ -2626,6 +2689,109 @@
       event.preventDefault();
     });
 
+    async function zoomIntoSynthesizedChip() {
+      if (reducedMotion.matches) return;
+
+      const builder = document.querySelector("#circuit-builder");
+      const welcomeContent = welcomeScreen.querySelector(".welcome-content");
+
+      welcomeScreen.classList.add("zooming-into-board");
+
+      // Freeze the background's current color before fading it.
+      // This overrides the earlier background entrance animation.
+      const startingColor = getComputedStyle(welcomeScreen).backgroundColor;
+      welcomeScreen.style.animation = "none";
+      welcomeScreen.style.backgroundColor = startingColor;
+
+      // Stop interaction while entering the circuit.
+      welcomeContent.style.pointerEvents = "none";
+
+      const bounds = builder.getBoundingClientRect();
+
+      // The inner chip body occupies 40 × 40 units
+      // within the icon's 120 × 100 viewBox.
+      const svgUnit = Math.min(bounds.width / 120, bounds.height / 100);
+      const chipSize = 40 * svgUnit;
+
+      const targetScale =
+        Math.max(
+          window.innerWidth / chipSize,
+          window.innerHeight / chipSize
+        ) * 1.2;
+
+      const moveX =
+        window.innerWidth / 2 - (bounds.left + bounds.width / 2);
+
+      const moveY =
+        window.innerHeight / 2 - (bounds.top + bounds.height / 2);
+
+      const duration = 1500;
+
+      const titleFade = welcomeTitle.animate(
+        [{ opacity: 1 }, { opacity: 0 }],
+        { duration: 350, fill: "forwards" }
+      );
+
+      const buttonFade = synthesizeButton.animate(
+        [{ opacity: 1 }, { opacity: 0 }],
+        { duration: 350, fill: "forwards" }
+      );
+
+      const chipZoom = builder.animate(
+        [
+          {
+            transform: "translate(0, 0) scale(1)",
+            opacity: 1
+          },
+          {
+            transform:
+              `translate(${moveX * 0.3}px, ${moveY * 0.3}px) scale(1.8)`,
+            opacity: 1,
+            offset: 0.3
+          },
+          {
+            transform:
+              `translate(${moveX}px, ${moveY}px) scale(${targetScale})`,
+            opacity: 0
+          }
+        ],
+        {
+          duration,
+          easing: "cubic-bezier(0.65, 0, 0.35, 1)",
+          fill: "forwards"
+        }
+      );
+
+      const backgroundFade = welcomeScreen.animate(
+        [
+          { backgroundColor: startingColor },
+          { backgroundColor: "#111713" }
+        ],
+        {
+          duration: 900,
+          delay: 300,
+          fill: "forwards"
+        }
+      );
+
+      await Promise.all([
+        titleFade.finished,
+        buttonFade.finished,
+        chipZoom.finished,
+        backgroundFade.finished
+      ]);
+
+      // Reveal the real circuit beneath the enlarged intro chip.
+      await welcomeScreen.animate(
+        [{ opacity: 1 }, { opacity: 0 }],
+        {
+          duration: 450,
+          easing: "ease-out",
+          fill: "forwards"
+        }
+      ).finished;
+    }
+
     async function animateWelcome() {
       if (reducedMotion.matches) {
         welcomeTitle.classList.add("decoded", "assembled");
@@ -2663,6 +2829,8 @@
 
       // This timer starts only when the button is clicked.
       await introWait(WELCOME_TIME);
+
+      await zoomIntoSynthesizedChip();
 
       welcomeScreen.close();
       welcomeScreen.remove();
@@ -3051,24 +3219,26 @@
 
     document.body.prepend(gridPatchLayer);
 
-    const PATCH_COUNT = 4;
+    const PATCH_COUNT = 6;
 
     // Duration of one complete fade in and fade out.
-    const PATCH_GLOW_MIN = 5000;  // 5 seconds
-    const PATCH_GLOW_MAX = 10000; // 10 seconds
+    const PATCH_GLOW_MIN = 5000;
+    const PATCH_GLOW_MAX = 10000;
 
     // Darkness between glows.
     const PATCH_PAUSE_MIN = 800;
-    const PATCH_PAUSE_MAX = 3000;
+    const PATCH_PAUSE_MAX = 1500;
 
     // Maximum brightness: 0 = invisible, 1 = fully opaque.
-    const PATCH_BRIGHTNESS = 0.18;
+    const PATCH_BRIGHTNESS = 0.75;
 
     const patchColors = [
-      "#91bfd3",
-      "#b9a17b",
-      "#94aa98",
-      "#aa99b7"
+      "#91bfd3", // Light blue
+      "#b9a17b", // Gold
+      "#94aa98", // Sage green
+      "#aa99b7", // Lavender
+      "#7fb8ad", // Teal
+      "#c39791"  // Soft coral
     ];
 
     function randomPatchValue(min, max) {
@@ -3249,7 +3419,7 @@
     );
 
     // Maximum grid movement in either direction, in pixels.
-    const GRID_DEPTH = 6;
+    const GRID_DEPTH = 8;
 
     const depthPointer = window.matchMedia(
       "(hover: hover) and (pointer: fine)"
