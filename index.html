@@ -1630,13 +1630,13 @@
     const IS_MAC = document.documentElement.classList.contains("mac-effects");
 
     const EFFECTS = {
-        navigationPulses: true,
-        ambientPulses: true,
-        gridGlow: true,
-        gridMovement: !IS_MAC,
-        panelSignals: true,
-        startupWave: true,
-        macChipHalos: true
+      navigationPulses: true,
+      ambientPulses: true,
+      gridGlow: true,
+      gridMovement: !IS_MAC,
+      panelSignals: true,
+      startupWave: true,
+      macChipHalos: true
     };
 
     const names = {
@@ -1906,7 +1906,7 @@
         .split(/[\s,]+/)
         .map(Number);
 
-      if (IS_MAC || reducedMotion.matches) {
+      if (reducedMotion.matches) {
         svg.setAttribute("viewBox", destination.join(" "));
         return Promise.resolve();
       }
