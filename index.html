@@ -1093,15 +1093,10 @@
 
     /* macOS fallback: plain translucent geometry, without blur filters.
        Other platforms continue to use the original rules above. */
-    .mac-effects .circuit .chip-body,
-    .mac-effects .circuit > g[role="button"]:hover .chip-body,
-    .mac-effects .circuit .power-arrival .chip-body,
     .mac-effects .signal-pulse,
     .mac-effects .ambient-signal {
       filter: none;
     }
-    .mac-effects .circuit .chip-body { transition: none; }
-    .mac-effects .circuit .power-arrival .chip-body { animation: none; }
     .mac-effects .welcome-character .binary,
     .mac-effects #welcome-title.decoded .binary {
       filter: none;
@@ -1636,7 +1631,7 @@
       gridMovement: !IS_MAC,
       panelSignals: true,
       startupWave: true,
-      macChipHalos: true
+      macChipHalos: false
     };
 
     const names = {
