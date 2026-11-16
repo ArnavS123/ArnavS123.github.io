@@ -1,17 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+    // Best-effort macOS detection; exclude iPads reporting a Mac platform.
+    (() => {
+      const platform = navigator.userAgentData?.platform || navigator.platform || "";
+      if (/mac/i.test(platform) && (navigator.maxTouchPoints || 0) <= 1) {
+        document.documentElement.classList.add("mac-effects");
+      }
+    })();
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Arnav Srivastava - Inside the Chip</title>
 
   <style>
+    /* Canonical base styles. Responsive and motion overrides follow below. */
+
     * {
       box-sizing: border-box;
     }
 
-    html,
-    body {
+    html {
       width: 100%;
       height: 100%;
       margin: 0;
@@ -19,21 +29,15 @@
     }
 
     body {
+      width: 100%;
+      margin: 0;
+      overflow: hidden;
       background-color: #111713;
-
-      background-image:
-        linear-gradient(
-          to right,
-          rgba(255, 255, 255, 0.035) 1px,
-          transparent 1px
-        ),
-        linear-gradient(
-          to bottom,
-          rgba(255, 255, 255, 0.035) 1px,
-          transparent 1px
-        );
-
+      background-image: linear-gradient( to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px ), linear-gradient( to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px );
       background-size: 24px 24px;
+      height: 100vh;
+      height: 100dvh;
+      background-position: var(--grid-offset-x, 0px) var(--grid-offset-y, 0px);
     }
 
     .circuit {
@@ -42,7 +46,6 @@
       height: 100%;
     }
 
-    /* Copper wiring */
     .wire {
       fill: none;
       stroke: #78583e;
@@ -61,7 +64,6 @@
       stroke-width: 2;
     }
 
-    /* Chip contacts */
     .pins {
       fill: none;
       stroke: #76776b;
@@ -69,7 +71,6 @@
       stroke-linecap: butt;
     }
 
-    /* Each chip supplies its own muted colors. */
     .pc {
       --chip-fill: #1c2b25;
       --chip-border: #526d5c;
@@ -123,11 +124,13 @@
       fill: var(--chip-accent);
       font: 9px monospace;
       letter-spacing: 2px;
+      font-family: var(--font-mono);
     }
 
     .chip-name {
       fill: #d4d8cf;
       font: 500 28px monospace;
+      font-family: var(--font-mono);
     }
 
     .chip-name-smallA {
@@ -141,6 +144,7 @@
     .chip-description {
       fill: var(--chip-accent);
       font: 11px monospace;
+      font-family: var(--font-mono);
     }
 
     .orientation-dot {
@@ -148,23 +152,25 @@
       opacity: 0.6;
     }
 
-    /* Make chips show a hand cursor */
     .circuit > g[role="button"] {
       cursor: pointer;
+      outline: none;
     }
 
-    /* Highlight the selected chip and keyboard-focused chip */
     .circuit > g[role="button"]:focus-visible {
       outline: none;
     }
 
-    .circuit > g[role="button"]:focus-visible .chip-body,
+    .circuit > g[role="button"]:focus-visible .chip-body {
+      stroke: var(--chip-accent);
+      stroke-width: 2.5;
+    }
+
     .circuit > g.is-current .chip-body {
       stroke: var(--chip-accent);
       stroke-width: 2.5;
     }
 
-    /* Moving signal dots */
     .signal-pulse {
       stroke: none;
       pointer-events: none;
@@ -185,35 +191,14 @@
       filter: drop-shadow(0 0 5px #a4d5ef);
     }
 
-    /* Status text in the top-left corner */
-    .route-status {
-      position: fixed;
-      top: 18px;
-      left: 20px;
-      margin: 0;
-      padding: 10px 14px;
-      border: 1px solid #ffffff18;
-      border-radius: 6px;
-      background: #111713e8;
-      color: #a5aea5;
-      font: 12px monospace;
-      pointer-events: none;
-    }
-
-    /* Hide the status textbox */
     .route-status {
       display: none;
     }
 
-    /* Remove the browser's rectangular focus outline */
-    .circuit > g[role="button"],
-    .circuit > g[role="button"]:focus,
-    .circuit > g[role="button"]:focus-visible {
+    .circuit > g[role="button"]:focus {
       outline: none;
     }
 
-    /* Hide a chip's small labels while its full content is open. */
-    /* Small labels on the circuit chips */
     .circuit > g[role="button"] text {
       opacity: 1;
       transition: opacity 350ms ease;
@@ -223,28 +208,18 @@
       opacity: 0;
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      .circuit > g[role="button"] text {
-        transition: none;
-      }
-    }
-
-    /* Shared content viewer */
     #chip-panel {
       position: fixed;
       inset: auto;
       margin: 0;
       padding: 0;
-
       max-width: none;
       max-height: none;
-
       border: none;
       background: var(--panel-fill);
       color: #d4d8cf;
-
-      font-family: system-ui, sans-serif;
       overflow: hidden;
+      font-family: var(--font-body);
     }
 
     #chip-panel[open] {
@@ -261,35 +236,41 @@
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 12px;
-
-      padding: 16px 20px;
       border-bottom: 1px solid var(--panel-border);
+      flex-shrink: 0;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
     }
 
     .panel-eyebrow {
       color: var(--panel-accent);
       font: 11px monospace;
       letter-spacing: 0.12em;
+      font-family: var(--font-mono);
     }
 
     #close-chip {
       padding: 9px 12px;
-
       border: 1px solid var(--panel-border);
       border-radius: 5px;
-
       background: transparent;
       color: #d4d8cf;
       font: 12px monospace;
       cursor: pointer;
+      font-family: var(--font-mono);
+      min-height: 44px;
+      flex-shrink: 0;
     }
 
     #close-chip:hover {
       background: #ffffff0a;
     }
 
-    #close-chip:focus-visible,
+    #close-chip:focus-visible {
+      outline: 2px solid var(--panel-accent);
+      outline-offset: 3px;
+    }
+
     .panel-content a:focus-visible {
       outline: 2px solid var(--panel-accent);
       outline-offset: 3px;
@@ -300,50 +281,54 @@
       min-height: 0;
       overflow-y: auto;
       overscroll-behavior: contain;
-
-      padding: 24px clamp(20px, 4vw, 64px) 40px;
       scrollbar-color: var(--panel-border) var(--panel-fill);
+      min-width: 0;
+      padding: clamp(1rem, 3vw, 3rem);
+      overflow-wrap: anywhere;
     }
 
     .panel-content h1 {
       margin: 14px 0 20px;
-      font-size: clamp(32px, 5vw, 64px);
       font-weight: 500;
       letter-spacing: -0.045em;
-      line-height: 1.1;
+      font-size: clamp(2rem, 1.25rem + 3vw, 4rem);
+      line-height: 1.15;
     }
 
     .panel-content h2 {
       margin-top: 32px;
-      font-size: 20px;
       font-weight: 500;
+      font-size: clamp(1.2rem, 1rem + 0.6vw, 1.5rem);
     }
 
-    .panel-content p,
-    .panel-content li {
-      max-width: 680px;
+    .panel-content p {
       color: #c0c4c0;
-      font-size: 16px;
-      line-height: 1.8;
+      font-size: 1rem;
+      line-height: 1.75;
+      max-width: 65ch;
+    }
+
+    .panel-content li {
+      color: #c0c4c0;
+      margin-bottom: 8px;
+      font-size: 1rem;
+      line-height: 1.75;
+      max-width: 65ch;
     }
 
     .panel-content .panel-lead {
       color: #e0e3dc;
-      font-size: clamp(18px, 2vw, 24px);
       line-height: 1.5;
+      font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
     }
 
     .panel-content .panel-eyebrow {
       color: var(--panel-accent);
-      font-size: 11px;
+      font-size: 0.75rem;
     }
 
     .panel-content ul {
       padding-left: 20px;
-    }
-
-    .panel-content li {
-      margin-bottom: 8px;
     }
 
     .panel-content a {
@@ -360,9 +345,10 @@
     .panel-content img {
       display: block;
       width: 100%;
-      height: auto;
       border: 1px solid var(--panel-border);
       border-radius: 6px;
+      max-width: 100%;
+      height: auto;
     }
 
     .panel-content figcaption {
@@ -372,16 +358,13 @@
       line-height: 1.6;
     }
 
-    /* Clickable images inside project write-ups */
     .image-expand {
       display: block;
       width: 100%;
       padding: 0;
-
       border: none;
       border-radius: 6px;
       background: transparent;
-
       cursor: zoom-in;
     }
 
@@ -390,24 +373,21 @@
       outline-offset: 5px;
     }
 
-    /* Large image viewer */
     #image-viewer {
       position: fixed;
       inset: 0;
       margin: auto;
       padding: 0;
-
       width: 94vw;
       height: 92dvh;
       max-width: none;
       max-height: none;
-
       border: 1px solid #526d5c;
       border-radius: 10px;
       background: #111713;
       color: #d4d8cf;
-
       overflow: hidden;
+      font-family: var(--font-body);
     }
 
     #image-viewer[open] {
@@ -425,10 +405,8 @@
       align-items: center;
       gap: 16px;
       flex-shrink: 0;
-
       padding: 14px 20px;
       border-bottom: 1px solid #ffffff18;
-
       color: #94aa98;
       font: 11px monospace;
       letter-spacing: 0.1em;
@@ -436,14 +414,15 @@
 
     #close-image {
       padding: 9px 14px;
-
       border: 1px solid #526d5c;
       border-radius: 5px;
       background: transparent;
-
       color: #d4d8cf;
       font: 12px monospace;
       cursor: pointer;
+      font-family: var(--font-mono);
+      min-height: 44px;
+      flex-shrink: 0;
     }
 
     #close-image:hover {
@@ -460,7 +439,6 @@
       flex-direction: column;
       align-items: center;
       gap: 12px;
-
       flex: 1;
       min-height: 0;
       margin: 0;
@@ -471,7 +449,6 @@
       display: block;
       flex: 1;
       min-height: 0;
-
       width: 100%;
       object-fit: contain;
     }
@@ -481,28 +458,26 @@
       max-width: 900px;
       max-height: 20%;
       overflow-y: auto;
-
       color: #a5aea5;
       font: 13px/1.6 system-ui, sans-serif;
       text-align: center;
     }
 
-    /* Two-second welcome screen */
     #welcome-screen {
       position: fixed;
       inset: 0;
-
       width: 100%;
       height: 100%;
       max-width: none;
       max-height: none;
-
       margin: 0;
-      padding: 24px;
       border: none;
-
-      background: #b8dce9;
       color: #294653;
+      box-sizing: border-box;
+      padding: 12px;
+      overflow: auto;
+      animation: welcome-background-in 1000ms ease-out both;
+      background-color: #578ae2;
     }
 
     #welcome-screen[open] {
@@ -511,51 +486,58 @@
     }
 
     #welcome-screen::backdrop {
-      background: #b8dce9;
+      animation: welcome-background-in 1000ms ease-out both;
+      background-color: #578ae2;
     }
 
     #welcome-screen h1 {
+      display: flex;
+      justify-content: center;
+      gap: 0.8vw;
       margin: 0;
-      padding-left: 0.18em;
-
-      font: 500 clamp(30px, 7vw, 80px) monospace;
-      letter-spacing: 0.18em;
+      padding: 0;
+      letter-spacing: 0;
+      font-family: var(--font-mono, "Courier New", monospace);
+      font-size: clamp(36px, 9vw, 88px);
+      font-weight: 500;
+      line-height: 1.2;
+      transition: gap 900ms cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    /* Decorative animation layer inside the expanded chip */
     #chip-background {
       position: absolute;
       inset: 0;
-
       width: 100%;
       height: 100%;
-
       pointer-events: none;
       overflow: hidden;
       z-index: 0;
     }
 
-    /* Keep text and controls above the animation. */
-    #chip-panel .chip-toolbar,
+    #chip-panel .chip-toolbar {
+      position: relative;
+      z-index: 1;
+    }
+
     #chip-panel .panel-content {
       position: relative;
       z-index: 1;
     }
 
-    .background-track,
-    .background-signal {
+    .background-track {
       fill: none;
       stroke-linecap: round;
       stroke-linejoin: round;
       vector-effect: non-scaling-stroke;
-    }
-
-    .background-track {
       stroke-width: 1;
       opacity: 0.045;
     }
 
     .background-signal {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
       stroke-width: 2;
       opacity: 0.22;
     }
@@ -565,88 +547,11 @@
       --font-mono: "Courier New", Courier, monospace;
     }
 
-    /* Follow the available browser height, including mobile toolbars. */
-    body {
-      height: 100vh;
-      height: 100dvh;
-    }
-
-    .circuit {
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Explicit font choices reduce differences between computers. */
-    .chip-index,
-    .chip-name,
-    .chip-description,
-    .panel-eyebrow,
-    #close-chip,
-    #close-image,
-    #welcome-screen h1 {
-      font-family: var(--font-mono);
-    }
-
-    #chip-panel,
-    #image-viewer {
-      font-family: var(--font-body);
-    }
-
-    /* Keep the toolbar from being squeezed by long content. */
-    .chip-toolbar {
-      flex-shrink: 0;
-      gap: 0.75rem;
-      padding: 0.75rem 1rem;
-    }
-
     #panel-label {
       min-width: 0;
       overflow-wrap: anywhere;
     }
 
-    #close-chip,
-    #close-image {
-      min-height: 44px;
-      flex-shrink: 0;
-    }
-
-    /* Readable text, with spacing that adjusts to the screen. */
-    .panel-content {
-      min-width: 0;
-      padding: clamp(1rem, 3vw, 3rem);
-      overflow-wrap: anywhere;
-    }
-
-    .panel-content h1 {
-      font-size: clamp(2rem, 1.25rem + 3vw, 4rem);
-      line-height: 1.15;
-    }
-
-    .panel-content h2 {
-      font-size: clamp(1.2rem, 1rem + 0.6vw, 1.5rem);
-    }
-
-    .panel-content p,
-    .panel-content li {
-      font-size: 1rem;
-      line-height: 1.75;
-      max-width: 65ch;
-    }
-
-    .panel-content .panel-lead {
-      font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
-    }
-
-    .panel-content .panel-eyebrow {
-      font-size: 0.75rem;
-    }
-
-    .panel-content img {
-      max-width: 100%;
-      height: auto;
-    }
-
-    /* On small screens, the content becomes a tall chip-like panel. */
     #chip-panel.compact-panel {
       border: 1px solid var(--panel-border);
       border-radius: 10px;
@@ -656,81 +561,29 @@
       background: #111713d9;
     }
 
-    /* Readable navigation for screens where the circuit is small. */
-    .mobile-chip-nav {
-      display: none;
-    }
-
-    @media (max-width: 700px), (max-height: 500px) {
-      .mobile-chip-nav {
-        position: fixed;
-        left: 12px;
-        right: 12px;
-        bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 8px;
-      }
-
-      .mobile-chip-nav button {
-        min-height: 44px;
-        padding: 8px;
-
-        border: 1px solid #526d5c;
-        border-radius: 6px;
-        background: #19231eed;
-        color: #d4d8cf;
-
-        font: 0.8rem var(--font-mono);
-        cursor: pointer;
-      }
-
-      .mobile-chip-nav button:focus-visible {
-        outline: 2px solid #a4d5ef;
-        outline-offset: 2px;
-      }
-
-      .mobile-chip-nav button:disabled {
-        opacity: 0.5;
-        cursor: wait;
-      }
-
-      .chip-toolbar {
-        padding: 0.75rem;
-      }
-
-      #image-viewer figure {
-        padding: 10px;
-      }
-    }
-
-    /* Leave room below the last paragraph for the floating button. */
     #panel-content {
       padding-bottom: 5rem;
     }
 
     #scroll-more {
       position: absolute;
-      bottom: 16px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 3;
-
       display: grid;
       place-items: center;
-
-      width: 44px;
-      height: 44px;
       padding: 0;
-
       border: 1px solid #ffffff30;
       border-radius: 50%;
       background: #080b09;
       color: #ffffff;
       box-shadow: 0 3px 12px #00000040;
-
       cursor: pointer;
+      width: 30px;
+      height: 30px;
+      min-width: 0;
+      min-height: 0;
+      bottom: 12px;
     }
 
     #scroll-more[hidden] {
@@ -746,23 +599,9 @@
       outline-offset: 4px;
     }
 
-    #scroll-more {
-      width: 30px;
-      height: 30px;
-      min-width: 0;
-      min-height: 0;
-      bottom: 12px;
-    }
-
     #scroll-more svg {
       width: 16px;
       height: 16px;
-    }
-
-    #welcome-screen {
-      box-sizing: border-box;
-      padding: 12px;
-      overflow: auto;
     }
 
     .welcome-content {
@@ -772,21 +611,6 @@
       width: 100%;
     }
 
-    #welcome-screen h1 {
-      display: flex;
-      justify-content: center;
-      gap: 0.8vw;
-      margin: 0;
-      padding: 0;
-      letter-spacing: 0;
-      font-family: var(--font-mono, "Courier New", monospace);
-      font-size: clamp(36px, 9vw, 88px);
-      font-weight: 500;
-      line-height: 1.2;
-
-      transition: gap 900ms cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
     .welcome-character {
       position: relative;
       display: grid;
@@ -794,41 +618,28 @@
       flex: none;
       width: min(12vw, 132px);
       height: 1.3em;
-
       transition: width 900ms cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    .welcome-character .binary,
-    .welcome-character .letter {
+    .welcome-character .binary {
       position: absolute;
       white-space: nowrap;
-    }
-
-    .welcome-character .binary {
-      font-size: clamp(5px, 1.65vw, 18px);
       letter-spacing: 0;
       opacity: 1;
       transform: scaleX(1);
       filter: blur(0);
-
-      transition:
-        transform 650ms ease-in,
-        opacity 650ms ease-in,
-        filter 650ms ease-in;
+      transition: transform 650ms ease-in, opacity 650ms ease-in, filter 650ms ease-in;
     }
 
     .welcome-character .letter {
+      position: absolute;
+      white-space: nowrap;
       opacity: 0;
       transform: scaleX(0.15);
       filter: blur(5px);
-
-      transition:
-        opacity 500ms ease-out 350ms,
-        transform 500ms ease-out 350ms,
-        filter 500ms ease-out 350ms;
+      transition: opacity 500ms ease-out 350ms, transform 500ms ease-out 350ms, filter 500ms ease-out 350ms;
     }
 
-    /* Each byte compresses into its corresponding letter. */
     #welcome-title.decoded .binary {
       opacity: 0;
       transform: scaleX(0);
@@ -841,7 +652,6 @@
       filter: blur(0);
     }
 
-    /* Bring the separate letters together into one word. */
     #welcome-title.assembled {
       gap: 0;
     }
@@ -850,33 +660,24 @@
       width: 0.62em;
     }
 
-    /* Gold button, initially invisible and unavailable. */
     #synthesize-button {
       margin-top: 2rem;
       padding: 0.9rem 1.6rem;
       min-height: 44px;
-
       border: 1px solid #a67b25;
       border-radius: 6px;
       background: linear-gradient(135deg, #f2d58a, #c89b3c);
       color: #382a10;
-
       font-family: var(--font-mono, "Courier New", monospace);
       font-size: clamp(12px, 2vw, 16px);
       font-weight: 700;
       letter-spacing: 0.16em;
-
       box-shadow: 0 5px 22px #97701e25;
       cursor: pointer;
-
       visibility: hidden;
       opacity: 0;
       transform: translateY(12px);
-
-      transition:
-        opacity 600ms ease,
-        transform 600ms ease,
-        box-shadow 200ms ease;
+      transition: opacity 600ms ease, transform 600ms ease, box-shadow 200ms ease;
     }
 
     #synthesize-button.visible {
@@ -899,43 +700,18 @@
     }
 
     #welcome-status {
-      min-height: 1.5em;
-      margin: 1rem 0 0;
       font: 13px var(--font-mono, "Courier New", monospace);
       color: #294653;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      #welcome-screen *,
-      #welcome-screen *::before,
-      #welcome-screen *::after {
-        transition: none !important;
-      }
-    }
-
-    /* Fade from dark silicon to the existing light blue. */
-    #welcome-screen,
-    #welcome-screen::backdrop {
-      animation: welcome-background-in 1000ms ease-out both;
-    }
-
-    @keyframes welcome-background-in {
-      from { background-color: #111713; }
-      to   { background-color: #b8dce9; }
-    }
-
-    /* Larger binary, still sized to fit all seven bytes. */
-    #welcome-screen .welcome-character .binary {
-      font-size: clamp(6px, 2.25vw, 26px);
-    }
-
-    /* Reserve space so revealing the icon doesn't shift the title. */
-    #welcome-status {
       display: grid;
       place-items: center;
       height: 90px;
       min-height: 90px;
       margin: 1rem 0 0;
+    }
+
+    #welcome-screen .welcome-character .binary {
+      font-size: clamp(6px, 2.25vw, 26px);
+      font-weight: 1000;
     }
 
     #circuit-builder {
@@ -950,8 +726,12 @@
       visibility: visible;
     }
 
-    /* Draw the chip first, then extend its wires outward. */
-    #circuit-builder .build-core,
+    #circuit-builder .build-core {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      stroke: #204954;
+    }
+
     #circuit-builder .build-traces path {
       stroke-dasharray: 1;
       stroke-dashoffset: 1;
@@ -959,6 +739,7 @@
 
     #circuit-builder .build-nodes {
       opacity: 0;
+      fill: #d09b40;
     }
 
     .building .build-core {
@@ -973,15 +754,6 @@
       animation: circuit-nodes-in 350ms ease-out 1300ms forwards;
     }
 
-    @keyframes circuit-draw {
-      to { stroke-dashoffset: 0; }
-    }
-
-    @keyframes circuit-nodes-in {
-      to { opacity: 1; }
-    }
-
-    /* Status announcement for screen readers, without visible text. */
     .welcome-sr-only {
       position: absolute;
       width: 1px;
@@ -994,79 +766,13 @@
       border: 0;
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      #welcome-screen,
-      #welcome-screen::backdrop {
-        animation: none;
-        background-color: #b8dce9;
-      }
-
-      #welcome-status.building .build-core,
-      #welcome-status.building .build-traces path {
-        animation: none;
-        stroke-dashoffset: 0;
-      }
-
-      #welcome-status.building .build-nodes {
-        animation: none;
-        opacity: 1;
-      }
-    }
-
-    /* Thicker binary text */
-    #welcome-screen .welcome-character .binary {
-      font-weight: 1000;
-    }
-
-    /* Slightly darker light-blue background */
-    #welcome-screen,
-    #welcome-screen::backdrop {
-      background-color: #578ae2;
-    }
-
-    @keyframes welcome-background-in {
-      from { background-color: #111713; }
-      to   { background-color: #578ae2; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      #welcome-screen,
-      #welcome-screen::backdrop {
-        background-color: #578ae2;
-      }
-    }
-
-    /* Soft halos inherit each chip's existing accent color. */
     .circuit .chip-body {
       filter: drop-shadow(0 0 6px var(--chip-accent));
       transition: filter 250ms ease;
     }
 
-    @media (hover: hover) {
-      .circuit > g[role="button"]:hover .chip-body {
-        filter:
-          drop-shadow(0 0 8px var(--chip-accent))
-          drop-shadow(0 0 15px var(--chip-border));
-      }
-    }
-
-    /* Brief illumination as the startup wave reaches each chip. */
     .circuit .power-arrival .chip-body {
       animation: chip-power-arrival 700ms ease-out;
-    }
-
-    @keyframes chip-power-arrival {
-      0% {
-        filter:
-          brightness(1.4)
-          drop-shadow(0 0 18px var(--chip-accent));
-      }
-
-      100% {
-        filter:
-          brightness(1)
-          drop-shadow(0 0 6px var(--chip-accent));
-      }
     }
 
     .board-effects {
@@ -1078,17 +784,6 @@
       filter: drop-shadow(0 0 3px currentColor);
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      .circuit .chip-body {
-        transition: none;
-      }
-
-      .circuit .power-arrival .chip-body {
-        animation: none;
-      }
-    }
-
-    /* Decorative layer behind the circuit. */
     #board-grid-patches {
       position: fixed;
       inset: 0;
@@ -1103,111 +798,20 @@
       opacity: 1;
     }
 
-    /* Keep the circuit above the decorative background. */
     svg.circuit {
       position: relative;
       z-index: 1;
     }
 
-    .grid-patch {
+    #board-grid-patches .grid-patch {
       position: absolute;
       inset: 0;
-
-      /* Match the existing 24px background grid. */
-      background-image:
-        linear-gradient(
-          to right,
-          var(--patch-color) 1px,
-          transparent 1px
-        ),
-        linear-gradient(
-          to bottom,
-          var(--patch-color) 1px,
-          transparent 1px
-        );
-
+      background-image: linear-gradient( to right, var(--patch-color) 1px, transparent 1px ), linear-gradient( to bottom, var(--patch-color) 1px, transparent 1px );
       background-size: 24px 24px;
-
-      /* Illuminate only a soft, localized region of the grid. */
-      -webkit-mask-image: radial-gradient(
-        ellipse 220px 170px at var(--patch-x) var(--patch-y),
-        #000 0%,
-        transparent 100%
-      );
-
-      mask-image: radial-gradient(
-        ellipse 220px 170px at var(--patch-x) var(--patch-y),
-        #000 0%,
-        transparent 100%
-      );
-
+      -webkit-mask-image: radial-gradient( ellipse 220px 170px at var(--patch-x) var(--patch-y), #000 0%, transparent 100% );
+      mask-image: radial-gradient( ellipse 220px 170px at var(--patch-x) var(--patch-y), #000 0%, transparent 100% );
       opacity: 0;
-      animation: grid-patch-breathe var(--patch-duration) ease-in-out infinite;
-      animation-delay: var(--patch-delay);
-      animation-play-state: paused;
-    }
-
-    #board-grid-patches.visible .grid-patch {
-      animation-play-state: running;
-    }
-
-    @keyframes grid-patch-breathe {
-      0%, 100% { opacity: 0.025; }
-      50%      { opacity: 1.0; }
-    }
-
-    /* Quiet, technical-looking board annotations. */
-    .board-markings {
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 600ms ease;
-    }
-
-    .circuit.board-decor-visible .board-markings {
-      opacity: 0.42;
-    }
-
-    .board-markings text {
-      fill: #8c9c8f;
-      font-family: var(--font-mono, "Courier New", monospace);
-      font-size: 7px;
-      letter-spacing: 1.2px;
-    }
-
-    .board-markings path,
-    .board-markings circle {
-      fill: none;
-      stroke: #819184;
-      stroke-width: 0.8;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      #board-grid-patches,
-      .board-markings {
-        transition: none;
-      }
-
-      .grid-patch {
-        animation: none;
-        opacity: 0.08;
-      }
-    }
-
-    .board-markings {
-      display: none;
-    }
-
-    #board-grid-patches .grid-patch {
-      animation: none;
-      opacity: 0;
-    }
-
-    /* Shift the base grid and illuminated grid together. */
-    body,
-    #board-grid-patches .grid-patch {
-      background-position:
-        var(--grid-offset-x, 0px)
-        var(--grid-offset-y, 0px);
+      background-position: var(--grid-offset-x, 0px) var(--grid-offset-y, 0px);
     }
 
     .site-signature {
@@ -1215,23 +819,23 @@
       top: max(18px, env(safe-area-inset-top));
       left: max(20px, env(safe-area-inset-left));
       z-index: 5;
-
       color: #b3bfb5;
-	    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
       font-size: clamp(10px, 1.0vw, 14px);
       letter-spacing: 0.06em;
       line-height: 1.2;
-
       pointer-events: none;
       user-select: none;
     }
 
-    /* Allow the intro chip to expand beyond its original bounds. */
     #welcome-screen.zooming-into-board {
       overflow: hidden;
     }
 
-    #welcome-screen.zooming-into-board .welcome-content,
+    #welcome-screen.zooming-into-board .welcome-content {
+      overflow: visible;
+    }
+
     #welcome-screen.zooming-into-board #welcome-status {
       overflow: visible;
     }
@@ -1248,50 +852,124 @@
       background: transparent;
     }
 
-    /* Chip outline */
-    #circuit-builder .build-core {
-      stroke: #204954;
-    }
-
-    /* Inner core */
     #circuit-builder .build-core + .build-core {
       stroke: #9a7026;
     }
 
-    /* Wires */
     #circuit-builder .build-traces {
       stroke: #8b5942;
     }
 
-    /* Connection points */
-    #circuit-builder .build-nodes {
-      fill: #d09b40;
+    #projects-board {
+      position: fixed;
+      inset: 0;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      width: 100%;
+      height: 100dvh;
+      max-width: none;
+      max-height: none;
+      background: transparent;
+      color: #d4d8cf;
+      overflow: hidden;
     }
 
-    /* Remove the six mobile navigation buttons. */
-    .mobile-chip-nav {
-      display: none !important;
+    #projects-board::backdrop {
+      background: transparent;
     }
 
-    /* Smaller grid on phones.
-      Update both layers so the glowing patches stay aligned. */
-    @media (max-width: 700px) {
-      body,
-      #board-grid-patches .grid-patch {
-        background-size: 10px 10px;
-      }
+    #projects-board[open] {
+      display: block;
     }
 
-    @media (max-width: 700px) {
-      /* Dim the entire patch layer on phones. */
-      #board-grid-patches.visible {
-        opacity: 0.35;
+    #projects-circuit {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .projects-toolbar {
+      position: absolute;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      z-index: 2;
+      font-family: var(--font-mono);
+      flex-direction: row-reverse;
+      top: max(18px, env(safe-area-inset-top));
+      left: max(20px, env(safe-area-inset-left));
+      align-items: flex-start;
+    }
+
+    .projects-toolbar span {
+      color: #b3bfb5;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      font-size: clamp(10px, 1.0vw, 14px);
+      letter-spacing: 0.06em;
+      line-height: 1.2;
+    }
+
+    #leave-projects {
+      min-height: 44px;
+      padding: 8px 14px;
+      background: #18221c;
+      color: #d4d8cf;
+      border: 1px solid #526d5c;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+    }
+
+    #leave-projects:focus-visible {
+      outline: 2px solid #91bfd3;
+      outline-offset: 3px;
+    }
+
+    #projects-circuit [role=button] {
+      cursor: pointer;
+      outline: none;
+    }
+
+    body.in-projects > .site-signature {
+      visibility: hidden;
+    }
+
+    @keyframes welcome-background-in {
+      from {
+        background-color: #111713;
       }
 
-      /* Highlight the chip border as the wave reaches it. */
-      .circuit .power-arrival .chip-body {
-        animation: mobile-chip-power 700ms ease-out;
+      to {
+        background-color: #578ae2;
       }
+
+    }
+
+    @keyframes circuit-draw {
+      to {
+        stroke-dashoffset: 0;
+      }
+
+    }
+
+    @keyframes circuit-nodes-in {
+      to {
+        opacity: 1;
+      }
+
+    }
+
+    @keyframes chip-power-arrival {
+      0% {
+        filter: brightness(1.4) drop-shadow(0 0 18px var(--chip-accent));
+      }
+
+      100% {
+        filter: brightness(1) drop-shadow(0 0 6px var(--chip-accent));
+      }
+
     }
 
     @keyframes mobile-chip-power {
@@ -1304,52 +982,165 @@
         stroke: var(--chip-border);
         stroke-width: 1.5;
       }
+
+    }
+
+    @media (max-width: 700px), (max-height: 500px) {
+      .chip-toolbar {
+        padding: 0.75rem;
+      }
+
+      #image-viewer figure {
+        padding: 10px;
+      }
+
+    }
+
+    @media (hover: hover) {
+      .circuit > g[role="button"]:hover .chip-body {
+        filter: drop-shadow(0 0 8px var(--chip-accent)) drop-shadow(0 0 15px var(--chip-border));
+      }
+
+    }
+
+    @media (max-width: 700px) {
+      body {
+        background-size: 10px 10px;
+      }
+
+      #board-grid-patches .grid-patch {
+        background-size: 10px 10px;
+      }
+
+      #board-grid-patches.visible {
+        opacity: 0.35;
+      }
+
+      .circuit .power-arrival .chip-body {
+        animation: mobile-chip-power 700ms ease-out;
+      }
+
     }
 
     @media (prefers-reduced-motion: reduce) {
+      .circuit > g[role="button"] text {
+        transition: none;
+      }
+
+      #welcome-screen {
+        animation: none;
+        background-color: #578ae2;
+      }
+
+      #welcome-screen::backdrop {
+        animation: none;
+        background-color: #578ae2;
+      }
+
+      #welcome-status.building .build-core {
+        animation: none;
+        stroke-dashoffset: 0;
+      }
+
+      #welcome-status.building .build-traces path {
+        animation: none;
+        stroke-dashoffset: 0;
+      }
+
+      #welcome-status.building .build-nodes {
+        animation: none;
+        opacity: 1;
+      }
+
+      .circuit .chip-body {
+        transition: none;
+      }
+
       .circuit .power-arrival .chip-body {
         animation: none;
       }
+
+      #board-grid-patches {
+        transition: none;
+      }
+
+      #board-grid-patches .grid-patch {
+        opacity: 0.08;
+      }
+
+      #welcome-screen h1 {
+        transition: none;
+      }
+
+      .welcome-character {
+        transition: none;
+      }
+
+      .welcome-character .binary {
+        transition: none;
+      }
+
+      .welcome-character .letter {
+        transition: none;
+      }
+
+      #synthesize-button {
+        transition: none;
+      }
+
     }
 
-    /* Past Projects subsystem */
-    #projects-board { position:fixed; inset:0; margin:0; padding:0; border:0;
-      width:100%; height:100dvh; max-width:none; max-height:none;
-      background:transparent; color:#d4d8cf; overflow:hidden; }
-    #projects-board::backdrop { background:transparent; }
-    #projects-board[open] { display:block; }
-    #projects-circuit { display:block; width:100%; height:100%; }
-    .projects-toolbar { position:absolute; top:max(18px, env(safe-area-inset-top));
-      left:20px; right:20px; display:flex; align-items:center;
-      justify-content:space-between; gap:16px; z-index:2; font-family:var(--font-mono); }
-    .projects-toolbar span { font-size:12px; letter-spacing:.1em; color:#a9b7ad; }
-    #leave-projects { min-height:44px; padding:8px 14px; background:#18221c;
-      color:#d4d8cf; border:1px solid #526d5c; border-radius:5px; cursor:pointer;
-      font-family:var(--font-mono); }
-    #leave-projects:focus-visible { outline:2px solid #91bfd3; outline-offset:3px; }
-    #projects-circuit [role=button] { cursor:pointer; outline:none; }
-    #projects-circuit .content-open text { opacity:0; }
-    #projects-circuit text { transition:opacity 350ms ease; }
-    body.in-projects > .site-signature { visibility:hidden; }
-    @media(max-width:700px) { .projects-toolbar span { font-size:10px; } }
-    @media(prefers-reduced-motion:reduce) { #projects-circuit text { transition:none; } }
 
-    .projects-toolbar {
-      flex-direction: row-reverse;
+    /* macOS fallback: plain translucent geometry, without blur filters.
+       Other platforms continue to use the original rules above. */
+    .mac-effects .circuit .chip-body,
+    .mac-effects .circuit > g[role="button"]:hover .chip-body,
+    .mac-effects .circuit .power-arrival .chip-body,
+    .mac-effects .signal-pulse,
+    .mac-effects .ambient-signal {
+      filter: none;
     }
-
-    .projects-toolbar {
-      top: max(18px, env(safe-area-inset-top));
-      left: max(20px, env(safe-area-inset-left));
-      align-items: flex-start;
+    .mac-effects .circuit .chip-body { transition: none; }
+    .mac-effects .circuit .power-arrival .chip-body { animation: none; }
+    .mac-effects .welcome-character .binary,
+    .mac-effects #welcome-title.decoded .binary {
+      filter: none;
+      transition: transform 650ms ease-in, opacity 650ms ease-in;
     }
-
-    .projects-toolbar span {
-      color: #b3bfb5;
-	    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-      font-size: clamp(10px, 1.0vw, 14px);
-      letter-spacing: 0.06em;
-      line-height: 1.2;
+    .mac-effects .welcome-character .letter,
+    .mac-effects #welcome-title.decoded .letter {
+      filter: none;
+      transition: opacity 500ms ease-out 350ms, transform 500ms ease-out 350ms;
+    }
+    .mac-effects .mac-chip-halo {
+      fill: none;
+      stroke: var(--chip-accent);
+      opacity: 0.22;
+      pointer-events: none;
+      transition: opacity 250ms ease;
+    }
+    .mac-effects .circuit > g.is-current .mac-chip-halo,
+    .mac-effects .circuit > g:focus-visible .mac-chip-halo { opacity: 0.65; }
+    @media (hover: hover) {
+      .mac-effects .circuit > g[role="button"]:hover .mac-chip-halo { opacity: 0.95; }
+    }
+    .mac-effects .power-arrival .mac-chip-halo {
+      animation: mac-chip-arrival 700ms ease-out;
+    }
+    @keyframes mac-chip-arrival {
+      from { opacity: 1; }
+      /* Return to the current/hover/base opacity rather than a fixed value. */
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .mac-effects .mac-chip-halo,
+      .mac-effects .power-arrival .mac-chip-halo {
+        transition: none;
+        animation: none;
+      }
+      .mac-effects .welcome-character .binary,
+      .mac-effects .welcome-character .letter,
+      .mac-effects #welcome-title.decoded .binary,
+      .mac-effects #welcome-title.decoded .letter { transition: none; }
     }
   </style>
 </head>
@@ -1747,14 +1538,6 @@
       </text>
     </g>
   </svg>
-  <nav class="mobile-chip-nav" aria-label="Portfolio sections">
-    <button type="button" data-chip="pc">About me</button>
-    <button type="button" data-chip="rf">Past projects</button>
-    <button type="button" data-chip="control">CPU</button>
-    <button type="button" data-chip="alu">Compiler</button>
-    <button type="button" data-chip="memory">VM simulator</button>
-    <button type="button" data-chip="io">Contact</button>
-  </nav>
   <p id="route-status" class="route-status" role="status"></p>
 
   <dialog id="projects-board" aria-label="Past projects: personal and academic collections">
@@ -2182,20 +1965,22 @@
     }
 
     async function fadeChipPanel(opening) {
-      if (reducedMotion.matches) return;
-
+      const finalOpacity = opening ? "1" : "0";
+      if (reducedMotion.matches) {
+        chipPanel.style.opacity = finalOpacity;
+        return;
+      }
       const animation = chipPanel.animate(
-        [
-          { opacity: opening ? 0 : 1 },
-          { opacity: opening ? 1 : 0 }
-        ],
-        {
-          duration: opening ? 350 : 200,
-          easing: "ease-in-out"
-        }
+        [{ opacity: opening ? 0 : 1 }, { opacity: finalOpacity }],
+        { duration: opening ? 350 : 200, easing: "ease-in-out", fill: "forwards" }
       );
-
-      await animation.finished;
+      try {
+        await animation.finished;
+      } finally {
+        // Keep the endpoint after the animation is removed (especially on close).
+        chipPanel.style.opacity = finalOpacity;
+        animation.cancel();
+      }
     }
 
     const chipBackground = document.querySelector("#chip-background");
@@ -2419,6 +2204,7 @@
         svg.setAttribute("viewBox", getChipView(id).join(" "));
         positionChipPanel(id);
 
+        chipPanel.style.opacity = reducedMotion.matches ? "1" : "0";
         chipPanel.showModal();
         openChipId = id;
         panelContent.scrollTop = 0;
@@ -2553,9 +2339,32 @@
         chip.setAttribute("aria-disabled", String(value));
       }
 
-      document.querySelectorAll(".mobile-chip-nav button").forEach(button => {
-        button.disabled = value;
-      });
+    }
+
+    // Keep original circle elements on Windows and other non-Mac platforms.
+    function withMacSignalGlow(circle) {
+      if (!document.documentElement.classList.contains("mac-effects")) return circle;
+      const group = document.createElementNS(SVG_NS, "g");
+      group.setAttribute("class", circle.getAttribute("class"));
+      group.style.color = circle.style.color;
+      if (circle.hasAttribute("fill")) group.setAttribute("fill", circle.getAttribute("fill"));
+      const radius = Number(circle.getAttribute("r"));
+      for (const [scale, opacity] of [[2.7, 0.08], [1.8, 0.18], [1, 1]]) {
+        const layer = document.createElementNS(SVG_NS, "circle");
+        layer.setAttribute("r", radius * scale);
+        layer.setAttribute("opacity", opacity);
+        group.append(layer);
+      }
+      return group;
+    }
+
+    function positionSignal(node, point) {
+      if (node.localName === "g") {
+        node.setAttribute("transform", `translate(${point.x} ${point.y})`);
+      } else {
+        node.setAttribute("cx", point.x);
+        node.setAttribute("cy", point.y);
+      }
     }
 
     function makePulse(path) {
@@ -2571,7 +2380,7 @@
       circle.setAttribute("r", color === "primary" ? "4" : "3");
 
       return {
-        circle,
+        circle: withMacSignalGlow(circle),
         path,
         length: path.getTotalLength()
       };
@@ -2585,8 +2394,7 @@
         signal.length * fraction
       );
 
-      signal.circle.setAttribute("cx", point.x);
-      signal.circle.setAttribute("cy", point.y);
+      positionSignal(signal.circle, point);
     }
 
     function animateConnection(connection, reverse) {
@@ -2998,16 +2806,6 @@
 
     document.fonts.ready.then(fitChipLabels);
 
-    const mobileChipButtons = document.querySelectorAll(
-      ".mobile-chip-nav button"
-    );
-
-    for (const button of mobileChipButtons) {
-      button.addEventListener("click", () => {
-        travelTo(button.dataset.chip);
-      });
-    }
-
     const scrollMoreButton = document.querySelector("#scroll-more");
 
     // Allow the content area to receive focus without entering the Tab order.
@@ -3260,7 +3058,7 @@
 
         return {
           path,
-          dot,
+          dot: withMacSignalGlow(dot),
           length: path.getTotalLength()
         };
       });
@@ -3283,8 +3081,7 @@
             position * signal.length
           );
 
-          signal.dot.setAttribute("cx", point.x);
-          signal.dot.setAttribute("cy", point.y);
+          positionSignal(signal.dot, point);
 
           // Fade gently at both ends.
           signal.dot.style.opacity =
@@ -3455,49 +3252,7 @@
     reducedMotion.addEventListener("change", syncPatchGlows);
     syncPatchGlows();
 
-    // ── PCB-style markings ─────────────────────────────────────
-
-    const boardMarkings = document.createElementNS(SVG_NS, "g");
-    boardMarkings.classList.add("board-markings");
-    boardMarkings.setAttribute("aria-hidden", "true");
-
-    // Positions use your existing circuit's SVG coordinates.
-    boardMarkings.innerHTML = `
-      <g transform="translate(80 35)">
-        <path d="M0 12 V0 H12"/>
-        <text x="20" y="5">PERSONAL SYSTEM / REV 01</text>
-        <text x="20" y="18">ARCHITECTURE · PROJECTS · IDEAS</text>
-      </g>
-
-      <g transform="translate(730 40)">
-        <circle cx="0" cy="0" r="4"/>
-        <path d="M-7 0 H7 M0 -7 V7"/>
-        <text x="13" y="3">TP01 / CLK</text>
-      </g>
-
-      <g transform="translate(625 710)">
-        <path d="M0 0 H55 M0 5 H32"/>
-        <text x="0" y="20">SIGNAL BUS</text>
-        <text x="0" y="32">BIDIRECTIONAL</text>
-      </g>
-
-      <g transform="translate(1045 380)">
-        <circle cx="0" cy="0" r="4"/>
-        <circle cx="18" cy="0" r="4"/>
-        <text x="30" y="3">TP02 / DATA</text>
-      </g>
-
-      <g transform="translate(80 745)">
-        <path d="M0 -12 V0 H12"/>
-        <text x="20" y="-2">DESIGNED BY ARNAV</text>
-      </g>
-    `;
-
-    // Draw behind wires and chips.
-    wires.before(boardMarkings);
-
-    // ── Show only after startup, and outside expanded chips ─────
-
+    // Background patches start after the intro and continue inside chips.
     let boardDecorationStarted = false;
 
     function updateBoardDecoration() {
@@ -3506,22 +3261,12 @@
         !document.hidden;
 
       gridPatchLayer.classList.toggle("visible", visible);
-      svg.classList.toggle("board-decor-visible", visible);
     }
 
     function startBoardDecoration() {
       boardDecorationStarted = true;
       updateBoardDecoration();
     }
-
-    const boardDecorationObserver = new MutationObserver(
-      updateBoardDecoration
-    );
-
-    boardDecorationObserver.observe(chipPanel, {
-      attributes: true,
-      attributeFilter: ["open"]
-    });
 
     document.addEventListener(
       "visibilitychange",
@@ -3787,7 +3532,7 @@
           const progress = Math.min((now - start) / 850, 1);
           for (const {path, circle, length} of signals) {
             const point = path.getPointAtLength(length * (reverse ? 1 - progress : progress));
-            circle.setAttribute("cx", point.x); circle.setAttribute("cy", point.y);
+            positionSignal(circle, point);
             if (!circle.parentNode) projectsPulseLayer.append(circle);
           }
           if (progress < 1) requestAnimationFrame(frame); else resolve();
@@ -3822,6 +3567,7 @@
         layoutProjectsBoard();
         projectsSvg.setAttribute("viewBox", archiveChipView(id).join(" "));
         positionArchivePanel();
+        chipPanel.style.opacity = reducedMotion.matches ? "1" : "0";
         chipPanel.showModal();
         panelContent.scrollTop = 0;
         startChipBackground();
@@ -3896,7 +3642,7 @@
         circle.setAttribute("r", "1.8");
         circle.setAttribute("fill", colors[i]);
         circle.style.color = colors[i];
-        return {path, circle};
+        return {path, circle: withMacSignalGlow(circle)};
       });
       let start;
       function frame(now) {
@@ -3909,8 +3655,7 @@
         for (const {path, circle} of signals) {
           // Re-read the length so rotation during a pulse keeps it on the wire.
           const point = path.getPointAtLength(path.getTotalLength() * (reverse ? 1 - progress : progress));
-          circle.setAttribute("cx", point.x);
-          circle.setAttribute("cy", point.y);
+          positionSignal(circle, point);
           circle.style.opacity = 0.55 * Math.sin(Math.PI * progress);
           if (!circle.parentNode) archiveAmbientLayer.append(circle);
         }
@@ -3920,6 +3665,25 @@
       requestAnimationFrame(frame);
     }
 
+
+    // Both boards are now built; add halos only on macOS (never to images).
+    if (document.documentElement.classList.contains("mac-effects")) {
+      document.querySelectorAll('.circuit > g[role="button"]').forEach(chip => {
+        const body = chip.querySelector(".chip-body");
+        if (!body) return;
+        const halo = document.createElementNS(SVG_NS, "g");
+        halo.setAttribute("class", "mac-chip-halo");
+        halo.setAttribute("aria-hidden", "true");
+        for (const [width, opacity] of [[12, 0.10], [7, 0.18], [3, 0.35]]) {
+          const outline = body.cloneNode(false);
+          outline.removeAttribute("class");
+          outline.setAttribute("stroke-width", width);
+          outline.setAttribute("opacity", opacity);
+          halo.append(outline);
+        }
+        chip.insertBefore(halo, body);
+      });
+    }
   </script>
 </body>
 </html>
