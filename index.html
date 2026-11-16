@@ -1142,6 +1142,12 @@
       .mac-effects #welcome-title.decoded .binary,
       .mac-effects #welcome-title.decoded .letter { transition: none; }
     }
+
+    /* Only optimize offscreen content on macOS */
+    .mac-effects .panel-content figure {
+        content-visibility: auto;
+        contain-intrinsic-size: auto 400px;
+    }
   </style>
 </head>
 
