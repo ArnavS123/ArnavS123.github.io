@@ -1220,6 +1220,7 @@
 	    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
       font-size: clamp(10px, 1.0vw, 14px);
       letter-spacing: 0.06em;
+      line-height: 1.2;
 
       pointer-events: none;
       user-select: none;
@@ -1309,6 +1310,46 @@
       .circuit .power-arrival .chip-body {
         animation: none;
       }
+    }
+
+    /* Past Projects subsystem */
+    #projects-board { position:fixed; inset:0; margin:0; padding:0; border:0;
+      width:100%; height:100dvh; max-width:none; max-height:none;
+      background:transparent; color:#d4d8cf; overflow:hidden; }
+    #projects-board::backdrop { background:transparent; }
+    #projects-board[open] { display:block; }
+    #projects-circuit { display:block; width:100%; height:100%; }
+    .projects-toolbar { position:absolute; top:max(18px, env(safe-area-inset-top));
+      left:20px; right:20px; display:flex; align-items:center;
+      justify-content:space-between; gap:16px; z-index:2; font-family:var(--font-mono); }
+    .projects-toolbar span { font-size:12px; letter-spacing:.1em; color:#a9b7ad; }
+    #leave-projects { min-height:44px; padding:8px 14px; background:#18221c;
+      color:#d4d8cf; border:1px solid #526d5c; border-radius:5px; cursor:pointer;
+      font-family:var(--font-mono); }
+    #leave-projects:focus-visible { outline:2px solid #91bfd3; outline-offset:3px; }
+    #projects-circuit [role=button] { cursor:pointer; outline:none; }
+    #projects-circuit .content-open text { opacity:0; }
+    #projects-circuit text { transition:opacity 350ms ease; }
+    body.in-projects > .site-signature { visibility:hidden; }
+    @media(max-width:700px) { .projects-toolbar span { font-size:10px; } }
+    @media(prefers-reduced-motion:reduce) { #projects-circuit text { transition:none; } }
+
+    .projects-toolbar {
+      flex-direction: row-reverse;
+    }
+
+    .projects-toolbar {
+      top: max(18px, env(safe-area-inset-top));
+      left: max(20px, env(safe-area-inset-left));
+      align-items: flex-start;
+    }
+
+    .projects-toolbar span {
+      color: #b3bfb5;
+	    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      font-size: clamp(10px, 1.0vw, 14px);
+      letter-spacing: 0.06em;
+      line-height: 1.2;
     }
   </style>
 </head>
@@ -1601,7 +1642,7 @@
       <text class="chip-index" x="24" y="35">ALIAS: PROGRAM COUNTER</text>
       <text class="chip-name" x="24" y="82">ABOUT ME</text>
       <text class="chip-description" x="24" y="119">
-        Intro & interests
+        Interests & Achievements
       </text>
     </g>
 
@@ -1620,7 +1661,7 @@
       <text class="chip-index" x="24" y="35">ALIAS: REGISTER FILE</text>
       <text class="chip-name chip-name-smallB" x="24" y="82">PAST PROJECTS</text>
       <text class="chip-description" x="24" y="119">
-        Older & smaller projects
+        Collection of Older Projects
       </text>
     </g>
 
@@ -1639,7 +1680,7 @@
       <text class="chip-index" x="24" y="35">ALIAS: CONTROL UNIT</text>
       <text class="chip-name" x="24" y="82">CUSTOM CPU</text>
       <text class="chip-description" x="24" y="119">
-        Custom CPU & assembler
+        CPU Architecture Project
       </text>
     </g>
 
@@ -1656,9 +1697,12 @@
       <circle class="orientation-dot" cx="221" cy="19" r="3" />
 
       <text class="chip-index" x="24" y="35">ALIAS: ARITHMETIC LOGIC UNIT</text>
-      <text class="chip-name chip-name-smallA" x="24" y="82">CUSTOM COMPILER</text>
+      <text class="chip-name chip-name-smallA" x="24" y="70">
+        <tspan x="24" dy="0">CUSTOM COMPILER</tspan>
+        <tspan x="24" dy="26">TOOLCHAIN</tspan>
+      </text>
       <text class="chip-description" x="24" y="119">
-        NACAIS & optimizer
+        Compiler & Assembler Project
       </text>
     </g>
 
@@ -1680,7 +1724,7 @@
         <tspan x="24" dy="26">SIMULATOR</tspan>
       </text>
       <text class="chip-description" x="24" y="119">
-        OS virtual memory sim
+        OS Memory Management Project
       </text>
     </g>
 
@@ -1699,7 +1743,7 @@
       <text class="chip-index" x="24" y="35">ALIAS: I/O CONTROLLER</text>
       <text class="chip-name" x="24" y="82">CONNECT</text>
       <text class="chip-description" x="24" y="119">
-        Links & contact
+        Links & Contact Information
       </text>
     </g>
   </svg>
@@ -1712,6 +1756,23 @@
     <button type="button" data-chip="io">Contact</button>
   </nav>
   <p id="route-status" class="route-status" role="status"></p>
+
+  <dialog id="projects-board" aria-label="Past projects: personal and academic collections">
+    <div class="projects-toolbar">
+      <button id="leave-projects" type="button" autofocus>← Main circuit</button>
+      <span>Arnav Srivastava / PAST PROJECTS</span>
+    </div>
+    <svg id="projects-circuit" class="circuit" viewBox="0 0 900 500" role="group"
+      aria-label="Personal and academic project collections">
+      <g id="projects-wires" fill="none" stroke-linejoin="round">
+        <path class="wire-secondary" stroke="#4d4032" stroke-width="2"/>
+        <path stroke="#78583e" stroke-width="3"/>
+        <path class="wire-ternary" stroke="#536e7c" stroke-width="2"/>
+      </g>
+      <g id="projects-pulses" pointer-events="none" aria-hidden="true"></g>
+    </svg>
+  </dialog>
+
   <dialog id="chip-panel" aria-labelledby="chip-heading">
     <svg
       id="chip-background"
@@ -2079,6 +2140,7 @@
     }
 
     function positionChipPanel(id) {
+      if (projectsBoard.open && archiveSelection) { positionArchivePanel(); return; }
       const compact = window.matchMedia(
         "(max-width: 700px), (max-height: 500px)"
       ).matches;
@@ -2322,6 +2384,7 @@
     });
 
     async function openChip(id) {
+      if (id === "rf") return enterProjectsBoard();
       if (openChipId !== null || cameraMoving) return;
 
       cameraMoving = true;
@@ -2379,6 +2442,7 @@
     }
 
     async function closeChip() {
+      if (projectsBoard.open && archiveSelection) return closeArchiveCollection();
       if (openChipId === null || cameraMoving) return;
 
       cameraMoving = true;
@@ -2410,6 +2474,7 @@
     });
 
     window.addEventListener("resize", () => {
+      if (projectsBoard.open) { resizeProjectsBoard(); return; }
       if (openChipId === null || cameraMoving) return;
 
       svg.setAttribute("viewBox", getChipView(openChipId).join(" "));
@@ -3182,7 +3247,7 @@
         connections[Math.floor(Math.random() * connections.length)];
 
       const reverse = Math.random() < 0.5;
-      const colors = ["#b9a17b", "#a5b99e", "#91bfd3"];
+      const colors = ["#a5b99e", "#b9a17b", "#91bfd3"];
 
       const signals = connection.paths.map((path, index) => {
         const dot = document.createElementNS(SVG_NS, "circle");
@@ -3243,7 +3308,8 @@
     function scheduleAmbientSignals() {
       // One group every 4–7 seconds.
       setTimeout(() => {
-        playAmbientSignals();
+        if (projectsBoard.open) playArchiveAmbientSignals();
+        else playAmbientSignals();
         scheduleAmbientSignals();
       }, 4000 + Math.random() * 3000);
     }
@@ -3560,6 +3626,300 @@
     depthPointer.addEventListener("change", syncGridDepth);
     document.addEventListener("visibilitychange", syncGridDepth);
     window.addEventListener("blur", resetGridDepth);
+
+    // ── Past Projects: nested circuit and editable collection content ──
+    const projectsBoard = document.querySelector("#projects-board");
+    const projectsSvg = document.querySelector("#projects-circuit");
+    const leaveProjectsButton = document.querySelector("#leave-projects");
+    const projectsPulseLayer = document.querySelector("#projects-pulses");
+    let archiveSelection = null;
+    let archiveLastSelection = "personal";
+    let archiveOverview = [0, 0, 900, 500];
+    let archiveBusy = false;
+    const originalCloseLabel = closeChipButton.textContent;
+
+    // Add your personal and academic project descriptions here.
+    // The previous RF content is preserved in the personal collection.
+    const archivePages = {
+      personal: {
+        label: "PERSONAL PROJECTS",
+        html: chipPages.rf.html.replace("Smaller builds.", "Personal projects.")
+      },
+      academic: {
+        label: "ACADEMIC PROJECTS",
+        html: `<p class="panel-eyebrow">PROJECT COLLECTION</p>
+          <h1 id="chip-heading">Academic projects.</h1>
+          <p class="panel-lead">Coursework, team projects, and design exercises.</p>
+          <!-- Add academic projects here: headings, descriptions, images, and links. -->`
+      }
+    };
+
+    const archiveChips = {};
+    for (const [id, title, subtitle, colorClass] of [
+      ["personal", "PERSONAL", "Independent Builds & Experiments", "pc"],
+      ["academic", "ACADEMIC", "Coursework & Team Projects", "rf"]
+    ]) {
+      const chip = chips[colorClass].cloneNode(true);
+      chip.removeAttribute("id");
+      chip.classList.remove("content-open", "is-current");
+      chip.setAttribute("role", "button");
+      chip.setAttribute("tabindex", "0");
+      chip.setAttribute("aria-label", `${title.toLowerCase()} projects`);
+      chip.removeAttribute("aria-disabled");
+      // Inline the pins so they remain visible across modal/SVG boundaries.
+      const use = chip.querySelector("use");
+      if (use) {
+        const pins = document.querySelector("#chip-pins").cloneNode(true);
+        pins.removeAttribute("id");
+        use.replaceWith(pins);
+      }
+      chip.querySelector(".chip-index").textContent = "ALIAS: " + (id === "personal" ? "LOW REGISTERS" : "HIGH REGISTERS");
+      const name = chip.querySelector(".chip-name");
+      name.textContent = title;
+      name.setAttribute("class", "chip-name");
+      name.setAttribute("y", "82");
+      chip.querySelector(".chip-description").textContent = subtitle;
+      chip.querySelector(".chip-description").style.fontSize = "9px";
+      projectsSvg.append(chip);
+      archiveChips[id] = chip;
+      chip.addEventListener("click", () => openArchiveCollection(id));
+      chip.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openArchiveCollection(id);
+        }
+      });
+    }
+
+    function showArchiveCurrentChip() {
+      for (const [id, chip] of Object.entries(archiveChips)) {
+        const current = id === archiveLastSelection;
+        chip.classList.toggle("is-current", current);
+        if (current) chip.setAttribute("aria-current", "true");
+        else chip.removeAttribute("aria-current");
+      }
+    }
+    showArchiveCurrentChip();
+
+    function layoutProjectsBoard() {
+      const portrait = window.innerWidth <= 700 && window.innerHeight > window.innerWidth;
+      archiveOverview = portrait ? [0, 0, 380, 700] : [0, 0, 900, 500];
+      archiveChips.personal.setAttribute("transform", portrait ? "translate(70 110)" : "translate(100 170)");
+      archiveChips.academic.setAttribute("transform", portrait ? "translate(70 430)" : "translate(560 170)");
+      const paths = projectsSvg.querySelectorAll("#projects-wires path");
+      // Endpoints meet the pin tips; order remains identical at both chips.
+      paths.forEach((path, i) => path.setAttribute("d", portrait
+        ? `M${150 + i * 40} 284 V416`
+        : `M354 ${218 + i * 32} H546`));
+    }
+
+    function archiveChipView(id) {
+      const bounds = projectsSvg.getBoundingClientRect();
+      const aspect = bounds.width / bounds.height;
+      const matrix = archiveChips[id].transform.baseVal.consolidate().matrix;
+      const width = Math.max(300, 220 * aspect);
+      const height = width / aspect;
+      return [matrix.e + 120 - width / 2, matrix.f + 80 - height / 2, width, height];
+    }
+
+    async function animateArchiveView(destination) {
+      const origin = projectsSvg.getAttribute("viewBox").split(/[\s,]+/).map(Number);
+      if (reducedMotion.matches) {
+        projectsSvg.setAttribute("viewBox", destination.join(" "));
+        return;
+      }
+      await new Promise(resolve => {
+        const start = performance.now();
+        function frame(now) {
+          const t = Math.min((now - start) / 700, 1);
+          const eased = t * t * (3 - 2 * t);
+          projectsSvg.setAttribute("viewBox", origin.map((v, i) => v + (destination[i] - v) * eased).join(" "));
+          if (t < 1) requestAnimationFrame(frame); else resolve();
+        }
+        requestAnimationFrame(frame);
+      });
+    }
+
+    async function archiveFade(element, from, to) {
+      if (reducedMotion.matches) { element.style.opacity = to; return; }
+      const animation = element.animate([{opacity:from}, {opacity:to}], {duration:350, fill:"forwards"});
+      await animation.finished;
+      element.style.opacity = to;
+      animation.cancel();
+    }
+
+    async function enterProjectsBoard() {
+      if (openChipId !== null || cameraMoving || archiveBusy) return;
+      archiveBusy = cameraMoving = true;
+      try {
+        chips.rf.classList.add("content-open");
+        await animateViewBox(getChipView("rf"));
+        layoutProjectsBoard();
+        projectsSvg.setAttribute("viewBox", archiveOverview.join(" "));
+        projectsBoard.showModal();
+        openChipId = "rf";
+        document.body.classList.add("in-projects");
+        await Promise.all([archiveFade(svg, 1, 0), archiveFade(projectsBoard, 0, 1)]);
+        leaveProjectsButton.focus({preventScroll:true});
+      } finally { archiveBusy = cameraMoving = false; }
+    }
+
+    function positionArchivePanel() {
+      const compact = window.innerWidth <= 700 || window.innerHeight <= 500;
+      chipPanel.classList.toggle("compact-panel", compact);
+      const bounds = compact ? projectsSvg.getBoundingClientRect()
+        : archiveChips[archiveSelection].querySelector(".chip-inset").getBoundingClientRect();
+      const inset = compact ? 12 : 3;
+      Object.assign(chipPanel.style, {
+        left: `${bounds.left + inset}px`, top: `${bounds.top + inset}px`,
+        width: `${Math.max(0, bounds.width - inset * 2)}px`,
+        height: `${Math.max(0, bounds.height - inset * 2)}px`
+      });
+    }
+
+    async function pulseArchiveWires(reverse) {
+      if (reducedMotion.matches) return;
+      // Reuse the main board's gold, copper and blue glowing signals.
+      const signals = [...projectsSvg.querySelectorAll("#projects-wires path")].map(makePulse);
+      await new Promise(resolve => {
+        const start = performance.now();
+        function frame(now) {
+          const progress = Math.min((now - start) / 850, 1);
+          for (const {path, circle, length} of signals) {
+            const point = path.getPointAtLength(length * (reverse ? 1 - progress : progress));
+            circle.setAttribute("cx", point.x); circle.setAttribute("cy", point.y);
+            if (!circle.parentNode) projectsPulseLayer.append(circle);
+          }
+          if (progress < 1) requestAnimationFrame(frame); else resolve();
+        }
+        requestAnimationFrame(frame);
+      });
+      projectsPulseLayer.replaceChildren();
+    }
+
+    async function openArchiveCollection(id) {
+      if (archiveBusy || cameraMoving || chipPanel.open) return;
+      archiveBusy = cameraMoving = true;
+      leaveProjectsButton.disabled = true;
+      try {
+        if (archiveLastSelection && archiveLastSelection !== id) {
+          await pulseArchiveWires(id === "personal");
+        }
+        archiveLastSelection = id;
+        showArchiveCurrentChip();
+        archiveSelection = id;
+        const chip = archiveChips[id];
+        const colors = getComputedStyle(chip);
+        for (const suffix of ["fill", "border", "accent"]) {
+          chipPanel.style.setProperty(`--panel-${suffix}`, colors.getPropertyValue(`--chip-${suffix}`));
+        }
+        panelLabel.textContent = archivePages[id].label;
+        panelContent.innerHTML = archivePages[id].html;
+        closeChipButton.textContent = "← Project collections";
+        chip.classList.add("content-open");
+        await animateArchiveView(archiveChipView(id));
+        // Recalculate in case orientation changed during the transition.
+        layoutProjectsBoard();
+        projectsSvg.setAttribute("viewBox", archiveChipView(id).join(" "));
+        positionArchivePanel();
+        chipPanel.showModal();
+        panelContent.scrollTop = 0;
+        startChipBackground();
+        await fadeChipPanel(true);
+        archiveLastSelection = id;
+      } finally { archiveBusy = cameraMoving = false; leaveProjectsButton.disabled = false; }
+    }
+
+    async function closeArchiveCollection() {
+      if (archiveBusy || cameraMoving) return;
+      archiveBusy = cameraMoving = true;
+      const id = archiveSelection;
+      try {
+        await fadeChipPanel(false);
+        panelContent.querySelectorAll("video, audio").forEach(media => media.pause());
+        chipPanel.close();
+        archiveChips[id].classList.remove("content-open");
+        archiveSelection = null;
+        closeChipButton.textContent = originalCloseLabel;
+        layoutProjectsBoard();
+        await animateArchiveView(archiveOverview);
+        archiveChips[id].focus({preventScroll:true});
+      } finally { archiveBusy = cameraMoving = false; resizeProjectsBoard(); }
+    }
+
+    async function leaveProjectsBoard() {
+      if (archiveBusy || cameraMoving || chipPanel.open) return;
+      archiveBusy = cameraMoving = true;
+      try {
+        svg.setAttribute("viewBox", getChipView("rf").join(" "));
+        await Promise.all([archiveFade(projectsBoard, 1, 0), archiveFade(svg, 0, 1)]);
+        projectsBoard.close();
+        document.body.classList.remove("in-projects");
+        openChipId = null;
+        chips.rf.classList.remove("content-open");
+        await animateViewBox(overviewView);
+        chips.rf.focus({preventScroll:true});
+      } finally { archiveBusy = cameraMoving = false; }
+    }
+
+    function resizeProjectsBoard() {
+      if (!projectsBoard.open || archiveBusy) return;
+      layoutProjectsBoard();
+      projectsSvg.setAttribute("viewBox", (archiveSelection ? archiveChipView(archiveSelection) : archiveOverview).join(" "));
+      if (archiveSelection) positionArchivePanel();
+    }
+    leaveProjectsButton.addEventListener("click", leaveProjectsBoard);
+    projectsBoard.addEventListener("cancel", event => {
+      event.preventDefault();
+      leaveProjectsBoard();
+    });
+
+
+    // Ambient traffic uses its own layer and the existing 4–7 second scheduler.
+    const archiveAmbientLayer = document.createElementNS(SVG_NS, "g");
+    archiveAmbientLayer.setAttribute("aria-hidden", "true");
+    archiveAmbientLayer.style.pointerEvents = "none";
+    projectsPulseLayer.before(archiveAmbientLayer);
+
+    function archiveIsIdle() {
+      return projectsBoard.open && !chipPanel.open && !archiveBusy &&
+        !cameraMoving && !document.hidden && !reducedMotion.matches;
+    }
+
+    function playArchiveAmbientSignals() {
+      if (!archiveIsIdle()) return;
+      const reverse = Math.random() < 0.5;
+      const colors = ["#a5b99e", "#b9a17b", "#91bfd3"];
+      const signals = [...projectsSvg.querySelectorAll("#projects-wires path")].map((path, i) => {
+        const circle = document.createElementNS(SVG_NS, "circle");
+        circle.setAttribute("class", "ambient-signal");
+        circle.setAttribute("r", "1.8");
+        circle.setAttribute("fill", colors[i]);
+        circle.style.color = colors[i];
+        return {path, circle};
+      });
+      let start;
+      function frame(now) {
+        if (!archiveIsIdle()) {
+          signals.forEach(({circle}) => circle.remove());
+          return;
+        }
+        if (start === undefined) start = now;
+        const progress = Math.min((now - start) / 2200, 1);
+        for (const {path, circle} of signals) {
+          // Re-read the length so rotation during a pulse keeps it on the wire.
+          const point = path.getPointAtLength(path.getTotalLength() * (reverse ? 1 - progress : progress));
+          circle.setAttribute("cx", point.x);
+          circle.setAttribute("cy", point.y);
+          circle.style.opacity = 0.55 * Math.sin(Math.PI * progress);
+          if (!circle.parentNode) archiveAmbientLayer.append(circle);
+        }
+        if (progress < 1) requestAnimationFrame(frame);
+        else signals.forEach(({circle}) => circle.remove());
+      }
+      requestAnimationFrame(frame);
+    }
+
   </script>
 </body>
 </html>
