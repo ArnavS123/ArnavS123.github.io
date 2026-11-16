@@ -1627,6 +1627,18 @@
       "(prefers-reduced-motion: reduce)"
     );
 
+    const IS_MAC = document.documentElement.classList.contains("mac-effects");
+
+    const EFFECTS = {
+      navigationPulses: false,
+      ambientPulses: false,
+      gridGlow: false,
+      gridMovement: false,
+      panelSignals: false,
+      startupWave: false,
+      macChipHalos: false
+    };
+
     const names = {
       pc: "PC",
       rf: "RF",
@@ -2101,7 +2113,11 @@
     function startChipBackground() {
       stopChipBackground();
 
-      if (reducedMotion.matches || !chipPanel.open) return;
+      if (
+        !EFFECTS.panelSignals ||
+        reducedMotion.matches ||
+        !chipPanel.open
+      ) return;
 
       const namespace = "http://www.w3.org/2000/svg";
       const now = performance.now();
@@ -2481,7 +2497,7 @@
             route.map(id => names[id]).join(" → ") +
             ` · Step ${i + 1} of ${route.length - 1}`;
 
-          if (!reducedMotion.matches) {
+          if (EFFECTS.navigationPulses && !reducedMotion.matches) {
             await animateConnection(connection, reverse);
           }
 
@@ -2759,7 +2775,10 @@
       welcomeScreen.remove();
 
       startBoardEffects();
-      startBoardDecoration();
+
+      if (EFFECTS.gridGlow) {
+        startBoardDecoration();
+      }
 
       // Display the circuit before automatically entering PC.
       await introWait(CIRCUIT_PREVIEW_TIME);
@@ -3121,8 +3140,8 @@
       if (boardEffectsStarted) return;
       boardEffectsStarted = true;
 
-      playPowerWave();
-      scheduleAmbientSignals();
+      if (EFFECTS.startupWave) playPowerWave();
+      if (EFFECTS.ambientPulses) scheduleAmbientSignals();
     }
 
     // ── Illuminated background grid patches ────────────────────
@@ -3294,6 +3313,7 @@
 
     function depthIsEnabled() {
       return (
+        EFFECTS.gridMovement &&
         depthPointer.matches &&
         !reducedMotion.matches &&
         !document.hidden &&
@@ -3529,7 +3549,7 @@
     }
 
     async function pulseArchiveWires(reverse) {
-      if (reducedMotion.matches) return;
+      if (!EFFECTS.navigationPulses || reducedMotion.matches) return;
       // Reuse the main board's gold, copper and blue glowing signals.
       const signals = [...projectsSvg.querySelectorAll("#projects-wires path")].map(makePulse);
       await new Promise(resolve => {
@@ -3673,7 +3693,7 @@
 
 
     // Both boards are now built; add halos only on macOS (never to images).
-    if (document.documentElement.classList.contains("mac-effects")) {
+    if (IS_MAC && EFFECTS.macChipHalos) {
       document.querySelectorAll('.circuit > g[role="button"]').forEach(chip => {
         const body = chip.querySelector(".chip-body");
         if (!body) return;
