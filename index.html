@@ -1630,13 +1630,13 @@
     const IS_MAC = document.documentElement.classList.contains("mac-effects");
 
     const EFFECTS = {
-        navigationPulses: !IS_MAC,
-        ambientPulses: !IS_MAC,
-        gridGlow: !IS_MAC,
+        navigationPulses: true,
+        ambientPulses: true,
+        gridGlow: true,
         gridMovement: !IS_MAC,
-        panelSignals: !IS_MAC,
-        startupWave: !IS_MAC,
-        macChipHalos: false
+        panelSignals: true,
+        startupWave: true,
+        macChipHalos: true
     };
 
     const names = {
