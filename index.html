@@ -244,7 +244,7 @@
 
     .panel-eyebrow {
       color: var(--panel-accent);
-      font: 11px monospace;
+      font: 14px monospace;
       letter-spacing: 0.12em;
       font-family: var(--font-mono);
     }
@@ -324,7 +324,7 @@
 
     .panel-content .panel-eyebrow {
       color: var(--panel-accent);
-      font-size: 0.75rem;
+      font-size: 1.2rem;
     }
 
     .panel-content ul {
@@ -1681,13 +1681,12 @@
     let cameraMoving = false;
 
     // Edit the content for each chip here.
+    // Internal eyebrows automatically match the external chip alias and name.
     // These strings contain HTML written by you, not visitor input.
     const chipPages = {
       pc: {
-        label: "PROGRAM COUNTER",
         html: `
-          <p class="panel-eyebrow">INTRODUCTION</p>
-          <h1 id="chip-heading">Hi, I’m Arnav.</h1>
+          <h1 id="chip-heading">Hi, I’m Arnav!</h1>
 
           <p class="panel-lead">
             I like understanding computers all the way down
@@ -1697,51 +1696,58 @@
           <p>
             I studied Computer Engineering at Purdue University,
             where I developed an interest in computer architecture
-            and digital design.
+            and digital logic design.
           </p>
 
           <p>
-            I enjoy exploring how logic gates, registers,
-            instructions, and programs come together to form
+            I enjoy exploring how logic gates, instructions,
+            memory systems, and programs come together to form
             a working system.
           </p>
 
           <h2>What interests me</h2>
           <ul>
-            <li>Computer architecture and processor design</li>
+            <li>Computer architecture and CPU design</li>
             <li>Digital logic and hardware design</li>
             <li>The connection between hardware and software</li>
           </ul>
 
           <p>
-            This website is a way to share what I’m building,
-            the decisions behind it, and what I learn along the way.
+            This website is a space to share the projects I’m developing,
+            the decisions behind them, and what I learn along the way.
+            I also share the experiences that have shaped who I am.
           </p>
+
+          <h2>Achievements I’m proud to share</h2>
+          <ul>
+            <li>Ranked first on Logicode, a platform for hardware design challenges,
+              as of November 17, 2026.</li>
+            <li>My team was one of the few to earn a 100% autograder score
+              for a multicore, pipelined CPU with caches.</li>
+          </ul>
 
           <figure>
             <button
               class="image-expand"
               type="button"
-              aria-label="Enlarge CPU overview"
+              aria-label="Enlarge Logicode leaderboard"
             >
               <img
-                src="images/cpu-overview.png"
-                alt="My custom CPU in Digital Logic Sim"
+                src="images/logicode-stats1.png"
+                alt="Logicode leaderboard - November 17, 2026"
                 loading="lazy"
               />
             </button>
 
             <figcaption>
-              The processor’s main components.
+              Logicode leaderboard - November 17, 2026
             </figcaption>
           </figure>
         `
       },
 
       rf: {
-        label: "REGISTER FILE",
         html: `
-          <p class="panel-eyebrow">PROJECT COLLECTION</p>
           <h1 id="chip-heading">Smaller builds.</h1>
 
           <p class="panel-lead">
@@ -1755,9 +1761,7 @@
       },
 
       control: {
-        label: "CONTROL UNIT",
         html: `
-          <p class="panel-eyebrow">CUSTOM CPU & ASSEMBLER</p>
           <h1 id="chip-heading">From gates to instructions.</h1>
 
           <p class="panel-lead">
@@ -1794,9 +1798,7 @@
       },
 
       alu: {
-        label: "ARITHMETIC LOGIC UNIT",
         html: `
-          <p class="panel-eyebrow">NACAIS & OPTIMIZATION</p>
           <h1 id="chip-heading">Giving the CPU a language.</h1>
 
           <p class="panel-lead">
@@ -1822,9 +1824,7 @@
       },
 
       memory: {
-        label: "CACHE HIERARCHY",
         html: `
-          <p class="panel-eyebrow">OPERATING SYSTEMS</p>
           <h1 id="chip-heading">Making memory visible.</h1>
 
           <p class="panel-lead">
@@ -1851,9 +1851,7 @@
       },
 
       io: {
-        label: "I/O CONTROLLER",
         html: `
-          <p class="panel-eyebrow">LINKS & CONTACT</p>
           <h1 id="chip-heading">Let’s connect.</h1>
 
           <p class="panel-lead">
@@ -1866,6 +1864,31 @@
         `
       }
     };
+
+    // The external alias and chip name are the source for both eyebrows.
+    // Joining tspans preserves spaces in chip names split across lines.
+    function readChipLabel(chip, selector) {
+      const element = chip.querySelector(selector);
+      if (!element) return "";
+      const lines = element.querySelectorAll("tspan");
+      const text = lines.length
+        ? Array.from(lines, line => line.textContent).join(" ")
+        : element.textContent;
+      return text.replace(/\s+/g, " ").trim();
+    }
+
+    function setChipPanelContent(chip, html) {
+      panelLabel.textContent = readChipLabel(chip, ".chip-index")
+        .replace(/^ALIAS\s*:\s*/i, "");
+      panelContent.innerHTML = html;
+      let eyebrow = panelContent.querySelector(":scope > .panel-eyebrow");
+      if (!eyebrow) {
+        eyebrow = document.createElement("p");
+        eyebrow.className = "panel-eyebrow";
+        panelContent.prepend(eyebrow);
+      }
+      eyebrow.textContent = readChipLabel(chip, ".chip-name");
+    }
 
     function getChipView(id) {
       const viewport = svg.getBoundingClientRect();
@@ -2207,8 +2230,7 @@
           colors.getPropertyValue("--chip-accent").trim()
         );
 
-        panelLabel.textContent = page.label;
-        panelContent.innerHTML = page.html;
+        setChipPanelContent(chips[id], page.html);
 
         // Fade out the small labels while zooming toward the chip.
         chips[id].classList.add("content-open");
@@ -3405,13 +3427,10 @@
     // The previous RF content is preserved in the personal collection.
     const archivePages = {
       personal: {
-        label: "PERSONAL PROJECTS",
         html: chipPages.rf.html.replace("Smaller builds.", "Personal projects.")
       },
       academic: {
-        label: "ACADEMIC PROJECTS",
-        html: `<p class="panel-eyebrow">PROJECT COLLECTION</p>
-          <h1 id="chip-heading">Academic projects.</h1>
+        html: `<h1 id="chip-heading">Academic projects.</h1>
           <p class="panel-lead">Coursework, team projects, and design exercises.</p>
           <!-- Add academic projects here: headings, descriptions, images, and links. -->`
       }
@@ -3420,17 +3439,13 @@
     // Edit experience content here, just like the project collections above.
     const experiencePages = {
       partTime: {
-        label: "L1 CACHE / PART-TIME JOBS",
-        html: `<p class="panel-eyebrow">EXPERIENCES</p>
-          <h1 id="chip-heading">Part-time jobs.</h1>
+        html: `<h1 id="chip-heading">Part-time jobs.</h1>
           <p class="panel-lead">Roles, responsibilities, and lessons learned.</p>
           <!-- Add each job here: role, employer, dates, responsibilities,
                achievements, and optional images or links. -->`
       },
       internships: {
-        label: "L2 CACHE / INTERNSHIPS",
-        html: `<p class="panel-eyebrow">EXPERIENCES</p>
-          <h1 id="chip-heading">Internships.</h1>
+        html: `<h1 id="chip-heading">Internships.</h1>
           <p class="panel-lead">Practical experience, projects, and contributions.</p>
           <!-- Add each internship here: role, organization, dates,
                projects, contributions, and optional images or links. -->`
@@ -3637,8 +3652,7 @@
         for (const suffix of ["fill", "border", "accent"]) {
           chipPanel.style.setProperty(`--panel-${suffix}`, colors.getPropertyValue(`--chip-${suffix}`));
         }
-        panelLabel.textContent = activeCollection.pages[id].label;
-        panelContent.innerHTML = activeCollection.pages[id].html;
+        setChipPanelContent(chip, activeCollection.pages[id].html);
         closeChipButton.textContent = activeCollection.backLabel;
         chip.classList.add("content-open");
         await animateArchiveView(archiveChipView(id));
