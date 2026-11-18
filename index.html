@@ -1511,12 +1511,9 @@
       <circle class="orientation-dot" cx="221" cy="19" r="3" />
 
       <text class="chip-index" x="24" y="35">ALIAS: CACHE HIERARCHY</text>
-      <text class="chip-name" x="24" y="70" style="font-size: 22px;">
-        <tspan x="24" dy="0">VIRTUAL MEMORY</tspan>
-        <tspan x="24" dy="26">SIMULATOR</tspan>
-      </text>
+      <text class="chip-name" x="24" y="82">EXPERIENCES</text>
       <text class="chip-description" x="24" y="119">
-        OS Memory Management Project
+        Internships & Part-Time Jobs
       </text>
     </g>
 
@@ -1639,7 +1636,7 @@
       rf: "RF",
       control: "CU",
       alu: "ALU",
-      memory: "Memory",
+      memory: "Experiences",
       io: "I/O"
     };
 
@@ -2186,7 +2183,7 @@
     });
 
     async function openChip(id) {
-      if (id === "rf") return enterProjectsBoard();
+      if (id === "rf" || id === "memory") return enterProjectsBoard(id);
       if (openChipId !== null || cameraMoving) return;
 
       cameraMoving = true;
@@ -3420,17 +3417,70 @@
       }
     };
 
+    // Edit experience content here, just like the project collections above.
+    const experiencePages = {
+      partTime: {
+        label: "L1 CACHE / PART-TIME JOBS",
+        html: `<p class="panel-eyebrow">EXPERIENCES</p>
+          <h1 id="chip-heading">Part-time jobs.</h1>
+          <p class="panel-lead">Roles, responsibilities, and lessons learned.</p>
+          <!-- Add each job here: role, employer, dates, responsibilities,
+               achievements, and optional images or links. -->`
+      },
+      internships: {
+        label: "L2 CACHE / INTERNSHIPS",
+        html: `<p class="panel-eyebrow">EXPERIENCES</p>
+          <h1 id="chip-heading">Internships.</h1>
+          <p class="panel-lead">Practical experience, projects, and contributions.</p>
+          <!-- Add each internship here: role, organization, dates,
+               projects, contributions, and optional images or links. -->`
+      }
+    };
+
+    // One shared circuit implementation keeps both sections identical.
+    const collectionBoards = {
+      rf: {
+        title: "PAST PROJECTS", description: "Personal and academic project collections",
+        backLabel: "← Project collections", pages: archivePages, last: "personal",
+        chips: [
+          ["personal", "PERSONAL", "Independent Builds & Experiments", "pc", "LOW REGISTERS"],
+          ["academic", "ACADEMIC", "Coursework & Team Projects", "rf", "HIGH REGISTERS"]
+        ]
+      },
+      memory: {
+        title: "EXPERIENCES", description: "Part-time jobs and internships",
+        backLabel: "← Experiences", pages: experiencePages, last: "partTime",
+        chips: [
+          ["partTime", "PART-TIME JOBS", "Roles & Responsibilities", "pc", "L1 CACHE"],
+          ["internships", "INTERNSHIPS", "Projects & Contributions", "rf", "L2 CACHE"]
+        ]
+      }
+    };
+    let activeCollectionId = "rf";
+    let activeCollection = collectionBoards.rf;
     const archiveChips = {};
-    for (const [id, title, subtitle, colorClass] of [
-      ["personal", "PERSONAL", "Independent Builds & Experiments", "pc"],
-      ["academic", "ACADEMIC", "Coursework & Team Projects", "rf"]
-    ]) {
+
+    function configureCollectionBoard(parentId) {
+      activeCollectionId = parentId;
+      activeCollection = collectionBoards[parentId];
+      archiveSelection = null;
+      archiveLastSelection = activeCollection.last;
+      for (const [id, chip] of Object.entries(archiveChips)) {
+        chip.remove();
+        delete archiveChips[id];
+      }
+      projectsPulseLayer.replaceChildren();
+      projectsBoard.querySelector(".projects-toolbar span").textContent =
+        `ARNAV SRIVASTAVA / ${activeCollection.title}`;
+      projectsBoard.setAttribute("aria-label", activeCollection.description);
+      projectsSvg.setAttribute("aria-label", activeCollection.description);
+    for (const [id, title, subtitle, colorClass, alias] of activeCollection.chips) {
       const chip = chips[colorClass].cloneNode(true);
       chip.removeAttribute("id");
       chip.classList.remove("content-open", "is-current");
       chip.setAttribute("role", "button");
       chip.setAttribute("tabindex", "0");
-      chip.setAttribute("aria-label", `${title.toLowerCase()} projects`);
+      chip.setAttribute("aria-label", title.toLowerCase());
       chip.removeAttribute("aria-disabled");
       // Inline the pins so they remain visible across modal/SVG boundaries.
       const use = chip.querySelector("use");
@@ -3439,11 +3489,12 @@
         pins.removeAttribute("id");
         use.replaceWith(pins);
       }
-      chip.querySelector(".chip-index").textContent = "ALIAS: " + (id === "personal" ? "LOW REGISTERS" : "HIGH REGISTERS");
+      chip.querySelector(".chip-index").textContent = "ALIAS: " + alias;
       const name = chip.querySelector(".chip-name");
       name.textContent = title;
       name.setAttribute("class", "chip-name");
       name.setAttribute("y", "82");
+      name.style.fontSize = title.length > 12 ? "21px" : "";
       chip.querySelector(".chip-description").textContent = subtitle;
       chip.querySelector(".chip-description").style.fontSize = "9px";
       projectsSvg.append(chip);
@@ -3456,6 +3507,10 @@
         }
       });
     }
+
+      showArchiveCurrentChip();
+    }
+    configureCollectionBoard("rf");
 
     function showArchiveCurrentChip() {
       for (const [id, chip] of Object.entries(archiveChips)) {
@@ -3470,8 +3525,8 @@
     function layoutProjectsBoard() {
       const portrait = window.innerWidth <= 700 && window.innerHeight > window.innerWidth;
       archiveOverview = portrait ? [0, 0, 380, 700] : [0, 0, 900, 500];
-      archiveChips.personal.setAttribute("transform", portrait ? "translate(70 110)" : "translate(100 170)");
-      archiveChips.academic.setAttribute("transform", portrait ? "translate(70 430)" : "translate(560 170)");
+      archiveChips[activeCollection.chips[0][0]].setAttribute("transform", portrait ? "translate(70 110)" : "translate(100 170)");
+      archiveChips[activeCollection.chips[1][0]].setAttribute("transform", portrait ? "translate(70 430)" : "translate(560 170)");
       const paths = projectsSvg.querySelectorAll("#projects-wires path");
       // Endpoints meet the pin tips; order remains identical at both chips.
       paths.forEach((path, i) => path.setAttribute("d", portrait
@@ -3514,16 +3569,18 @@
       animation.cancel();
     }
 
-    async function enterProjectsBoard() {
+    async function enterProjectsBoard(parentId = "rf") {
       if (openChipId !== null || cameraMoving || archiveBusy) return;
       archiveBusy = cameraMoving = true;
       try {
-        chips.rf.classList.add("content-open");
-        await animateViewBox(getChipView("rf"));
+        configureCollectionBoard(parentId);
+        archiveAmbientLayer.replaceChildren();
+        chips[parentId].classList.add("content-open");
+        await animateViewBox(getChipView(parentId));
         layoutProjectsBoard();
         projectsSvg.setAttribute("viewBox", archiveOverview.join(" "));
         projectsBoard.showModal();
-        openChipId = "rf";
+        openChipId = parentId;
         document.body.classList.add("in-projects");
         await Promise.all([archiveFade(svg, 1, 0), archiveFade(projectsBoard, 0, 1)]);
         leaveProjectsButton.focus({preventScroll:true});
@@ -3569,9 +3626,10 @@
       leaveProjectsButton.disabled = true;
       try {
         if (archiveLastSelection && archiveLastSelection !== id) {
-          await pulseArchiveWires(id === "personal");
+          await pulseArchiveWires(id === activeCollection.chips[0][0]);
         }
         archiveLastSelection = id;
+        activeCollection.last = id;
         showArchiveCurrentChip();
         archiveSelection = id;
         const chip = archiveChips[id];
@@ -3579,9 +3637,9 @@
         for (const suffix of ["fill", "border", "accent"]) {
           chipPanel.style.setProperty(`--panel-${suffix}`, colors.getPropertyValue(`--chip-${suffix}`));
         }
-        panelLabel.textContent = archivePages[id].label;
-        panelContent.innerHTML = archivePages[id].html;
-        closeChipButton.textContent = "← Project collections";
+        panelLabel.textContent = activeCollection.pages[id].label;
+        panelContent.innerHTML = activeCollection.pages[id].html;
+        closeChipButton.textContent = activeCollection.backLabel;
         chip.classList.add("content-open");
         await animateArchiveView(archiveChipView(id));
         // Recalculate in case orientation changed during the transition.
@@ -3594,6 +3652,7 @@
         startChipBackground();
         await fadeChipPanel(true);
         archiveLastSelection = id;
+        activeCollection.last = id;
       } finally { archiveBusy = cameraMoving = false; leaveProjectsButton.disabled = false; }
     }
 
@@ -3618,14 +3677,14 @@
       if (archiveBusy || cameraMoving || chipPanel.open) return;
       archiveBusy = cameraMoving = true;
       try {
-        svg.setAttribute("viewBox", getChipView("rf").join(" "));
+        svg.setAttribute("viewBox", getChipView(activeCollectionId).join(" "));
         await Promise.all([archiveFade(projectsBoard, 1, 0), archiveFade(svg, 0, 1)]);
         projectsBoard.close();
         document.body.classList.remove("in-projects");
         openChipId = null;
-        chips.rf.classList.remove("content-open");
+        chips[activeCollectionId].classList.remove("content-open");
         await animateViewBox(overviewView);
-        chips.rf.focus({preventScroll:true});
+        chips[activeCollectionId].focus({preventScroll:true});
       } finally { archiveBusy = cameraMoving = false; }
     }
 
