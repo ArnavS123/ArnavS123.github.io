@@ -211,6 +211,8 @@
     #chip-panel {
       --panel-type-step: 0rem;
       position: fixed;
+      /* Keep non-modal chip content over the circuit but below utility links. */
+      z-index: 3;
       inset: auto;
       margin: 0;
       padding: 0;
@@ -603,6 +605,19 @@
 
     #chip-panel.compact-panel::backdrop {
       background: #111713d9;
+    }
+
+    /* On small screens, retain the dimmed backdrop of the old modal panel
+       without blocking the performance link outside the chip. */
+    @media (max-width: 700px), (max-height: 500px) {
+      body.main-chip-open::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 2;
+        background: #111713d9;
+        pointer-events: none;
+      }
     }
 
     #panel-content {
@@ -1212,6 +1227,144 @@
         content-visibility: auto;
         contain-intrinsic-size: auto 400px;
     }
+
+
+    /* User-controlled performance menu, available on both circuit boards. */
+    .performance-trigger {
+      position: fixed;
+      z-index: 6;
+      left: max(20px, env(safe-area-inset-left));
+      bottom: max(16px, env(safe-area-inset-bottom));
+      padding: 5px 0;
+      border: 0;
+      background: transparent;
+      color: #adbbb0;
+      font: 12px var(--font-mono);
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      cursor: pointer;
+    }
+    .performance-trigger:hover { color: #e1e9df; }
+    .performance-trigger:focus-visible {
+      outline: 2px solid #91bfd3;
+      outline-offset: 5px;
+      border-radius: 2px;
+    }
+    .performance-trigger-projects { z-index: 4; }
+
+    #performance-dialog {
+      position: fixed;
+      inset: auto auto max(55px, calc(env(safe-area-inset-bottom) + 55px))
+        max(16px, env(safe-area-inset-left));
+      margin: 0;
+      width: min(380px, calc(100vw - 32px));
+      max-width: calc(100vw - 32px);
+      max-height: min(80dvh, 580px);
+      padding: 20px;
+      overflow-y: auto;
+      border: 1px solid #597263;
+      border-radius: 10px;
+      background: #17221b;
+      color: #dfe6dd;
+      box-shadow: 0 14px 45px #000a;
+      font-family: var(--font-body);
+    }
+    #performance-dialog::backdrop { background: #05090688; }
+    .performance-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .performance-heading h2 {
+      margin: 0;
+      font: 600 17px var(--font-mono);
+      letter-spacing: 0.02em;
+    }
+    #performance-close {
+      flex: none;
+      min-width: 34px;
+      min-height: 34px;
+      border: 1px solid #526d5c;
+      border-radius: 5px;
+      background: transparent;
+      color: #dfe6dd;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    #performance-close:hover { background: #ffffff12; }
+    #performance-dialog button:focus-visible,
+    #performance-dialog input:focus-visible {
+      outline: 2px solid #91bfd3;
+      outline-offset: 3px;
+    }
+    .performance-help {
+      margin: 12px 0 16px;
+      color: #b7c3b9;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .performance-options {
+      display: grid;
+      gap: 9px;
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+    .performance-choice {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      padding: 12px;
+      border: 1px solid #4a5b4e;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+    .performance-choice:hover { background: #ffffff09; }
+    .performance-choice:has(input:checked) {
+      border-color: #a5c7b1;
+      background: #94aa9813;
+    }
+    .performance-choice input {
+      flex: none;
+      width: 16px;
+      height: 16px;
+      margin: 2px 0 0;
+      accent-color: #a5c7b1;
+    }
+    .performance-choice strong {
+      display: block;
+      font: 600 13px var(--font-mono);
+      margin-bottom: 4px;
+    }
+    .performance-choice small {
+      display: block;
+      color: #b7c3b9;
+      line-height: 1.45;
+      font-size: 12px;
+    }
+    .performance-footnote {
+      margin: 14px 0 0;
+      color: #8ea194;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+    /* Minimal removes expensive SVG shadows and power-up flashes as well. */
+    .performance-minimal .circuit .chip-body {
+      filter: none !important;
+      transition: none !important;
+    }
+    .performance-minimal .circuit .power-arrival .chip-body {
+      animation: none !important;
+    }
+    .performance-minimal .mac-chip-halo,
+    .performance-minimal .board-effects {
+      display: none !important;
+    }
+    @media (max-width: 700px) {
+      .performance-trigger { font-size: 11px; }
+      #performance-dialog { padding: 16px; }
+    }
   </style>
 </head>
 
@@ -1219,6 +1372,10 @@
   <div class="site-signature">
     ARNAV SRIVASTAVA
   </div>
+  <button type="button" class="performance-trigger" data-open-performance
+          aria-haspopup="dialog" aria-controls="performance-dialog">
+    Experiencing Issues?
+  </button>
   <dialog id="welcome-screen" aria-label="Welcome">
     <div class="welcome-content">
       <h1 id="welcome-title" aria-label="WELCOME">
@@ -1649,6 +1806,10 @@
         <g id="projects-pulses" pointer-events="none" aria-hidden="true"></g>
       </svg>
     </div>
+    <button type="button" class="performance-trigger performance-trigger-projects"
+            data-open-performance aria-haspopup="dialog" aria-controls="performance-dialog">
+      Experiencing Issues?
+    </button>
   </dialog>
 
   <dialog id="chip-panel" aria-labelledby="chip-heading">
@@ -1705,6 +1866,35 @@
       <figcaption id="enlarged-caption"></figcaption>
     </figure>
   </dialog>
+  <dialog id="performance-dialog" aria-labelledby="performance-title"
+          aria-describedby="performance-help">
+    <div class="performance-heading">
+      <h2 id="performance-title">Performance Settings</h2>
+      <button type="button" id="performance-close" aria-label="Close performance settings">×</button>
+    </div>
+    <p class="performance-help" id="performance-help">
+      If the circuit feels slow or stutters on your device, choose a lighter mode.
+      Your changes take effect immediately.
+    </p>
+    <fieldset class="performance-options" aria-label="Performance mode">
+      <label class="performance-choice">
+        <input type="radio" name="performance-mode" value="normal" checked />
+        <span><strong>Normal (default)</strong>
+          <small>All standard effects enabled, subject to device optimizations and motion preferences.</small></span>
+      </label>
+      <label class="performance-choice">
+        <input type="radio" name="performance-mode" value="reduced" />
+        <span><strong>Reduced</strong>
+          <small>Disables moving grid, glowing grid patches, and weak pulses between chips.</small></span>
+      </label>
+      <label class="performance-choice">
+        <input type="radio" name="performance-mode" value="minimal" />
+        <span><strong>Minimal</strong>
+          <small>Disables navigation pulses, signals inside chip panels, circuit startup wave, and chip glow.</small></span>
+      </label>
+    </fieldset>
+    <p class="performance-footnote">Your selection is remembered on this device.</p>
+  </dialog>
   <script>
     const svg = document.querySelector(".circuit");
     const status = document.querySelector("#route-status");
@@ -1718,7 +1908,7 @@
 
     const IS_MAC = document.documentElement.classList.contains("mac-effects");
 
-    const EFFECTS = {
+    const BASE_EFFECTS = {
       navigationPulses: true,
       ambientPulses: true,
       gridGlow: true,
@@ -1727,6 +1917,71 @@
       startupWave: true,
       macChipHalos: false
     };
+    const EFFECTS = { ...BASE_EFFECTS };
+    const PERFORMANCE_PRESETS = {
+      normal: {},
+      reduced: { gridMovement: false, gridGlow: false, ambientPulses: false },
+      minimal: {
+        gridMovement: false, gridGlow: false, ambientPulses: false,
+        panelSignals: false, navigationPulses: false, startupWave: false
+      }
+    };
+    const PERFORMANCE_STORAGE_KEY = "arnav-portfolio-performance";
+    const performanceDialog = document.querySelector("#performance-dialog");
+    const performanceRadios = Array.from(
+      performanceDialog.querySelectorAll('input[name="performance-mode"]')
+    );
+
+    function applyPerformanceMode(mode, refresh = true) {
+      if (!Object.prototype.hasOwnProperty.call(PERFORMANCE_PRESETS, mode)) {
+        mode = "normal";
+      }
+      Object.assign(EFFECTS, BASE_EFFECTS, PERFORMANCE_PRESETS[mode]);
+      document.documentElement.classList.toggle("performance-minimal", mode === "minimal");
+      performanceRadios.forEach(input => { input.checked = input.value === mode; });
+      if (!refresh) return; // During startup, effect systems are not initialized yet.
+
+      updateBoardDecoration();
+      syncPatchGlows();
+      syncGridDepth();
+      stopChipBackground();
+      if (EFFECTS.panelSignals && chipPanel.open) startChipBackground();
+      if (EFFECTS.ambientPulses) {
+        if (boardEffectsStarted) scheduleAmbientSignals();
+      } else {
+        stopAmbientSignals();
+      }
+    }
+
+    // Read an optional saved preference without breaking private browsing modes.
+    let initialPerformanceMode = "normal";
+    try {
+      initialPerformanceMode = localStorage.getItem(PERFORMANCE_STORAGE_KEY) || "normal";
+    } catch (error) { /* Storage can be unavailable. */ }
+    applyPerformanceMode(initialPerformanceMode, false);
+
+    performanceRadios.forEach(input => input.addEventListener("change", () => {
+      if (!input.checked) return;
+      applyPerformanceMode(input.value);
+      try { localStorage.setItem(PERFORMANCE_STORAGE_KEY, input.value); }
+      catch (error) { /* The setting still works for this visit. */ }
+    }));
+    document.querySelectorAll("[data-open-performance]").forEach(trigger => {
+      trigger.addEventListener("click", () => performanceDialog.showModal());
+    });
+    document.querySelector("#performance-close").addEventListener(
+      "click", () => performanceDialog.close()
+    );
+
+    // Escape does not dismiss dialogs or interrupt chip transitions.
+    // Visitors can still use the visible Back / Close buttons.
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }, true);
+    performanceDialog.addEventListener("cancel", event => event.preventDefault());
 
     const names = {
       pc: "PC",
@@ -2424,7 +2679,11 @@
         positionChipPanel(id);
 
         chipPanel.style.opacity = reducedMotion.matches ? "1" : "0";
-        chipPanel.showModal();
+        // Unlike showModal(), show() leaves the main board's utility link
+        // interactive while a write-up is open (as on the Projects board).
+        chipPanel.show();
+        document.body.classList.add("main-chip-open");
+        closeChipButton.focus({ preventScroll: true });
         openChipId = id;
         panelContent.scrollTop = 0;
         startChipBackground();
@@ -2458,6 +2717,7 @@
         await fadeChipPanel(false);
 
         chipPanel.close();
+        document.body.classList.remove("main-chip-open");
         openChipId = null;
 
         // Restore the small labels as we zoom back out.
@@ -2473,10 +2733,8 @@
 
     closeChipButton.addEventListener("click", closeChip);
 
-    chipPanel.addEventListener("cancel", event => {
-      event.preventDefault();
-      closeChip();
-    });
+    // Never let a browser-initiated dialog cancellation bypass chip animations.
+    chipPanel.addEventListener("cancel", event => event.preventDefault());
 
     window.addEventListener("resize", () => {
       if (projectsBoard.open) { resizeProjectsBoard(); return; }
@@ -2634,6 +2892,11 @@
             startTime = time;
           }
 
+          if (!EFFECTS.navigationPulses) {
+            signals.forEach(signal => signal.circle.remove());
+            resolve();
+            return;
+          }
           const progress = Math.min(
             (time - startTime) / TRAVEL_TIME,
             1
@@ -2773,11 +3036,8 @@
 
     closeImageButton.addEventListener("click", closeImageViewer);
 
-    // Escape closes only the image viewer, leaving the chip open.
-    imageViewer.addEventListener("cancel", event => {
-      event.preventDefault();
-      closeImageViewer();
-    });
+    // Dismiss the image viewer with its Close button, not Escape.
+    imageViewer.addEventListener("cancel", event => event.preventDefault());
 
     // Clicking the dark backdrop also closes the viewer.
     imageViewer.addEventListener("click", event => {
@@ -2973,9 +3233,9 @@
 
       startBoardEffects();
 
-      if (EFFECTS.gridGlow) {
-        startBoardDecoration();
-      }
+      // Mark decoration ready even if the saved preset initially hides it.
+      // Switching to Normal later can then restart the grid glow.
+      startBoardDecoration();
 
       // Display the circuit before automatically entering PC.
       await introWait(CIRCUIT_PREVIEW_TIME);
@@ -3130,7 +3390,7 @@
     // ── Startup power wave ─────────────────────────────────────
 
     function playPowerWave() {
-      if (!boardIsIdle()) return;
+      if (!EFFECTS.startupWave || !boardIsIdle()) return;
 
       // Convert the visible SVG viewport into circuit coordinates.
       // This includes the extra space around the preserved viewBox.
@@ -3223,7 +3483,7 @@
 
       function frame(now) {
         if (start === undefined) start = now;
-        if (!boardIsIdle()) {
+        if (!EFFECTS.startupWave || !boardIsIdle()) {
           layer.remove();
           return;
         }
@@ -3261,7 +3521,7 @@
     // ── Occasional ambient wire signals ────────────────────────
 
     function playAmbientSignals() {
-      if (!boardIsIdle() || connections.length === 0) return;
+      if (!EFFECTS.ambientPulses || !boardIsIdle() || connections.length === 0) return;
 
       const connection =
         connections[Math.floor(Math.random() * connections.length)];
@@ -3290,7 +3550,7 @@
 
       function frame(now) {
         // Immediately clear ambient signals if navigation begins.
-        if (!boardIsIdle()) {
+        if (!EFFECTS.ambientPulses || !boardIsIdle()) {
           signals.forEach(signal => signal.dot.remove());
           return;
         }
@@ -3324,13 +3584,25 @@
       requestAnimationFrame(frame);
     }
 
+    let ambientScheduleTimer = null;
+
     function scheduleAmbientSignals() {
-      // One group every 4-7 seconds.
-      setTimeout(() => {
+      // A single 4-7 second timer; no background wakeups in lighter modes.
+      if (!EFFECTS.ambientPulses || ambientScheduleTimer !== null) return;
+      ambientScheduleTimer = setTimeout(() => {
+        ambientScheduleTimer = null;
+        if (!EFFECTS.ambientPulses) return;
         if (projectsBoard.open) playArchiveAmbientSignals();
         else playAmbientSignals();
         scheduleAmbientSignals();
       }, 4000 + Math.random() * 3000);
+    }
+
+    function stopAmbientSignals() {
+      clearTimeout(ambientScheduleTimer);
+      ambientScheduleTimer = null;
+      ambientLayer.replaceChildren();
+      archiveAmbientLayer.replaceChildren();
     }
 
     function startBoardEffects() {
@@ -3446,7 +3718,7 @@
 
     function syncPatchGlows() {
       const visible = gridPatchLayer.classList.contains("visible");
-      const shouldRun = visible && !reducedMotion.matches;
+      const shouldRun = visible && EFFECTS.gridGlow && !reducedMotion.matches;
 
       if (shouldRun === patchGlowsRunning) return;
       patchGlowsRunning = shouldRun;
@@ -3482,7 +3754,7 @@
         boardDecorationStarted &&
         !document.hidden;
 
-      gridPatchLayer.classList.toggle("visible", visible);
+      gridPatchLayer.classList.toggle("visible", visible && EFFECTS.gridGlow);
     }
 
     function startBoardDecoration() {
@@ -4129,13 +4401,9 @@
       if (archiveSelection) positionArchivePanel();
     }
     leaveProjectsButton.addEventListener("click", leaveProjectsBoard);
-    projectsBoard.addEventListener("cancel", event => {
-      if (event.target !== projectsBoard) return;
-      event.preventDefault();
-      // Escape goes back one level; Main circuit explicitly exits both levels.
-      if (chipPanel.open && archiveSelection) closeArchiveCollection();
-      else leaveProjectsBoard();
-    });
+    // Closing during a zoom animation can break the board state.
+    // Only use the visible navigation controls for returning to the circuit.
+    projectsBoard.addEventListener("cancel", event => event.preventDefault());
 
 
     // Ambient traffic uses its own layer and the existing 4-7 second scheduler.
@@ -4145,7 +4413,7 @@
     projectsPulseLayer.before(archiveAmbientLayer);
 
     function archiveIsIdle() {
-      return projectsBoard.open && !chipPanel.open && !archiveBusy &&
+      return EFFECTS.ambientPulses && projectsBoard.open && !chipPanel.open && !archiveBusy &&
         !cameraMoving && !document.hidden && !reducedMotion.matches;
     }
 
