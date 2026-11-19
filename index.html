@@ -327,6 +327,34 @@
       font-size: 1.2rem;
     }
 
+    .panel-content .portfolio-entry + .portfolio-entry {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--panel-border);
+    }
+
+    .panel-content .entry-meta {
+      color: var(--panel-accent);
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+
+    .panel-content .contact-links {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .contact-links li + li {
+      margin-top: 1rem;
+    }
+
+    .contact-links a {
+      display: inline-block;
+      padding-block: 0.5rem;
+      overflow-wrap: anywhere;
+    }
+
     .panel-content ul {
       padding-left: 20px;
     }
@@ -1368,7 +1396,7 @@
         <path d="M 574 304 Q 580 292 586 304" />
       </g>
 
-      <!-- ALU left pins tap the CU–RF bus. Each full route includes its shared
+      <!-- ALU left pins tap the CU-RF bus. Each full route includes its shared
            RF-to-junction segment, so forward and reverse pulses follow the wiring. -->
       <g data-from="rf" data-to="alu">
         <path d="M 630 460 V 360 H 540 V 304 H 574 Q 580 292 586 304 H 768 V 230 H 850" />
@@ -1522,11 +1550,11 @@
 
       <text class="chip-index" x="24" y="35">ALIAS: CONTROL UNIT</text>
       <text class="chip-name chip-name-smallA" x="24" y="70">
-        <tspan x="24" dy="0">CUSTOM CPU</tspan>
-        <tspan x="24" dy="26">&amp; TOOLCHAIN</tspan>
+        <tspan x="24" dy="0" font-size="1.15em">CUSTOM CPU &amp;</tspan>
+        <tspan x="24" dy="26" font-size="0.8em">COMPILER TOOLCHAIN</tspan>
       </text>
       <text class="chip-description" x="24" y="119">
-        CPU, Assembler &amp; NACAIS
+        CPU, Assembler, &amp; Compiler
       </text>
     </g>
 
@@ -1545,7 +1573,7 @@
       <text class="chip-index" x="24" y="35">ALIAS: ARITHMETIC LOGIC UNIT</text>
       <text class="chip-name" x="24" y="82">SKILLS</text>
       <text class="chip-description" x="24" y="119">
-        Hardware, Software &amp; Tools
+        Hardware, Software, &amp; Tools
       </text>
     </g>
 
@@ -1747,10 +1775,16 @@
           </p>
 
           <p>
-            I studied Computer Engineering at Purdue University,
-            where I developed an interest in computer architecture
-            and digital logic design.
+            I graduated from Purdue University in May 2026 with a Bachelor
+            of Science in Computer Engineering. My studies deepened my interest
+            in computer architecture and digital logic design.
           </p>
+
+          <h2>My concentrations</h2>
+          <ul>
+            <li>Semiconductors &amp; Microelectronics</li>
+            <li>Computer Systems</li>
+          </ul>
 
           <p>
             I enjoy exploring how logic gates, instructions,
@@ -1763,6 +1797,17 @@
             <li>Computer architecture and CPU design</li>
             <li>Digital logic and hardware design</li>
             <li>The connection between hardware and software</li>
+          </ul>
+
+          <h2>My favorite courses</h2>
+          <ul>
+            <li>ASIC Design Laboratory</li>
+            <li>Computer Design and Prototyping</li>
+            <li>Digital Systems Design — also served as a teaching assistant</li>
+            <li>Microprocessor Systems &amp; Interfacing — also served as a teaching assistant</li>
+            <li>Cybersecurity</li>
+            <li>Signals and Systems</li>
+            <li>Probabilistic Methods</li>
           </ul>
 
           <p>
@@ -1778,8 +1823,8 @@
             <li>My 2-person team was one of the few to earn a 100% autograder score
               for a 5-Stage Pipelined RISC-V CPU with Caches and MSI Coherence in my
               Computer Design and Prototyping course at Purdue.</li>
-            <li>I was the first to finish the AHB Fir Filter in my ASIC Design Lab course
-              at Purdue, passing all instructor testcases on my first submission.</li>
+            <li>I was the first to finish the AHB FIR filter in my ASIC Design Lab course
+              at Purdue, passing all instructor test cases on my first submission.</li>
           </ul>
 
           <figure>
@@ -1799,26 +1844,46 @@
               Logicode leaderboard - November 17, 2026
             </figcaption>
           </figure>
+
+          <h2>Beyond engineering</h2>
+          <section class="portfolio-entry">
+            <h3>Shashi Dream Foundation</h3>
+            <p class="entry-meta">Volunteer · Katol, India · May 2020-present</p>
+            <p>
+              I support children through tutoring, homework help, and proofreading.
+              I have also helped edit the foundation’s mission statement and other
+              written materials.
+            </p>
+          </section>
+          <section class="portfolio-entry">
+            <h3>Youth Service Corps</h3>
+            <p class="entry-meta">Volunteer · Fremont, California · July-August 2019</p>
+            <p>
+              I helped organize public events and clean up parks with the City of
+              Fremont Community Services Department, and received a Certificate of
+              Achievement for Exceptional Community Service.
+            </p>
+          </section>
         `
       },
 
       rf: {
         html: `
-          <h1 id="chip-heading">Smaller builds.</h1>
-
+          <h1 id="chip-heading">Projects &amp; experiments.</h1>
           <p class="panel-lead">
-            A place for older projects, experiments,
-            and focused design exercises.
+            Independent builds, coursework, and the systems I have helped bring to life.
           </p>
-
-          <!-- Add individual projects here.
-              Each can have an h2, a paragraph, and an image or link. -->
+          <p>
+            Explore Personal Projects for independent work, or Academic Projects
+            for processor design, digital interfaces, and embedded systems.
+          </p>
         `
       },
 
       control: {
         html: `
           <h1 id="chip-heading">From gates to programs.</h1>
+          <p class="entry-meta">Personal project · May-June 2026 · Digital Logic Sim &amp; Python</p>
 
           <p class="panel-lead">
             A custom 8-bit processor with a 16-bit instruction set,
@@ -1859,8 +1924,13 @@
             operations the processor can execute.
           </p>
 
-          <!-- Add your optimizer's design, examples,
-              and results here when you are ready. -->
+          <h2>A complete programming path</h2>
+          <p>
+            Together, the frontend and assembler take a program from high-level
+            syntax to executable machine code. Building these pieces alongside
+            the processor let me explore the connection between an instruction
+            set, its software tools, and the underlying digital logic.
+          </p>
 
           <h2>Working within constraints</h2>
           <p>
@@ -1904,6 +1974,7 @@
           <ul>
             <li>Git, Visual Studio Code, and Digital Logic Sim</li>
             <li>Python libraries: pandas, NumPy, and Pillow</li>
+            <li>Microsoft Office, including Excel for data reconciliation workflows</li>
           </ul>
 
           <h2>Communication &amp; teamwork</h2>
@@ -1917,28 +1988,16 @@
 
       memory: {
         html: `
-          <h1 id="chip-heading">Making memory visible.</h1>
-
+          <h1 id="chip-heading">Learning through experience.</h1>
           <p class="panel-lead">
-            A virtual memory simulator for exploring
-            how address translation and paging work.
+            Teaching, internships, and research across hardware, software,
+            and data-focused projects.
           </p>
-
           <p>
-            This project models the relationship between
-            virtual pages and physical frames, making
-            memory-management behavior easier to observe.
+            L1 Cache contains my teaching work at Purdue. L2 Cache covers
+            internships and research with Droisys, Mvation, Cornell ACERT,
+            and ASDRP.
           </p>
-
-          <h2>What happens during an access?</h2>
-          <p>
-            The simulator provides a way to explore address
-            translation, page faults, and the movement of
-            pages into physical memory.
-          </p>
-
-          <!-- Add implementation details, screenshots,
-              and measured results here. -->
         `
       },
 
@@ -1951,8 +2010,24 @@
             digital design, or something I’ve built?
           </p>
 
-          <!-- Add your actual GitHub, LinkedIn,
-              résumé, and email links here. -->
+          <p>
+            I’m happy to talk about hardware, software, my projects, and opportunities
+            to build useful systems. Email is a good way to get in touch.
+          </p>
+          <ul class="contact-links">
+            <li>
+              <strong>Email</strong><br>
+              <a href="mailto:arnavsri20@gmail.com">arnavsri20@gmail.com</a>
+            </li>
+            <li>
+              <strong>GitHub</strong><br>
+              <a href="https://github.com/ArnavS123" target="_blank" rel="noopener noreferrer">github.com/ArnavS123</a>
+            </li>
+            <li>
+              <strong>LinkedIn</strong><br>
+              <a href="https://www.linkedin.com/in/arnav-srivastava-102889210" target="_blank" rel="noopener noreferrer">Arnav Srivastava on LinkedIn</a>
+            </li>
+          </ul>
         `
       }
     };
@@ -3234,7 +3309,7 @@
     }
 
     function scheduleAmbientSignals() {
-      // One group every 4–7 seconds.
+      // One group every 4-7 seconds.
       setTimeout(() => {
         if (projectsBoard.open) playArchiveAmbientSignals();
         else playAmbientSignals();
@@ -3520,32 +3595,228 @@
     let archiveBusy = false;
     const originalCloseLabel = closeChipButton.textContent;
 
-    // Add your personal and academic project descriptions here.
-    // The previous RF content is preserved in the personal collection.
+    // Edit the project write-ups here. Internal eyebrows follow the chip labels.
     const archivePages = {
       personal: {
-        html: chipPages.rf.html.replace("Smaller builds.", "Personal projects.")
+        html: `
+          <h1 id="chip-heading">Personal projects.</h1>
+          <p class="panel-lead">Independent builds and ways I explore computer engineering.</p>
+
+          <section class="portfolio-entry">
+            <h2>Custom 8-bit CPU &amp; compiler toolchain</h2>
+            <p class="entry-meta">May-June 2026 · Digital Logic Sim &amp; Python</p>
+            <p>
+              I designed an 8-bit CPU with a custom 16-bit instruction set, then built
+              a Python assembler and the NACAIS frontend to program it. The project
+              connects gate-level hardware with assembly and higher-level syntax.
+            </p>
+            <p>
+              The Control Unit chip contains the full write-up on the processor,
+              assembler, and NACAIS.
+            </p>
+          </section>
+
+          <section class="portfolio-entry">
+            <h2>This circuit portfolio</h2>
+            <p class="entry-meta">HTML · CSS · JavaScript · SVG</p>
+            <p>
+              This portfolio presents my work as an interactive circuit. Each chip
+              opens a different section, and signal pulses trace the route between
+              them. The register file and cache hierarchy open into smaller circuits
+              for my projects and experiences.
+            </p>
+            <p>
+              The design includes responsive layouts, keyboard navigation, and
+              expandable images, with hardware themes carried through the interface.
+            </p>
+          </section>
+
+          <section class="portfolio-entry">
+            <h2>Hardware design challenges</h2>
+            <p class="entry-meta">Logicode</p>
+            <p>
+              Hardware challenges are another part of my design practice. As of
+              November 17, 2026, I ranked first on Logicode. The About Me chip
+              includes a snapshot of the leaderboard from that date.
+            </p>
+          </section>
+        `
       },
       academic: {
-        html: `<h1 id="chip-heading">Academic projects.</h1>
-          <p class="panel-lead">Coursework, team projects, and design exercises.</p>
-          <!-- Add academic projects here: headings, descriptions, images, and links. -->`
+        html: `
+          <h1 id="chip-heading">Academic projects.</h1>
+          <p class="panel-lead">Processors, digital interfaces, and embedded systems built through coursework.</p>
+
+          <section class="portfolio-entry">
+            <h2>Five-stage RISC-V CPU with caches &amp; MSI coherence</h2>
+            <p class="entry-meta">January 2026-present · SystemVerilog · Computer Design and Prototyping</p>
+            <p>
+              I implemented a synthesizable RISC-V processor with a five-stage
+              pipeline, then extended it with caches and dual-core support.
+            </p>
+            <ul>
+              <li>Designed and verified instruction support, including the atomic instructions <code>lr.w</code> and <code>sc.w</code>.</li>
+              <li>Implemented forwarding, stalling, and flush logic for data and control hazards, plus a 2-bit saturating-counter branch predictor.</li>
+              <li>Added separate L1 instruction and data caches, MSI cache coherence, and a bus controller to arbitrate memory transactions.</li>
+            </ul>
+            <p>
+              My two-person team was one of the few to earn a 100% autograder score
+              in the course.
+            </p>
+          </section>
+
+          <section class="portfolio-entry">
+            <h2>AHB-USB transceiver</h2>
+            <p class="entry-meta">November-December 2025 · SystemVerilog</p>
+            <p>
+              I led a team developing a synthesizable transceiver, including an AHB
+              bus subordinate, receive and transmit modules, and a FIFO data buffer.
+            </p>
+            <ul>
+              <li>Supported AHB burst transfers.</li>
+              <li>Implemented USB bit-stuffing and CRC-based error detection.</li>
+            </ul>
+          </section>
+
+          <section class="portfolio-entry">
+            <h2>Autonomous seed distributor</h2>
+            <p class="entry-meta">August-December 2025 · STM32 · Embedded C</p>
+            <p>
+              I developed firmware for an autonomous tracked robot designed to
+              distribute wildflower seeds across varied terrain.
+            </p>
+            <ul>
+              <li>Implemented PID closed-loop motor control with H-bridge drivers and PWM speed and direction control.</li>
+              <li>Integrated motor control with the power, movement, and sensor subsystems.</li>
+              <li>Collaborated on terrain, proximity, and GPS sensing for path following and obstacle avoidance.</li>
+            </ul>
+          </section>
+
+          <section class="portfolio-entry">
+            <h2>Audio synthesizer drum machine</h2>
+            <p class="entry-meta">March-May 2025 · STM32 · Embedded C</p>
+            <p>
+              I built a 16-step drum-machine sequencer with programmable patterns,
+              adjustable tempo and volume, and modular sample packs.
+            </p>
+            <ul>
+              <li>Added push-button recording and playback for interactive sequencing.</li>
+              <li>Used an LCD to display feedback while the user created and played patterns.</li>
+            </ul>
+          </section>
+
+          <section class="portfolio-entry">
+            <h2>AHB FIR filter</h2>
+            <p class="entry-meta">ASIC Design Laboratory · Purdue University</p>
+            <p>
+              I was the first to finish the AHB FIR filter in my ASIC Design Lab
+              course, passing all instructor test cases on my first submission.
+            </p>
+          </section>
+
+          <section class="portfolio-entry">
+            <h2>Virtual Memory Simulator</h2>
+            <p class="entry-meta">Operating systems project</p>
+            <p>
+              This simulator models the relationship between virtual pages and
+              physical frames. It makes address translation, page faults, and
+              the movement of pages into physical memory easier to observe.
+            </p>
+          </section>
+        `
       }
     };
 
-    // Edit experience content here, just like the project collections above.
+    // Edit professional experience here. Volunteer work appears in About Me.
     const experiencePages = {
       partTime: {
-        html: `<h1 id="chip-heading">Part-time jobs.</h1>
-          <p class="panel-lead">Roles, responsibilities, and lessons learned.</p>
-          <!-- Add each job here: role, employer, dates, responsibilities,
-               achievements, and optional images or links. -->`
+        html: `
+          <h1 id="chip-heading">Teaching as a Passion</h1>
+          <p class="panel-lead">Helping students turn digital-design concepts into working systems.</p>
+
+          <section class="portfolio-entry">
+            <h2>Lab Teaching Assistant</h2>
+            <p class="entry-meta">Purdue University ECE Department · West Lafayette, Indiana<br>Summer 2025 &amp; Fall 2025</p>
+            <p>
+              I supported students in digital systems and microprocessor labs,
+              helping them debug circuits, FPGA designs, and embedded programs.
+            </p>
+            <h3>ECE 27000 — Introduction to Digital System Design</h3>
+            <ul>
+              <li>Assisted with combinational and sequential logic labs.</li>
+              <li>Helped students troubleshoot breadboard circuits and SystemVerilog designs on FPGAs.</li>
+            </ul>
+            <h3>ECE 36200 — Microprocessor Systems &amp; Interfacing</h3>
+            <ul>
+              <li>Supported Embedded C labs on Raspberry Pi microcontrollers and work in RISC-V assembly.</li>
+              <li>Helped with peripheral interfacing and runtime debugging.</li>
+            </ul>
+          </section>
+        `
       },
       internships: {
-        html: `<h1 id="chip-heading">Internships.</h1>
-          <p class="panel-lead">Practical experience, projects, and contributions.</p>
-          <!-- Add each internship here: role, organization, dates,
-               projects, contributions, and optional images or links. -->`
+        html: `
+          <h1 id="chip-heading">Internships &amp; research.</h1>
+          <p class="panel-lead">Experience with data engineering, computer vision, signal processing, and research.</p>
+
+          <section class="portfolio-entry">
+            <h2>Data Engineering Intern</h2>
+            <p class="entry-meta">Droisys · Las Vegas, Nevada · July-August 2025</p>
+            <p>
+              I developed a Python framework to reconcile client records with a
+              company master dataset in Excel, automating work that had required
+              manual verification.
+            </p>
+            <ul>
+              <li>Used pandas and fuzzy matching to handle typos, inconsistent formatting, and unstructured records.</li>
+              <li>Improved automated match rates by over 50% relative to the baseline.</li>
+            </ul>
+          </section>
+
+          <section class="portfolio-entry">
+            <h2>AI/ML Programming Intern</h2>
+            <p class="entry-meta">Mvation · Fremont, California · June-August 2024</p>
+            <p>
+              I developed image-preprocessing routines in Python using Pillow
+              (PIL) and NumPy to support YOLOv8 object detection.
+            </p>
+            <ul>
+              <li>Implemented custom brightness, contrast, and sharpness adjustments.</li>
+              <li>Assisted with machine-learning pipelines and automation for inventory analytics and alcohol-bottle classification.</li>
+            </ul>
+          </section>
+
+          <section class="portfolio-entry">
+            <h2>Signal Processing Research Intern</h2>
+            <p class="entry-meta">Cornell University ACERT · Ithaca, New York · June-July 2021</p>
+            <p>
+              I learned to implement digital signal processing algorithms for
+              magnetic resonance experiments and used wavelet transforms to
+              reduce noise and improve signal quality.
+            </p>
+            <p>
+              I also contributed to software aimed at distinguishing healthy
+              and unhealthy eggs for in-vitro fertilization.
+            </p>
+          </section>
+
+          <section class="portfolio-entry">
+            <h2>Student Researcher</h2>
+            <p class="entry-meta">ASDRP · Fremont, California · May-August 2020</p>
+            <p>
+              I developed the Comprehensive Habitability Index (CHI) to evaluate
+              exoplanets using factors such as distance from the host star,
+              atmospheric composition, and the presence of water. The work also
+              considered resource availability, location, and safety for potential
+              human use.
+            </p>
+            <p>
+              I contributed to the paper <cite>Comprehensive Habitability Index (CHI)</cite>,
+              published through the Aspiring Scholars Directed Research Program
+              in <cite>ASDRP Communications</cite>, Volume 3, in 2020.
+            </p>
+          </section>
+        `
       }
     };
 
@@ -3851,7 +4122,7 @@
     });
 
 
-    // Ambient traffic uses its own layer and the existing 4–7 second scheduler.
+    // Ambient traffic uses its own layer and the existing 4-7 second scheduler.
     const archiveAmbientLayer = document.createElementNS(SVG_NS, "g");
     archiveAmbientLayer.setAttribute("aria-hidden", "true");
     archiveAmbientLayer.style.pointerEvents = "none";
