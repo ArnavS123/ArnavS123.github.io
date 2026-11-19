@@ -883,6 +883,16 @@
       display: block;
     }
 
+    #projects-stage {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Inner chip panels share the board's modal, so its toolbar stays active. */
+    #projects-board > #chip-panel {
+      z-index: 3;
+    }
+
     #projects-circuit {
       display: block;
       width: 100%;
@@ -920,6 +930,11 @@
       border-radius: 5px;
       cursor: pointer;
       font-family: var(--font-mono);
+    }
+
+    #leave-projects:disabled,
+    #close-chip:disabled {
+      cursor: wait;
     }
 
     #leave-projects:focus-visible {
@@ -986,6 +1001,16 @@
     }
 
     @media (max-width: 700px), (max-height: 500px) {
+      /* Keep the compact panel's dim backdrop behind the active toolbar. */
+      #projects-board.inner-chip-open::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        background: #111713d9;
+        pointer-events: none;
+      }
+
       .chip-toolbar {
         padding: 0.75rem;
       }
@@ -1326,12 +1351,38 @@
               d="M 670 460 V 348 H 580 V 230" />
       </g>
 
+      <!-- CU right pins to ALU top pins; lanes keep their order around the bends. -->
       <g data-from="control" data-to="alu">
-        <path d="M 660 150 H 755 V 230 H 850" />
+        <path d="M 660 150 H 728 V 86 H 970 V 150" />
         <path class="wire-secondary"
-              d="M 660 118 H 767 V 198 H 850" />
+              d="M 660 118 H 716 V 74 H 1010 V 150" />
         <path class="wire-ternary"
-              d="M 660 182 H 743 V 262 H 850" />
+              d="M 660 182 H 740 V 98 H 930 V 150" />
+      </g>
+
+      <!-- Small gaps beneath wire bridges mean these crossings are NOT junctions.
+           Keep this decorative group outside the data-from/data-to route groups. -->
+      <g stroke="#111713" stroke-width="8" aria-hidden="true" pointer-events="none">
+        <path d="M 534 288 Q 540 276 546 288" />
+        <path d="M 574 288 Q 580 276 586 288" />
+        <path d="M 574 304 Q 580 292 586 304" />
+      </g>
+
+      <!-- ALU left pins tap the CU–RF bus. Each full route includes its shared
+           RF-to-junction segment, so forward and reverse pulses follow the wiring. -->
+      <g data-from="rf" data-to="alu">
+        <path d="M 630 460 V 360 H 540 V 304 H 574 Q 580 292 586 304 H 768 V 230 H 850" />
+        <path class="wire-secondary"
+              d="M 590 460 V 372 H 500 V 288 H 534 Q 540 276 546 288 H 574 Q 580 276 586 288 H 750 V 198 H 850" />
+        <path class="wire-ternary"
+              d="M 670 460 V 348 H 580 V 320 H 784 V 262 H 850" />
+      </g>
+
+      <!-- Filled dots are the three actual electrical junctions. -->
+      <g stroke="#111713" stroke-width="1.5" aria-hidden="true" pointer-events="none">
+        <circle cx="500" cy="288" r="4" fill="#4d4032" />
+        <circle cx="540" cy="304" r="4" fill="#78583e" />
+        <circle cx="580" cy="320" r="4" fill="#536e7c" />
       </g>
 
       <g data-from="alu" data-to="memory">
@@ -1470,9 +1521,12 @@
       <circle class="orientation-dot" cx="221" cy="19" r="3" />
 
       <text class="chip-index" x="24" y="35">ALIAS: CONTROL UNIT</text>
-      <text class="chip-name" x="24" y="82">CUSTOM CPU</text>
+      <text class="chip-name chip-name-smallA" x="24" y="70">
+        <tspan x="24" dy="0">CUSTOM CPU</tspan>
+        <tspan x="24" dy="26">&amp; TOOLCHAIN</tspan>
+      </text>
       <text class="chip-description" x="24" y="119">
-        CPU Architecture Project
+        CPU, Assembler &amp; NACAIS
       </text>
     </g>
 
@@ -1489,12 +1543,9 @@
       <circle class="orientation-dot" cx="221" cy="19" r="3" />
 
       <text class="chip-index" x="24" y="35">ALIAS: ARITHMETIC LOGIC UNIT</text>
-      <text class="chip-name chip-name-smallA" x="24" y="70">
-        <tspan x="24" dy="0">CUSTOM COMPILER</tspan>
-        <tspan x="24" dy="26">TOOLCHAIN</tspan>
-      </text>
+      <text class="chip-name" x="24" y="82">SKILLS</text>
       <text class="chip-description" x="24" y="119">
-        Compiler & Assembler Project
+        Hardware, Software &amp; Tools
       </text>
     </g>
 
@@ -1540,18 +1591,20 @@
 
   <dialog id="projects-board" aria-label="Past projects: personal and academic collections">
     <div class="projects-toolbar">
-      <button id="leave-projects" type="button" autofocus>← Main circuit</button>
+      <button id="leave-projects" type="button" aria-label="Back to main circuit" autofocus>← Main circuit</button>
       <span>ARNAV SRIVASTAVA / PAST PROJECTS</span>
     </div>
-    <svg id="projects-circuit" class="circuit" viewBox="0 0 900 500" role="group"
-      aria-label="Personal and academic project collections">
-      <g id="projects-wires" fill="none" stroke-linejoin="round">
-        <path class="wire-secondary" stroke="#4d4032" stroke-width="2"/>
-        <path stroke="#78583e" stroke-width="3"/>
-        <path class="wire-ternary" stroke="#536e7c" stroke-width="2"/>
-      </g>
-      <g id="projects-pulses" pointer-events="none" aria-hidden="true"></g>
-    </svg>
+    <div id="projects-stage">
+      <svg id="projects-circuit" class="circuit" viewBox="0 0 900 500" role="group"
+        aria-label="Personal and academic project collections">
+        <g id="projects-wires" fill="none" stroke-linejoin="round">
+          <path class="wire-secondary" stroke="#4d4032" stroke-width="2"/>
+          <path stroke="#78583e" stroke-width="3"/>
+          <path class="wire-ternary" stroke="#536e7c" stroke-width="2"/>
+        </g>
+        <g id="projects-pulses" pointer-events="none" aria-hidden="true"></g>
+      </svg>
+    </div>
   </dialog>
 
   <dialog id="chip-panel" aria-labelledby="chip-heading">
@@ -1705,7 +1758,7 @@
             a working system.
           </p>
 
-          <h2>What interests me</h2>
+          <h2>What concepts interest me</h2>
           <ul>
             <li>Computer architecture and CPU design</li>
             <li>Digital logic and hardware design</li>
@@ -1718,12 +1771,15 @@
             I also share the experiences that have shaped who I am.
           </p>
 
-          <h2>Achievements I’m proud to share</h2>
+          <h2>Recent achievements I’m proud to share</h2>
           <ul>
-            <li>Ranked first on Logicode, a platform for hardware design challenges,
+            <li>I am ranked first on Logicode, a platform for hardware design challenges,
               as of November 17, 2026.</li>
-            <li>My team was one of the few to earn a 100% autograder score
-              for a 5-Stage Pipelined RISC-V CPU with Caches and MSI Coherence.</li>
+            <li>My 2-person team was one of the few to earn a 100% autograder score
+              for a 5-Stage Pipelined RISC-V CPU with Caches and MSI Coherence in my
+              Computer Design and Prototyping course at Purdue.</li>
+            <li>I was the first to finish the AHB Fir Filter in my ASIC Design Lab course
+              at Purdue, passing all instructor testcases on my first submission.</li>
           </ul>
 
           <figure>
@@ -1762,18 +1818,21 @@
 
       control: {
         html: `
-          <h1 id="chip-heading">From gates to instructions.</h1>
+          <h1 id="chip-heading">From gates to programs.</h1>
 
           <p class="panel-lead">
             A custom 8-bit processor with a 16-bit instruction set,
-            built at the gate level.
+            paired with its own assembler and NACAIS language frontend.
           </p>
 
           <p>
             I built this processor in Digital Logic Sim, starting
             with basic circuits and working up to registers,
-            an ALU, memory, and a control unit.
+            an ALU, memory, and a control unit. Its toolchain connects
+            the programs I write to the hardware that executes them.
           </p>
+
+          <p><code>NACAIS → assembly → machine code → CPU</code></p>
 
           <h2>The hardware</h2>
           <p>
@@ -1784,9 +1843,24 @@
 
           <h2>The assembler</h2>
           <p>
-            A custom Python assembler translates assembly
-            instructions into machine code for the processor.
+            My Python assembler parses assembly instructions, resolves labels,
+            and emits machine code for the processor.
           </p>
+
+          <h2>NACAIS</h2>
+          <p>
+            NACAIS stands for Not As Cool As It Sounds. It is a lightweight,
+            Python-based language frontend that translates high-level syntax
+            into assembly for my custom CPU.
+          </p>
+          <p>
+            The language supports variables, arithmetic, conditionals,
+            and loops. The frontend translates these constructs into
+            operations the processor can execute.
+          </p>
+
+          <!-- Add your optimizer's design, examples,
+              and results here when you are ready. -->
 
           <h2>Working within constraints</h2>
           <p>
@@ -1799,27 +1873,45 @@
 
       alu: {
         html: `
-          <h1 id="chip-heading">Giving the CPU a language.</h1>
+          <h1 id="chip-heading">Skills &amp; tools.</h1>
 
           <p class="panel-lead">
-            NACAIS: Not As Cool As It Sounds.
+            The languages, hardware, and tools I use to design,
+            build, and debug systems.
           </p>
 
+          <h2>Digital design &amp; computer architecture</h2>
+          <ul>
+            <li>SystemVerilog, combinational and sequential logic, and FPGA development</li>
+            <li>CPU datapaths and control logic, instruction-set design, and RISC-V</li>
+            <li>Pipelining, hazard handling, branch prediction, caches, and MSI coherence</li>
+          </ul>
+
+          <h2>Programming &amp; embedded systems</h2>
+          <ul>
+            <li>C, C++, Python, and RISC-V assembly</li>
+            <li>Embedded C, STM32 and Raspberry Pi microcontrollers, and peripheral interfacing</li>
+            <li>MATLAB and R</li>
+          </ul>
+
+          <h2>Hardware &amp; lab equipment</h2>
+          <ul>
+            <li>PCB design with KiCad and circuit simulation with LTspice</li>
+            <li>Oscilloscopes, multimeters, function generators, and DC power supplies</li>
+          </ul>
+
+          <h2>Development tools</h2>
+          <ul>
+            <li>Git, Visual Studio Code, and Digital Logic Sim</li>
+            <li>Python libraries: pandas, NumPy, and Pillow</li>
+          </ul>
+
+          <h2>Communication &amp; teamwork</h2>
           <p>
-            NACAIS is a high-level language frontend that
-            translates programs into assembly for my custom CPU.
+            Technical teaching, public speaking, team leadership, critical thinking,
+            time management, and conflict resolution. As a lab teaching assistant,
+            I helped students debug digital circuits, FPGA designs, and embedded programs.
           </p>
-
-          <h2>From source to assembly</h2>
-          <p>
-            The language supports variables, arithmetic,
-            conditionals, and loops. The frontend handles
-            the translation into operations the processor
-            can execute.
-          </p>
-
-          <!-- Add your optimizer's design, examples,
-              and results here when you are ready. -->
         `
       },
 
@@ -3415,6 +3507,11 @@
     // ── Past Projects: nested circuit and editable collection content ──
     const projectsBoard = document.querySelector("#projects-board");
     const projectsSvg = document.querySelector("#projects-circuit");
+    const projectsStage = document.querySelector("#projects-stage");
+    const projectsToolbar = projectsBoard.querySelector(".projects-toolbar");
+    // Restore the shared panel here before opening a main-circuit chip.
+    const chipPanelHome = document.createComment("Shared chip panel home");
+    chipPanel.before(chipPanelHome);
     const leaveProjectsButton = document.querySelector("#leave-projects");
     const projectsPulseLayer = document.querySelector("#projects-pulses");
     let archiveSelection = null;
@@ -3456,7 +3553,7 @@
     const collectionBoards = {
       rf: {
         title: "PAST PROJECTS", description: "Personal and academic project collections",
-        backLabel: "← Project collections", pages: archivePages, last: "personal",
+        backLabel: "← Past projects", pages: archivePages, last: "personal",
         chips: [
           ["personal", "PERSONAL", "Independent Builds & Experiments", "pc", "HIGH REGISTERS"],
           ["academic", "ACADEMIC", "Coursework & Team Projects", "rf", "LOW REGISTERS"]
@@ -3485,7 +3582,7 @@
         delete archiveChips[id];
       }
       projectsPulseLayer.replaceChildren();
-      projectsBoard.querySelector(".projects-toolbar span").textContent =
+      projectsToolbar.querySelector("span").textContent =
         `ARNAV SRIVASTAVA / ${activeCollection.title}`;
       projectsBoard.setAttribute("aria-label", activeCollection.description);
       projectsSvg.setAttribute("aria-label", activeCollection.description);
@@ -3584,9 +3681,26 @@
       animation.cancel();
     }
 
+    function setArchiveNavigationBusy(busy) {
+      archiveBusy = cameraMoving = busy;
+      leaveProjectsButton.disabled = busy;
+      closeChipButton.disabled = busy;
+      projectsStage.inert = busy || archiveSelection !== null;
+    }
+
+    function mountArchivePanel() {
+      projectsBoard.append(chipPanel);
+      projectsBoard.classList.add("inner-chip-open");
+    }
+
+    function restoreArchivePanel() {
+      chipPanelHome.after(chipPanel);
+      projectsBoard.classList.remove("inner-chip-open");
+    }
+
     async function enterProjectsBoard(parentId = "rf") {
       if (openChipId !== null || cameraMoving || archiveBusy) return;
-      archiveBusy = cameraMoving = true;
+      setArchiveNavigationBusy(true);
       try {
         configureCollectionBoard(parentId);
         archiveAmbientLayer.replaceChildren();
@@ -3598,8 +3712,8 @@
         openChipId = parentId;
         document.body.classList.add("in-projects");
         await Promise.all([archiveFade(svg, 1, 0), archiveFade(projectsBoard, 0, 1)]);
-        leaveProjectsButton.focus({preventScroll:true});
-      } finally { archiveBusy = cameraMoving = false; }
+      } finally { setArchiveNavigationBusy(false); }
+      leaveProjectsButton.focus({preventScroll:true});
     }
 
     function positionArchivePanel() {
@@ -3608,10 +3722,13 @@
       const bounds = compact ? projectsSvg.getBoundingClientRect()
         : archiveChips[archiveSelection].querySelector(".chip-inset").getBoundingClientRect();
       const inset = compact ? 12 : 3;
+      // Reserve space for Main circuit, including on phones and short screens.
+      const toolbarBottom = projectsToolbar.getBoundingClientRect().bottom;
+      const top = Math.max(bounds.top + inset, toolbarBottom + 12);
       Object.assign(chipPanel.style, {
-        left: `${bounds.left + inset}px`, top: `${bounds.top + inset}px`,
+        left: `${bounds.left + inset}px`, top: `${top}px`,
         width: `${Math.max(0, bounds.width - inset * 2)}px`,
-        height: `${Math.max(0, bounds.height - inset * 2)}px`
+        height: `${Math.max(0, bounds.bottom - inset - top)}px`
       });
     }
 
@@ -3637,8 +3754,7 @@
 
     async function openArchiveCollection(id) {
       if (archiveBusy || cameraMoving || chipPanel.open) return;
-      archiveBusy = cameraMoving = true;
-      leaveProjectsButton.disabled = true;
+      setArchiveNavigationBusy(true);
       try {
         if (archiveLastSelection && archiveLastSelection !== id) {
           await pulseArchiveWires(id === activeCollection.chips[0][0]);
@@ -3659,38 +3775,55 @@
         // Recalculate in case orientation changed during the transition.
         layoutProjectsBoard();
         projectsSvg.setAttribute("viewBox", archiveChipView(id).join(" "));
+        mountArchivePanel();
         positionArchivePanel();
         chipPanel.style.opacity = reducedMotion.matches ? "1" : "0";
-        chipPanel.showModal();
+        // The outer board remains the modal; the inner panel must not block it.
+        chipPanel.show();
         panelContent.scrollTop = 0;
         startChipBackground();
         await fadeChipPanel(true);
         archiveLastSelection = id;
         activeCollection.last = id;
-      } finally { archiveBusy = cameraMoving = false; leaveProjectsButton.disabled = false; }
+      } finally { setArchiveNavigationBusy(false); }
+      closeChipButton.focus({preventScroll:true});
+    }
+
+    // Used by both return buttons. The caller holds the navigation lock.
+    async function zoomOutArchiveCollection() {
+      const id = archiveSelection;
+      await fadeChipPanel(false);
+      panelContent.querySelectorAll("video, audio").forEach(media => media.pause());
+      chipPanel.close();
+      restoreArchivePanel();
+      archiveChips[id].classList.remove("content-open");
+      archiveSelection = null;
+      closeChipButton.textContent = originalCloseLabel;
+      layoutProjectsBoard();
+      await animateArchiveView(archiveOverview);
     }
 
     async function closeArchiveCollection() {
-      if (archiveBusy || cameraMoving) return;
-      archiveBusy = cameraMoving = true;
+      if (archiveBusy || cameraMoving || !chipPanel.open || !archiveSelection) return;
+      setArchiveNavigationBusy(true);
       const id = archiveSelection;
       try {
-        await fadeChipPanel(false);
-        panelContent.querySelectorAll("video, audio").forEach(media => media.pause());
-        chipPanel.close();
-        archiveChips[id].classList.remove("content-open");
-        archiveSelection = null;
-        closeChipButton.textContent = originalCloseLabel;
-        layoutProjectsBoard();
-        await animateArchiveView(archiveOverview);
-        archiveChips[id].focus({preventScroll:true});
-      } finally { archiveBusy = cameraMoving = false; resizeProjectsBoard(); }
+        await zoomOutArchiveCollection();
+      } finally {
+        setArchiveNavigationBusy(false);
+        resizeProjectsBoard();
+      }
+      archiveChips[id].focus({preventScroll:true});
     }
 
     async function leaveProjectsBoard() {
-      if (archiveBusy || cameraMoving || chipPanel.open) return;
-      archiveBusy = cameraMoving = true;
+      if (archiveBusy || cameraMoving || !projectsBoard.open) return;
+      setArchiveNavigationBusy(true);
       try {
+        // Finish the inner zoom-out before beginning the outer zoom-out.
+        if (chipPanel.open && archiveSelection) {
+          await zoomOutArchiveCollection();
+        }
         svg.setAttribute("viewBox", getChipView(activeCollectionId).join(" "));
         await Promise.all([archiveFade(projectsBoard, 1, 0), archiveFade(svg, 0, 1)]);
         projectsBoard.close();
@@ -3699,7 +3832,7 @@
         chips[activeCollectionId].classList.remove("content-open");
         await animateViewBox(overviewView);
         chips[activeCollectionId].focus({preventScroll:true});
-      } finally { archiveBusy = cameraMoving = false; }
+      } finally { setArchiveNavigationBusy(false); }
     }
 
     function resizeProjectsBoard() {
@@ -3710,8 +3843,11 @@
     }
     leaveProjectsButton.addEventListener("click", leaveProjectsBoard);
     projectsBoard.addEventListener("cancel", event => {
+      if (event.target !== projectsBoard) return;
       event.preventDefault();
-      leaveProjectsBoard();
+      // Escape goes back one level; Main circuit explicitly exits both levels.
+      if (chipPanel.open && archiveSelection) closeArchiveCollection();
+      else leaveProjectsBoard();
     });
 
 
