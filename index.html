@@ -209,6 +209,7 @@
     }
 
     #chip-panel {
+      --panel-type-step: 0rem;
       position: fixed;
       inset: auto;
       margin: 0;
@@ -220,6 +221,17 @@
       color: #d4d8cf;
       overflow: hidden;
       font-family: var(--font-body);
+    }
+
+    /* Scale the reading area using the open chip's width, not monitor inches.
+       At the default font setting: unchanged through 800px, then 16px to 32px
+       body text. The final 1rem caps the extra growth. Older browsers keep
+       the original sizing through the 0rem fallback above. */
+    @supports (container-type: inline-size) and (font-size: 1cqi) {
+      #chip-panel {
+        container-type: inline-size;
+        --panel-type-step: clamp(0rem, 2cqi - 1rem, 1rem);
+      }
     }
 
     #chip-panel[open] {
@@ -238,27 +250,28 @@
       flex-wrap: wrap;
       border-bottom: 1px solid var(--panel-border);
       flex-shrink: 0;
-      gap: 0.75rem;
-      padding: 0.75rem 1rem;
+      font-size: calc(1rem + var(--panel-type-step));
+      gap: 0.75em;
+      padding: 0.75em 1em;
     }
 
     .panel-eyebrow {
       color: var(--panel-accent);
-      font: 14px monospace;
+      font: calc(14px + 0.875 * var(--panel-type-step, 0rem)) monospace;
       letter-spacing: 0.12em;
       font-family: var(--font-mono);
     }
 
     #close-chip {
-      padding: 9px 12px;
+      padding: calc(9px + 0.5625 * var(--panel-type-step)) calc(12px + 0.75 * var(--panel-type-step));
       border: 1px solid var(--panel-border);
       border-radius: 5px;
       background: transparent;
       color: #d4d8cf;
-      font: 12px monospace;
+      font: calc(12px + 0.75 * var(--panel-type-step)) monospace;
       cursor: pointer;
       font-family: var(--font-mono);
-      min-height: 44px;
+      min-height: calc(44px + 2.75 * var(--panel-type-step));
       flex-shrink: 0;
     }
 
@@ -283,35 +296,36 @@
       overscroll-behavior: contain;
       scrollbar-color: var(--panel-border) var(--panel-fill);
       min-width: 0;
-      padding: clamp(1rem, 3vw, 3rem);
+      font-size: calc(1rem + var(--panel-type-step));
+      padding: calc(clamp(1rem, 3vw, 3rem) + 3 * var(--panel-type-step));
       overflow-wrap: anywhere;
     }
 
     .panel-content h1 {
-      margin: 14px 0 20px;
+      margin: calc(14px + 0.875 * var(--panel-type-step)) 0 calc(20px + 1.25 * var(--panel-type-step));
       font-weight: 500;
       letter-spacing: -0.045em;
-      font-size: clamp(2rem, 1.25rem + 3vw, 4rem);
+      font-size: calc(clamp(2rem, 1.25rem + 3vw, 4rem) + 4 * var(--panel-type-step));
       line-height: 1.15;
     }
 
     .panel-content h2 {
-      margin-top: 32px;
+      margin-top: calc(32px + 2 * var(--panel-type-step));
       font-weight: 500;
-      font-size: clamp(1.2rem, 1rem + 0.6vw, 1.5rem);
+      font-size: calc(clamp(1.2rem, 1rem + 0.6vw, 1.5rem) + 1.5 * var(--panel-type-step));
     }
 
     .panel-content p {
       color: #c0c4c0;
-      font-size: 1rem;
+      font-size: 1em;
       line-height: 1.75;
       max-width: 65ch;
     }
 
     .panel-content li {
       color: #c0c4c0;
-      margin-bottom: 8px;
-      font-size: 1rem;
+      margin-bottom: 0.5em;
+      font-size: 1em;
       line-height: 1.75;
       max-width: 65ch;
     }
@@ -319,24 +333,24 @@
     .panel-content .panel-lead {
       color: #e0e3dc;
       line-height: 1.5;
-      font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+      font-size: calc(clamp(1.125rem, 1rem + 0.6vw, 1.5rem) + 1.5 * var(--panel-type-step));
     }
 
     .panel-content .panel-eyebrow {
       color: var(--panel-accent);
-      font-size: 1.2rem;
+      font-size: calc(1.2rem + 1.2 * var(--panel-type-step));
     }
 
     .panel-content .portfolio-entry + .portfolio-entry {
-      margin-top: 2rem;
-      padding-top: 1rem;
+      margin-top: 2em;
+      padding-top: 1em;
       border-top: 1px solid var(--panel-border);
     }
 
     .panel-content .entry-meta {
       color: var(--panel-accent);
       font-family: var(--font-mono);
-      font-size: 0.875rem;
+      font-size: calc(0.875rem + 0.875 * var(--panel-type-step));
       line-height: 1.6;
     }
 
@@ -346,17 +360,17 @@
     }
 
     .contact-links li + li {
-      margin-top: 1rem;
+      margin-top: 1em;
     }
 
     .contact-links a {
       display: inline-block;
-      padding-block: 0.5rem;
+      padding-block: 0.5em;
       overflow-wrap: anywhere;
     }
 
     .panel-content ul {
-      padding-left: 20px;
+      padding-left: 1.25em;
     }
 
     .panel-content a {
@@ -367,7 +381,7 @@
     .panel-content figure {
       width: 100%;
       max-width: none;
-      margin: 28px 0;
+      margin: 1.75em 0;
     }
 
     .panel-content img {
@@ -382,7 +396,7 @@
     .panel-content figcaption {
       margin-top: 10px;
       color: var(--panel-accent);
-      font-size: 12px;
+      font-size: calc(12px + 0.75 * var(--panel-type-step));
       line-height: 1.6;
     }
 
@@ -581,6 +595,8 @@
     }
 
     #chip-panel.compact-panel {
+      /* Phones and short windows retain their current reading sizes. */
+      --panel-type-step: 0rem;
       border: 1px solid var(--panel-border);
       border-radius: 10px;
     }
@@ -590,7 +606,7 @@
     }
 
     #panel-content {
-      padding-bottom: 5rem;
+      padding-bottom: 5em;
     }
 
     #scroll-more {
@@ -1803,8 +1819,8 @@
           <ul>
             <li>ASIC Design Laboratory</li>
             <li>Computer Design and Prototyping</li>
-            <li>Digital Systems Design — also served as a teaching assistant</li>
-            <li>Microprocessor Systems &amp; Interfacing — also served as a teaching assistant</li>
+            <li>Digital Systems Design - also served as a teaching assistant</li>
+            <li>Microprocessor Systems &amp; Interfacing - also served as a teaching assistant</li>
             <li>Cybersecurity</li>
             <li>Signals and Systems</li>
             <li>Probabilistic Methods</li>
@@ -3741,12 +3757,12 @@
               I supported students in digital systems and microprocessor labs,
               helping them debug circuits, FPGA designs, and embedded programs.
             </p>
-            <h3>ECE 27000 — Introduction to Digital System Design</h3>
+            <h3>ECE 27000 - Introduction to Digital System Design</h3>
             <ul>
               <li>Assisted with combinational and sequential logic labs.</li>
               <li>Helped students troubleshoot breadboard circuits and SystemVerilog designs on FPGAs.</li>
             </ul>
-            <h3>ECE 36200 — Microprocessor Systems &amp; Interfacing</h3>
+            <h3>ECE 36200 - Microprocessor Systems &amp; Interfacing</h3>
             <ul>
               <li>Supported Embedded C labs on Raspberry Pi microcontrollers and work in RISC-V assembly.</li>
               <li>Helped with peripheral interfacing and runtime debugging.</li>
