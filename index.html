@@ -335,6 +335,99 @@ THE SOFTWARE.
       line-height: 1.15;
     }
 
+    /* A small circuit signature within the About Me greeting. */
+    .intro-name {
+      position: relative;
+      display: inline-block;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 0.06em;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      letter-spacing: inherit;
+      white-space: nowrap;
+      cursor: zoom-in;
+    }
+
+    .intro-name:focus-visible {
+      outline: 2px solid var(--panel-accent);
+      outline-offset: 0.08em;
+    }
+
+    .intro-name-text {
+      color: #e3c58a;
+      font-weight: 600;
+    }
+
+    @supports (background-clip: text) or (-webkit-background-clip: text) {
+      .intro-name-text {
+        background-image: linear-gradient(110deg, #e3c58a 5%, #bfd3b3 48%, #a4d5ef 95%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+    }
+
+    .intro-name-trace {
+      position: absolute;
+      left: 0;
+      bottom: -0.11em;
+      width: 100%;
+      height: 0.28em;
+      overflow: visible;
+      pointer-events: none;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .intro-name-track {
+      stroke: #94aa98;
+      stroke-width: 1.2;
+      opacity: 0.55;
+    }
+
+    .intro-name-pad {
+      fill: #a4d5ef;
+      opacity: 0.7;
+    }
+
+    .intro-name-signal {
+      stroke: #9ad7ee;
+      stroke-width: 1.8;
+      stroke-dasharray: 12 112;
+      stroke-dashoffset: 12;
+      opacity: 0;
+    }
+
+    /* A new pass every 2 seconds, including a short pause at the end.
+       Three muted colors alternate over a matching 6-second cycle. */
+    #chip-panel[open] .intro-name-signal {
+      animation:
+        intro-name-sweep 2s ease-in-out 450ms infinite both,
+        intro-name-colors 6s steps(1, end) 450ms infinite both;
+    }
+
+    @keyframes intro-name-sweep {
+      0% { stroke-dashoffset: 12; opacity: 0; }
+      10% { opacity: 1; }
+      70% { opacity: 1; }
+      80%, 100% { stroke-dashoffset: -100; opacity: 0; }
+    }
+
+    @keyframes intro-name-colors {
+      0%, 100% { stroke: #9ad7ee; }
+      33.333333% { stroke: #c6b0e6; }
+      66.666667% { stroke: #97d2bf; }
+    }
+
+    @media (forced-colors: active) {
+      .intro-name-text { background-image: none; color: CanvasText; }
+      .intro-name-trace { display: none; }
+    }
+
     .panel-content h2 {
       margin-top: calc(32px + 2 * var(--panel-type-step));
       font-weight: 500;
@@ -1283,6 +1376,9 @@ THE SOFTWARE.
       text-decoration: underline;
       text-underline-offset: 4px;
       cursor: pointer;
+      opacity: 1;
+      /* Change 900ms to adjust both the dimming and brightening speed. */
+      transition: opacity 900ms ease-in-out, color 600ms ease-in-out;
     }
     .performance-trigger:not(:disabled):hover { color: #e1e9df; }
     .performance-trigger:disabled {
@@ -1405,9 +1501,16 @@ THE SOFTWARE.
     .performance-minimal .board-effects {
       display: none !important;
     }
+    .performance-minimal #chip-panel[open] .intro-name-signal {
+      animation: none;
+    }
     @media (max-width: 700px) {
       .performance-trigger { font-size: 11px; }
       #performance-dialog { padding: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .performance-trigger { transition: none; }
+      #chip-panel[open] .intro-name-signal { animation: none; }
     }
   </style>
 </head>
@@ -2107,7 +2210,17 @@ THE SOFTWARE.
     const chipPages = {
       pc: {
         html: `
-          <h1 id="chip-heading">Hi, I’m Arnav!</h1>
+          <h1 id="chip-heading" aria-label="Hi, I’m Arnav!">Hi, I’m <button type="button" class="intro-name"
+              data-image-src="images/me_literally.png" data-image-alt="Portrait of Arnav Srivastava"
+              data-image-caption="Arnav Srivastava" aria-label="View a photo of Arnav"
+              aria-haspopup="dialog" aria-controls="image-viewer"><span class="intro-name-text">Arnav</span><svg
+              class="intro-name-trace" viewBox="0 0 100 18" preserveAspectRatio="none"
+              aria-hidden="true" focusable="false">
+              <path class="intro-name-track" d="M4 12 H22 V6 H74 V12 H96" />
+              <circle class="intro-name-pad" cx="4" cy="12" r="1.8" />
+              <circle class="intro-name-pad" cx="96" cy="12" r="1.8" />
+              <path class="intro-name-signal" d="M4 12 H22 V6 H74 V12 H96" pathLength="100" />
+            </svg></button>!</h1>
 
           <p class="panel-lead">
             I like understanding computer systems all the way down
@@ -3094,28 +3207,30 @@ THE SOFTWARE.
     let savedPanelScroll = 0;
 
     panelContent.addEventListener("click", event => {
-      const button = event.target.closest(".image-expand");
+      const button = event.target.closest(".image-expand, [data-image-src]");
 
       if (!button || imageViewer.open) return;
 
       const image = button.querySelector("img");
-      if (!image) return;
+      // Text buttons can open an image without downloading a hidden thumbnail.
+      const source = button.dataset.imageSrc ||
+        image?.dataset.full || image?.currentSrc || image?.src;
+      if (!source) return;
 
       imageOpener = button;
       savedPanelScroll = panelContent.scrollTop;
 
       // Optional data-full lets you supply a higher-resolution image.
-      enlargedImage.src =
-        image.dataset.full || image.currentSrc || image.src;
+      enlargedImage.src = source;
 
-      enlargedImage.alt = image.alt;
+      enlargedImage.alt = button.dataset.imageAlt || image?.alt || "";
 
       const caption = button
         .closest("figure")
         ?.querySelector("figcaption");
 
       enlargedCaption.textContent =
-        caption?.textContent.trim() || image.alt;
+        button.dataset.imageCaption || caption?.textContent.trim() || enlargedImage.alt;
 
       enlargedCaption.hidden = !enlargedCaption.textContent;
 
@@ -3522,8 +3637,8 @@ THE SOFTWARE.
             x2="${bandWidth}" y2="0"
           >
             <stop offset="0" stop-color="#91bfd3" stop-opacity="0"/>
-            <stop offset="0.40" stop-color="#91bfd3" stop-opacity="0.55"/>
-            <stop offset="0.65" stop-color="#e1bd74" stop-opacity="0.80"/>
+            <stop offset="0.40" stop-color="#91bfd3" stop-opacity="0.6"/>
+            <stop offset="0.65" stop-color="#e1bd74" stop-opacity="0.85"/>
             <stop offset="1" stop-color="#e1bd74" stop-opacity="0"/>
           </linearGradient>
         </defs>
