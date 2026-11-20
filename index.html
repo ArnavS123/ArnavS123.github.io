@@ -2,6 +2,12 @@
 <html lang="en">
 <head>
   <script>
+    // TEXT ALIGNMENT: change to false for left-aligned chip text, then reload.
+    const JUSTIFY_CHIP_TEXT = true;
+    document.documentElement.style.setProperty(
+      "--chip-text-align", JUSTIFY_CHIP_TEXT ? "justify" : "left"
+    );
+
     // Best-effort macOS detection; exclude iPads reporting a Mac platform.
     (() => {
       const platform = navigator.userAgentData?.platform || navigator.platform || "";
@@ -327,6 +333,24 @@ THE SOFTWARE.
       overflow-wrap: anywhere;
     }
 
+    /* Shared by every chip write-up, including nested chips and the fun fact. */
+    .panel-content,
+    .chip-fact-tooltip {
+      text-align: var(--chip-text-align, left);
+      text-align-last: start;
+    }
+
+    /* Keep all chip headings left-aligned, even when body text is justified. */
+    .panel-content :is(h1, h2, h3, h4, h5, h6) {
+      text-align: left;
+      text-align-last: auto;
+    }
+
+    .panel-content pre {
+      text-align: left;
+      text-align-last: auto;
+    }
+
     .panel-content h1 {
       margin: calc(14px + 0.875 * var(--panel-type-step)) 0 calc(20px + 1.25 * var(--panel-type-step));
       font-weight: 500;
@@ -471,6 +495,243 @@ THE SOFTWARE.
       font-family: var(--font-mono);
       font-size: calc(0.875rem + 0.875 * var(--panel-type-step));
       line-height: 1.6;
+    }
+
+    .panel-content .cpu-demo,
+    .panel-content .video-expand {
+      margin: 1.5em 0;
+    }
+
+    .chip-fact-trigger {
+      padding: 0.2em 0.15em;
+      border: 0;
+      border-radius: 3px;
+      background: transparent;
+      color: var(--panel-accent);
+      font: inherit;
+      text-decoration: underline dotted;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.22em;
+      cursor: help;
+    }
+
+    .chip-fact-trigger:hover,
+    .chip-fact-trigger[aria-expanded="true"] {
+      color: #e0d5e8;
+      text-decoration-style: solid;
+    }
+
+    .chip-fact-trigger:focus-visible {
+      outline: 2px solid var(--panel-accent);
+      outline-offset: 3px;
+    }
+
+    /* This lives outside the scrolling text, with its position kept inside
+       the chip so the explanation stays readable near the panel edges. */
+    .chip-fact-tooltip {
+      position: absolute;
+      z-index: 4;
+      box-sizing: border-box;
+      width: min(26em, calc(100% - 24px));
+      padding: 1em;
+      border: 1px solid var(--panel-accent);
+      border-radius: 8px;
+      background: var(--panel-fill);
+      color: #d4d8cf;
+      font: calc(0.875rem + 0.75 * var(--panel-type-step)) / 1.6 var(--font-body);
+      overflow-y: auto;
+      overflow-wrap: anywhere;
+      overscroll-behavior: contain;
+    }
+
+    .chip-fact-tooltip[hidden] { display: none; }
+    .chip-fact-tooltip strong {
+      display: block;
+      margin-bottom: 0.5em;
+      color: var(--panel-accent);
+    }
+    .chip-fact-tooltip p { margin: 0; }
+
+    /* Matching full-width controls for the code disclosure and video viewer. */
+    .cpu-demo summary,
+    .video-expand {
+      display: flex;
+      align-items: center;
+      gap: 0.65em;
+      width: 100%;
+      min-height: 44px;
+      padding: 1em;
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      background: #ffffff05;
+      color: var(--panel-accent);
+      font: inherit;
+      font-weight: 600;
+      line-height: 1.5;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .cpu-demo summary { list-style: none; }
+    .cpu-demo summary::-webkit-details-marker { display: none; }
+
+    .cpu-demo-icon {
+      display: block;
+      flex-shrink: 0;
+      width: 1em;
+      height: 1em;
+    }
+
+    .cpu-demo[open] > summary .cpu-demo-icon { transform: rotate(90deg); }
+
+    .cpu-demo summary:hover,
+    .video-expand:hover { background: #ffffff0d; }
+
+    .cpu-demo summary:focus-visible,
+    .video-expand:focus-visible,
+    .cpu-demo pre:focus-visible {
+      outline: 2px solid var(--panel-accent);
+      outline-offset: 4px;
+    }
+
+    .cpu-demo pre {
+      max-width: 100%;
+      margin: 1em 0 0;
+      padding: 1em;
+      overflow-x: auto;
+      background: #0000001a;
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      font: 0.875em/1.7 var(--font-mono);
+      white-space: pre;
+    }
+
+    .isa-demo {
+      margin: 1.5em 0;
+      padding: 1em;
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      background: #00000012;
+    }
+
+    .isa-demo h3 { margin: 0 0 0.5em; }
+    .panel-content .isa-demo p {
+      max-width: none;
+      margin: 0.6em 0;
+      font-size: 0.88em;
+      line-height: 1.55;
+    }
+    .isa-demo [hidden] { display: none; }
+
+    .isa-bit-grid {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 0.3em;
+      margin: 1em 0;
+    }
+
+    .isa-bit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.2em;
+      min-width: 0;
+      min-height: 44px;
+      padding: 0.4em 0;
+      border: 1px solid var(--panel-border);
+      border-radius: 5px;
+      background: transparent;
+      color: #bbc0b9;
+      font: inherit;
+      font-family: var(--font-mono);
+      cursor: pointer;
+    }
+
+    .isa-bit[aria-pressed="true"] {
+      background: #aa99b724;
+      color: #eee3f5;
+      border-color: var(--panel-accent);
+    }
+    .isa-bit:disabled { opacity: 0.4; cursor: default; }
+    .isa-bit-index { font-size: 0.6em; color: var(--panel-accent); }
+    .isa-bit-value { font-size: 1.1em; font-weight: 600; }
+
+    .isa-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.8em;
+    }
+    .isa-controls label {
+      display: grid;
+      gap: 0.4em;
+      min-width: 0;
+      color: var(--panel-accent);
+      font-size: 0.85em;
+    }
+    .isa-controls input,
+    .isa-controls select {
+      width: 100%;
+      min-width: 0;
+      min-height: 44px;
+      padding: 0.6em;
+      border: 1px solid var(--panel-border);
+      border-radius: 5px;
+      background: var(--panel-fill);
+      color: #e2dfe5;
+      color-scheme: dark;
+      font: inherit;
+      font-family: var(--font-mono);
+      font-size: max(16px, 1em);
+    }
+    .isa-controls input[aria-invalid="true"] { border-color: #c39583; }
+    .isa-demo :is(button, input, select, summary):focus-visible {
+      outline: 2px solid var(--panel-accent);
+      outline-offset: 3px;
+    }
+
+    .isa-controls,
+    .isa-result,
+    .isa-fields {
+      text-align: left;
+      text-align-last: auto;
+    }
+    .isa-result {
+      margin-top: 1em;
+      padding: 0.9em;
+      border-left: 3px solid var(--panel-accent);
+      border-radius: 0 5px 5px 0;
+      background: #ffffff05;
+    }
+    .isa-result[data-valid="false"] { border-left-color: #c39583; }
+    .isa-result output {
+      display: block;
+      color: #eee3f5;
+      font: 600 1.15em/1.5 var(--font-mono);
+      overflow-wrap: anywhere;
+    }
+    .panel-content .isa-kind { color: var(--panel-accent); }
+    .panel-content .isa-error { color: #e3b7a9; }
+    .isa-fields { margin-top: 1em; font-size: 0.85em; }
+    .isa-fields summary { color: var(--panel-accent); cursor: pointer; }
+    .isa-field-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.5em;
+      margin: 0.8em 0;
+    }
+    .isa-field-grid > div {
+      padding: 0.5em;
+      border: 1px solid var(--panel-border);
+      border-radius: 5px;
+    }
+    .isa-field-grid dt { color: var(--panel-accent); font-size: 0.8em; }
+    .isa-field-grid dt small { display: block; }
+    .isa-field-grid dd { margin: 0.4em 0 0; font-family: var(--font-mono); }
+    @container (min-width: 900px) {
+      .isa-bit-grid { grid-template-columns: repeat(16, minmax(0, 1fr)); }
+      .isa-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .isa-field-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
     }
 
     .panel-content .contact-links {
@@ -622,12 +883,23 @@ THE SOFTWARE.
       padding: 20px;
     }
 
-    #enlarged-image {
+    #enlarged-image,
+    #enlarged-video {
       display: block;
       flex: 1;
       min-height: 0;
       width: 100%;
       object-fit: contain;
+    }
+
+    #enlarged-video { background: #080c09; }
+    #image-viewer [hidden] { display: none; }
+
+    #viewer-error {
+      margin: 0;
+      color: #e3b7a9;
+      font: 14px/1.5 var(--font-body);
+      text-align: center;
     }
 
     #enlarged-caption {
@@ -1214,7 +1486,7 @@ THE SOFTWARE.
     }
 
     @media (hover: hover) {
-      .circuit > g[role="button"]:hover .chip-body {
+      .circuit > g[role="button"]:not(.content-open):hover .chip-body {
         filter: drop-shadow(0 0 8px var(--chip-accent)) drop-shadow(0 0 15px var(--chip-border));
       }
 
@@ -1334,7 +1606,7 @@ THE SOFTWARE.
     .mac-effects .circuit > g.is-current .mac-chip-halo,
     .mac-effects .circuit > g:focus-visible .mac-chip-halo { opacity: 0.65; }
     @media (hover: hover) {
-      .mac-effects .circuit > g[role="button"]:hover .mac-chip-halo { opacity: 0.95; }
+      .mac-effects .circuit > g[role="button"]:not(.content-open):hover .mac-chip-halo { opacity: 0.95; }
     }
     .mac-effects .power-arrival .mac-chip-halo {
       animation: mac-chip-arrival 700ms ease-out;
@@ -1975,6 +2247,18 @@ THE SOFTWARE.
     </div>
 
     <div id="panel-content" class="panel-content"></div>
+    <aside id="x7-fact-tooltip" class="chip-fact-tooltip" role="tooltip" hidden>
+      <strong>Why x7 instead of x0?</strong>
+      <p>
+        In an early version of my Digital Logic Sim CPU datapath, I had no NOP
+        detector, so a NOP (all-zero instruction) could write to <code>x0</code>,
+        my original zero register. I moved the zero register to <code>x7</code>
+        in order to keep NOPs encoded as all zeros. My finalized CPU datapath can
+        now detect NOPs, so this workaround is no longer necessary. However, I kept
+        <code>x7</code> as my zero register because it makes the design feel more
+        unique and personal.
+      </p>
+    </aside>
     <button
       id="scroll-more"
       type="button"
@@ -2002,7 +2286,7 @@ THE SOFTWARE.
   </dialog>
   <dialog id="image-viewer" aria-label="Enlarged project image">
     <div class="image-viewer-toolbar">
-      <span>ZOOMED IMAGE VIEWER</span>
+      <span id="viewer-kind">IMAGE VIEWER</span>
       <button id="close-image" type="button" autofocus>
         Close ✕
       </button>
@@ -2010,6 +2294,11 @@ THE SOFTWARE.
 
     <figure>
       <img id="enlarged-image" alt="" />
+      <video id="enlarged-video" controls playsinline preload="none"
+             aria-label="Video player" hidden>
+        Your browser does not support embedded video.
+      </video>
+      <p id="viewer-error" role="status" hidden></p>
       <figcaption id="enlarged-caption"></figcaption>
     </figure>
   </dialog>
@@ -2127,6 +2416,7 @@ THE SOFTWARE.
     // Visitors can still use the visible Back / Close buttons.
     document.addEventListener("keydown", event => {
       if (event.key === "Escape") {
+        hideChipFact();
         event.preventDefault();
         event.stopPropagation();
       }
@@ -2201,6 +2491,7 @@ THE SOFTWARE.
 
     function setCameraMoving(moving) {
       cameraMoving = moving;
+      if (moving) hideChipFact();
       syncPerformanceTriggers();
     }
 
@@ -2212,7 +2503,7 @@ THE SOFTWARE.
         html: `
           <h1 id="chip-heading" aria-label="Hi, I’m Arnav!">Hi, I’m <button type="button" class="intro-name"
               data-image-src="images/me_literally.png" data-image-alt="Portrait of Arnav Srivastava"
-              data-image-caption="Arnav Srivastava" aria-label="View a photo of Arnav"
+              data-image-caption="Arnav Srivastava - NVIDIA HQ" aria-label="View a photo of Arnav"
               aria-haspopup="dialog" aria-controls="image-viewer"><span class="intro-name-text">Arnav</span><svg
               class="intro-name-trace" viewBox="0 0 100 18" preserveAspectRatio="none"
               aria-hidden="true" focusable="false">
@@ -2313,7 +2604,7 @@ THE SOFTWARE.
             <p class="entry-meta">Fremont, California · July - August 2019</p>
             <p>
               I helped organize public events and clean up parks with the City of
-              Fremont Community Services Department, and received a Certificate of
+              Fremont Community Services Department and received a Certificate of
               Achievement for Exceptional Community Service.
             </p>
           </section>
@@ -2335,61 +2626,230 @@ THE SOFTWARE.
 
       control: {
         html: `
-          <h1 id="chip-heading">From gates to programs</h1>
-          <p class="entry-meta">Personal project · May-June 2026 · Digital Logic Sim &amp; Python</p>
+          <h1 id="chip-heading">From logic gates to programs</h1>
+          <p class="entry-meta">May - June 2026 · Python · Digital Logic Sim</p>
 
           <p class="panel-lead">
             A custom 8-bit processor with a 16-bit instruction set,
-            paired with its own assembler and NACAIS language frontend.
+            its own assembler, and a lightweight language compiler called NACAIS.
           </p>
 
           <p>
-            I built this processor in Digital Logic Sim, starting
-            with basic circuits and working up to registers,
-            an ALU, memory, and a control unit. Its toolchain connects
-            the programs I write to the hardware that executes them.
+            After graduating from Purdue, I took on this independent project to
+            understand how a complete computing system fits together. I wanted
+            to explore how early computer engineers connected hardware with
+            software, so I built both the processor and the software-based tools
+            needed to program it.
           </p>
 
-          <p><code>NACAIS → assembly → machine code → CPU</code></p>
-
-          <h2>The hardware</h2>
           <p>
-            The design brings together an 8-bit datapath,
-            a register file, 256 bytes of RAM, and the control
-            logic needed to execute its instruction set.
+            Here’s how the overall 3-stage program execution structure looks:
           </p>
 
-          <h2>The assembler</h2>
+          <ol>
+            <li><code>NACAIS source code → NACAIS compiler → assembly</code></li>
+            <li><code>assembly → assembler → machine code</code></li>
+            <li><code>machine code → CPU → Output</code></li>
+          </ol>
+
+          <h2>Building the hardware from NAND gates</h2>
           <p>
-            My Python assembler parses assembly instructions, resolves labels,
-            and emits machine code for the processor.
+            I used Digital Logic Sim by Sebastian Lague to build the CPU at the
+            gate level. Starting with only NAND gates and combining smaller circuits
+            into reusable components using the power of abstraction, I first built
+            D flip-flops, then registers, then a register file and RAM unit.
+            I also built adders, subtractors, and barrel shifters to combine into
+            an ALU. Once I had planned out my Instruction Set Architecture (ISA), I
+            built the control unit and immediate generator. This design was constructed
+            directly from logic gates, without SystemVerilog.
+          </p>
+          <p>
+            Specifically, my processor design has the following specifications:
+          </p>
+          <ul>
+            <li><strong>Datapath:</strong> 8-bit operations</li>
+            <li><strong>Instruction format:</strong> custom 16-bit ISA</li>
+            <li><strong>Data memory:</strong> 256 bytes of RAM</li>
+            <li>
+              <strong>Zero register:</strong> <code>x7</code>
+              (<button type="button" class="chip-fact-trigger"
+                       data-chip-fact aria-controls="x7-fact-tooltip"
+                       aria-describedby="x7-fact-tooltip" aria-expanded="false">fun fact</button>)
+            </li>
+          </ul>
+
+          <h2>Designing the Instruction Set Architecture</h2>
+          <p>
+            The ISA supports register arithmetic (R-type), immediate arithmetic
+            (I-type), conditional branches (B-type), unconditional jumps (J-type),
+            loads and stores (LS-type), no-operation instructions (NOP), and
+            <code>HALT</code>.
+          </p>
+          <p>
+            Depending on the instruction class, the encoding contains fields for
+            the opcode, ALU operation, miscellaneous control bits, destination and
+            source registers, and immediates. Encoding such a wide variety of instructions
+            into just 16 bits required careful planning and inevitable trade-offs between
+            functionality and the limited encoding space.
+          </p>
+
+          <section class="isa-demo" data-isa-demo aria-labelledby="isa-demo-title">
+            <h3 id="isa-demo-title">Decode a 16-bit instruction</h3>
+            <p id="isa-demo-help">
+              Toggle a bit or paste a binary word to see its assembly instruction.
+              Bit 15 is the most significant bit and bit 0 is the least significant.
+            </p>
+            <div class="isa-bit-grid" data-isa-bits role="group"
+                 aria-label="Instruction bits, from bit 15 to bit 0"></div>
+            <div class="isa-controls">
+              <label for="isa-binary">16-bit binary word
+                <input id="isa-binary" data-isa-input type="text" inputmode="numeric"
+                       autocomplete="off" spellcheck="false" maxlength="40"
+                       aria-describedby="isa-demo-help isa-input-error" />
+              </label>
+              <label for="isa-example">Try an example
+                <select id="isa-example" data-isa-example>
+                  <option value="" disabled>Custom bits</option>
+                  <option value="0000">NOP - all zeros</option>
+                  <option value="6880">ADD x1, x2, x3</option>
+                  <option value="FDA8">ADDI x3, x7, 15</option>
+                  <option value="4590">BEQ x1, x2, 3</option>
+                  <option value="7FB5">JAL x7, 253</option>
+                  <option value="1E18">LB x4, 0(x7)</option>
+                  <option value="3C59">SB x1, 1(x7)</option>
+                  <option value="FFFF">HALT - all ones</option>
+                </select>
+              </label>
+            </div>
+            <p id="isa-input-error" class="isa-error" data-isa-error hidden></p>
+            <div class="isa-result" data-isa-result role="status" aria-live="polite" aria-atomic="true">
+              <p class="isa-kind" data-isa-kind></p>
+              <output data-isa-instruction aria-label="Decoded instruction"></output>
+              <p data-isa-description></p>
+            </div>
+            <details class="isa-fields">
+              <summary>See the bit fields</summary>
+              <dl class="isa-field-grid">
+                <div><dt>RS2 / IMM<small>Bits 15-13</small></dt><dd data-isa-field="rs2"></dd></div>
+                <div><dt>RS1 / IMM<small>Bits 12-10</small></dt><dd data-isa-field="rs1"></dd></div>
+                <div><dt>RD / IMM<small>Bits 9-7</small></dt><dd data-isa-field="rd"></dd></div>
+                <div><dt>Misc<small>Bits 6-5</small></dt><dd data-isa-field="misc"></dd></div>
+                <div><dt>Type<small>Bits 4-3</small></dt><dd data-isa-field="type"></dd></div>
+                <div><dt>ALUOp / IMM<small>Bits 2-0</small></dt><dd data-isa-field="aluop"></dd></div>
+              </dl>
+              <p>
+                Some fields carry immediate values instead of register numbers.
+                For branches, bits 2-0 select the condition and bits 9-7 carry
+                the lower three offset bits. NOP and HALT override the normal fields.
+              </p>
+            </details>
+          </section>
+
+          <h2>A two-pass assembler</h2>
+          <p>
+            My Python-based assembler uses regular expressions (regexes) to parse
+            assembly instructions from an input file and generates separate binary
+            and hexadecimal machine code output files. Label handling required two
+            passes: first resolving labels into the immediate values used by
+            control-flow instructions, then encoding the program into machine code.
           </p>
 
           <h2>NACAIS</h2>
           <p>
-            NACAIS stands for Not As Cool As It Sounds. It is a lightweight,
-            Python-based language frontend that translates high-level syntax
-            into assembly for my custom CPU.
+            NACAIS stands for <em>Not As Cool As It Sounds</em>. It is a lightweight,
+            Python-based compiler that also uses regexes to translate my custom
+            high-level NACAIS language into assembly code for the assembler to encode
+            into machine code.
           </p>
           <p>
-            The language supports variables, arithmetic, conditionals,
-            and loops. The frontend translates these constructs into
-            operations the processor can execute.
+            NACAIS has the following capabilities:
+          </p>
+          <ul>
+            <li>Handles variables and arithmetic expressions</li>
+            <li>Supports <code>if</code>, <code>elif</code>, and <code>else</code> statements</li>
+            <li>Supports <code>for</code> and <code>while</code> loops</li>
+            <li>Tracks what variable each register holds while generating assembly</li>
+          </ul>
+          <p>
+            Register-variable tracking was a key challenge. When translating a
+            comparison into a branch instruction such as <code>BLT</code>
+            (branch if less than), the compiler needs to know which registers
+            contain the two operands being compared. The compiler not only needs
+            to generate the correct instruction but also keep that variable-to-register
+            mapping consistent.
           </p>
 
-          <h2>A complete programming path</h2>
+          <h2>Program counter overflow: “it’s not a bug, it’s a feature”</h2>
           <p>
-            Together, the frontend and assembler take a program from high-level
-            syntax to executable machine code. Building these pieces alongside
-            the processor let me explore the connection between an instruction
-            set, its software tools, and the underlying digital logic.
+            To implement backward jumps, I deliberately used the
+            wraparound behavior of the 8-bit program-counter adder. An addition
+            that exceeds its range wraps modulo 256, allowing the CPU to return
+            to an earlier instruction without dedicating an additional bit to a
+            negative offset. This kept the instruction encoding compact.
           </p>
 
-          <h2>Working within constraints</h2>
+          <h2>Putting it all together: Fibonacci sequence</h2>
           <p>
-            One interesting design decision was using the
-            wraparound behavior of the 8-bit program counter
-            to encode backward jumps.
+            I tested the CPU with a Fibonacci program that exercises arithmetic,
+            branching, a backward jump, and memory access. Its stopping value is
+            233, the largest Fibonacci number that fits in an unsigned 8-bit value.
+          </p>
+          <ol>
+            <li>Calculate <code>15 × 15 + 8 = 233</code> and store it in <code>x2</code></li>
+            <li>Generate the sequence in <code>x0</code> and <code>x1</code> until <code>x1</code> reaches <code>233</code></li>
+            <li>Store both values at RAM addresses <code>0</code> and <code>1</code>, load them into <code>x4</code> and <code>x5</code>, then halt the program</li>
+          </ol>
+          <p>
+            The expected final values are <code>x4 = 144</code> and
+            <code>x5 = 233</code>. Throughout the program, <code>x7</code>
+            supplies the constant <code>0</code>.
+          </p>
+
+          <details class="cpu-demo">
+            <summary>
+              <svg class="cpu-demo-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M7 4v16l14-8z" />
+              </svg>
+              <span>View the Fibonacci assembly</span>
+            </summary>
+            <pre tabindex="0" aria-label="Fibonacci assembly program"><code>ADDI x3, x7, 15
+MUL  x2, x3, x3
+ADDI x2, x2, 8
+
+ADDI x0, x7, 0
+ADDI x1, x7, 1
+
+loop:
+ADD  x0, x0, x1
+ADD  x1, x0, x1
+BEQ  x1, x2, done
+JAL  x7, loop
+
+done:
+SB x0, 0(x7)
+SB x1, 1(x7)
+LB x4, 0(x7)
+LB x5, 1(x7)
+HALT</code></pre>
+          </details>
+
+          <button type="button" class="video-expand"
+                  data-video-src="videos/cpu_fib.mp4"
+                  data-video-caption="The Fibonacci program running on my custom 8-bit CPU"
+                  aria-haspopup="dialog" aria-controls="image-viewer">
+            <svg class="cpu-demo-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M7 4v16l14-8z" />
+            </svg>
+            <span>Watch the Fibonacci program</span>
+          </button>
+
+          <h2>What I learned</h2>
+          <p>
+            This project changed how I judge a design. A good system design depends
+            on the tradeoffs between hardware complexity, instruction encoding, and
+            ease of programming. Building the CPU and its tools together showed
+            me how even a small architectural decision can affect the software
+            above it and the importance of designing the two together.
           </p>
         `
       },
@@ -2512,6 +2972,7 @@ THE SOFTWARE.
     }
 
     function setChipPanelContent(chip, html) {
+      hideChipFact();
       panelLabel.textContent = readChipLabel(chip, ".chip-index")
         .replace(/^ALIAS\s*:\s*/i, "");
       panelContent.innerHTML = html;
@@ -2522,6 +2983,178 @@ THE SOFTWARE.
         panelContent.prepend(eyebrow);
       }
       eyebrow.textContent = readChipLabel(chip, ".chip-name");
+      initializeIsaDemo();
+    }
+
+    // ISA decoder: inverse of the encodings in assembler.py.
+    // No Python runtime, downloads, or animation loop is needed for this demo.
+    let isaDemoWord = 0xFDA8;
+
+    function decodeInstructionWord(word) {
+      if (!Number.isInteger(word) || word < 0 || word > 0xFFFF) {
+        throw new RangeError("An instruction must be an unsigned 16-bit word.");
+      }
+      const fields = {
+        rs2: (word >>> 13) & 7,
+        rs1: (word >>> 10) & 7,
+        rd: (word >>> 7) & 7,
+        misc: (word >>> 5) & 3,
+        type: (word >>> 3) & 3,
+        aluop: word & 7
+      };
+      const { rs2, rs1, rd, misc, type, aluop } = fields;
+      const result = (assembly, family, description, valid = true) =>
+        ({ assembly, family, description, valid, fields });
+      const unsupported = (family, explanation) => result(
+        "Unsupported encoding", family,
+        explanation + " This word is not emitted by the supplied assembler.", false
+      );
+
+      // Exact-word detectors take priority over any overlapping instruction.
+      if (word === 0) return result("NOP", "Special instruction",
+        "All zeros means no operation. This reserved word overrides the ADD x0, x0, x0 encoding.");
+      if (word === 0xFFFF) return result("HALT", "Special instruction",
+        "All ones halts the processor. This reserved word overrides the SB x7, 127(x7) encoding.");
+
+      const operations = ["ADD", "SUB", "AND", "OR", "XOR", "SL", "SR", "MUL"];
+      if (type === 0 || type === 1) {
+        const immediate = type === 1;
+        if (!immediate && misc !== 0) {
+          return unsupported("R-type", "R-type instructions use 00 in bits 6-5.");
+        }
+        const operand = immediate ? (misc << 3) | rs2 : `x${rs2}`;
+        const assembly = `${operations[aluop]}${immediate ? "I" : ""} x${rd}, x${rs1}, ${operand}`;
+        const actions = [
+          `Add x${rs1} and ${operand}`,
+          `Subtract ${operand} from x${rs1}`,
+          `Bitwise AND of x${rs1} and ${operand}`,
+          `Bitwise OR of x${rs1} and ${operand}`,
+          `Bitwise XOR of x${rs1} and ${operand}`,
+          `Shift x${rs1} left by ${operand}`,
+          `Shift x${rs1} right by ${operand}`,
+          `Multiply x${rs1} by ${operand}`
+        ];
+        return result(assembly, immediate ? "I-type" : "R-type",
+          `${actions[aluop]}. Destination: x${rd}.`);
+      }
+
+      if (type === 2) {
+        if (misc & 1) {
+          if ((misc & 2) || (word & 0x8000)) {
+            return unsupported("J-type", "JAL uses 0 in bits 15 and 6.");
+          }
+          const immediate = ((rs2 & 3) << 6) | (rs1 << 3) | aluop;
+          return result(`JAL x${rd}, ${immediate}`, "J-type",
+            `Unconditional jump with link register x${rd}. Encoded 8-bit offset: ${immediate}.`);
+        }
+        const branches = ["BEQ", "BNE", "BGT", "BLT", "BGE", "BLE"];
+        if (aluop >= branches.length) {
+          return unsupported("B-type", "Branch selectors 110 and 111 have no assigned instruction.");
+        }
+        const immediate = ((misc >>> 1) << 3) | rd;
+        const comparisons = ["equals", "does not equal", "is greater than", "is less than", "is greater than or equal to", "is less than or equal to"];
+        return result(`${branches[aluop]} x${rs1}, x${rs2}, ${immediate}`, "B-type",
+          `Branch if x${rs1} ${comparisons[aluop]} x${rs2}. Encoded 4-bit offset: ${immediate}.`);
+      }
+
+      const store = Boolean(misc & 2);
+      const immediate = ((misc & 1) << 6) | ((store ? rd : rs2) << 3) | aluop;
+      return result(`${store ? "SB" : "LB"} x${store ? rs2 : rd}, ${immediate}(x${rs1})`,
+        store ? "S-type" : "L-type", store
+          ? `Store the byte from x${rs2} at the address formed by x${rs1} plus ${immediate}.`
+          : `Load a byte into x${rd} from the address formed by x${rs1} plus ${immediate}.`);
+    }
+
+    function initializeIsaDemo() {
+      const demo = panelContent.querySelector("[data-isa-demo]");
+      if (!demo) return;
+      const grid = demo.querySelector("[data-isa-bits]");
+      const input = demo.querySelector("[data-isa-input]");
+      const examples = demo.querySelector("[data-isa-example]");
+      const error = demo.querySelector("[data-isa-error]");
+      const output = demo.querySelector("[data-isa-instruction]");
+      const description = demo.querySelector("[data-isa-description]");
+      const kind = demo.querySelector("[data-isa-kind]");
+      const result = demo.querySelector("[data-isa-result]");
+      const fieldCells = [...demo.querySelectorAll("[data-isa-field]")];
+      const buttons = [];
+      const values = [];
+      grid.replaceChildren();
+
+      for (let bit = 15; bit >= 0; bit--) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "isa-bit";
+        button.dataset.isaBit = bit;
+        const index = document.createElement("span");
+        index.className = "isa-bit-index";
+        index.textContent = bit;
+        index.setAttribute("aria-hidden", "true");
+        const value = document.createElement("span");
+        value.className = "isa-bit-value";
+        value.setAttribute("aria-hidden", "true");
+        button.append(index, value);
+        grid.append(button);
+        buttons.push(button);
+        values.push(value);
+      }
+
+      function render(word, syncInput = true) {
+        isaDemoWord = word;
+        const decoded = decodeInstructionWord(word);
+        const binary = word.toString(2).padStart(16, "0");
+        const hex = word.toString(16).toUpperCase().padStart(4, "0");
+        if (syncInput) input.value = binary;
+        input.setAttribute("aria-invalid", "false");
+        error.hidden = true;
+        error.textContent = "";
+        buttons.forEach((button, index) => {
+          const value = binary[index];
+          button.disabled = false;
+          button.setAttribute("aria-pressed", String(value === "1"));
+          button.setAttribute("aria-label", `Bit ${15 - index}, value ${value}`);
+          values[index].textContent = value;
+        });
+        examples.value = [...examples.options].some(option => option.value === hex) ? hex : "";
+        result.dataset.valid = String(decoded.valid);
+        output.textContent = decoded.assembly;
+        kind.textContent = `${decoded.family} · 0x${hex}`;
+        description.textContent = decoded.description;
+        fieldCells.forEach(cell => {
+          const name = cell.dataset.isaField;
+          const width = name === "misc" || name === "type" ? 2 : 3;
+          cell.textContent = decoded.fields[name].toString(2).padStart(width, "0");
+        });
+      }
+
+      grid.addEventListener("click", event => {
+        const button = event.target.closest("button[data-isa-bit]");
+        if (!button || button.disabled || !grid.contains(button)) return;
+        render(isaDemoWord ^ (1 << Number(button.dataset.isaBit)));
+      });
+      input.addEventListener("input", () => {
+        const binary = input.value.replace(/\s/g, "");
+        if (!/^[01]{16}$/.test(binary)) {
+          input.setAttribute("aria-invalid", "true");
+          error.textContent = /^[01]*$/.test(binary)
+            ? `Enter exactly 16 bits; you currently have ${binary.length}.`
+            : "Use only 0 and 1; spaces between groups are allowed.";
+          error.hidden = false;
+          buttons.forEach(button => { button.disabled = true; });
+          examples.value = "";
+          result.dataset.valid = "false";
+          output.textContent = "Enter 16 valid bits";
+          kind.textContent = "Waiting for binary input";
+          description.textContent = "Complete the input or choose an example to continue.";
+          fieldCells.forEach(cell => { cell.textContent = "..."; });
+          return;
+        }
+        render(parseInt(binary, 2), false);
+      });
+      examples.addEventListener("change", () => {
+        if (examples.value) render(parseInt(examples.value, 16));
+      });
+      render(isaDemoWord);
     }
 
     function getChipView(id) {
@@ -3198,43 +3831,167 @@ THE SOFTWARE.
 
     showCurrentChip();
 
+    const chipFactTooltip = document.querySelector("#x7-fact-tooltip");
+    let chipFactTrigger = null;
+    let chipFactPinned = false;
+    let chipFactCloseTimer = null;
+
+    function hideChipFact() {
+      clearTimeout(chipFactCloseTimer);
+      chipFactTooltip.hidden = true;
+      chipFactTrigger?.setAttribute("aria-expanded", "false");
+      chipFactTrigger = null;
+      chipFactPinned = false;
+    }
+
+    function positionChipFact() {
+      const panel = chipPanel.getBoundingClientRect();
+      const content = panelContent.getBoundingClientRect();
+      const trigger = chipFactTrigger.getBoundingClientRect();
+      const gap = 8;
+      const edge = 12;
+      const originLeft = panel.left + chipPanel.clientLeft;
+      const originTop = panel.top + chipPanel.clientTop;
+      const minTop = Math.max(edge, content.top - originTop + gap);
+      const maxBottom = Math.min(chipPanel.clientHeight - edge, content.bottom - originTop - gap);
+      const above = Math.max(0, trigger.top - originTop - gap - minTop);
+      const below = Math.max(0, maxBottom - (trigger.bottom - originTop + gap));
+
+      // Measure at full height, then choose the side with enough room.
+      chipFactTooltip.style.maxHeight = "none";
+      const placeBelow = chipFactTooltip.offsetHeight <= below || below >= above;
+      chipFactTooltip.style.maxHeight = `${placeBelow ? below : above}px`;
+      const height = chipFactTooltip.offsetHeight;
+      const top = placeBelow
+        ? trigger.bottom - originTop + gap
+        : trigger.top - originTop - gap - height;
+      chipFactTooltip.style.top = `${Math.max(minTop, Math.min(top, maxBottom - height))}px`;
+      chipFactTooltip.style.left = `${Math.max(edge, Math.min(
+        trigger.left - originLeft,
+        chipPanel.clientWidth - chipFactTooltip.offsetWidth - edge
+      ))}px`;
+    }
+
+    function showChipFact(trigger) {
+      if (!trigger || !chipPanel.open || navigationIsBusy()) return;
+      clearTimeout(chipFactCloseTimer);
+      if (chipFactTrigger !== trigger) hideChipFact();
+      chipFactTrigger = trigger;
+      trigger.setAttribute("aria-expanded", "true");
+      chipFactTooltip.hidden = false;
+      positionChipFact();
+    }
+
+    function scheduleChipFactClose() {
+      clearTimeout(chipFactCloseTimer);
+      // Give the pointer time to cross the small gap into the explanation.
+      chipFactCloseTimer = setTimeout(() => {
+        if (chipFactPinned || document.activeElement === chipFactTrigger ||
+            chipFactTooltip.matches(":hover")) return;
+        hideChipFact();
+      }, 180);
+    }
+
+    panelContent.addEventListener("pointerover", event => {
+      if (event.pointerType !== "touch") showChipFact(event.target.closest("[data-chip-fact]"));
+    });
+    panelContent.addEventListener("pointerout", event => {
+      if (!chipFactTrigger || !chipFactTrigger.contains(event.target)) return;
+      if (chipFactTrigger.contains(event.relatedTarget) || chipFactTooltip.contains(event.relatedTarget)) return;
+      scheduleChipFactClose();
+    });
+    panelContent.addEventListener("focusin", event => {
+      showChipFact(event.target.closest("[data-chip-fact]"));
+    });
+    panelContent.addEventListener("click", event => {
+      const trigger = event.target.closest("[data-chip-fact]");
+      if (!trigger) return;
+      if (chipFactTrigger === trigger && chipFactPinned) {
+        hideChipFact();
+      } else {
+        showChipFact(trigger);
+        chipFactPinned = chipFactTrigger === trigger;
+      }
+    });
+    chipFactTooltip.addEventListener("pointerenter", () => clearTimeout(chipFactCloseTimer));
+    chipFactTooltip.addEventListener("pointerleave", scheduleChipFactClose);
+
+    // Tapping elsewhere or moving keyboard focus dismisses the explanation.
+    for (const type of ["pointerdown", "focusin"]) {
+      document.addEventListener(type, event => {
+        if (!chipFactTooltip.hidden && !chipFactTrigger?.contains(event.target) &&
+            !chipFactTooltip.contains(event.target)) hideChipFact();
+      });
+    }
+    panelContent.addEventListener("scroll", hideChipFact, { passive: true });
+    window.addEventListener("resize", hideChipFact);
+    chipPanel.addEventListener("close", hideChipFact);
+
     const imageViewer = document.querySelector("#image-viewer");
     const enlargedImage = document.querySelector("#enlarged-image");
+    const enlargedVideo = document.querySelector("#enlarged-video");
     const enlargedCaption = document.querySelector("#enlarged-caption");
+    const viewerKind = document.querySelector("#viewer-kind");
+    const viewerError = document.querySelector("#viewer-error");
     const closeImageButton = document.querySelector("#close-image");
 
     let imageOpener = null;
     let savedPanelScroll = 0;
 
     panelContent.addEventListener("click", event => {
-      const button = event.target.closest(".image-expand, [data-image-src]");
+      const button = event.target.closest(".image-expand, [data-image-src], [data-video-src]");
 
       if (!button || imageViewer.open) return;
 
       const image = button.querySelector("img");
+      const isVideo = Boolean(button.dataset.videoSrc);
       // Text buttons can open an image without downloading a hidden thumbnail.
-      const source = button.dataset.imageSrc ||
+      const source = button.dataset.videoSrc || button.dataset.imageSrc ||
         image?.dataset.full || image?.currentSrc || image?.src;
       if (!source) return;
 
       imageOpener = button;
       savedPanelScroll = panelContent.scrollTop;
 
-      // Optional data-full lets you supply a higher-resolution image.
-      enlargedImage.src = source;
+      viewerError.hidden = true;
+      viewerError.textContent = "";
+      enlargedImage.hidden = isVideo;
+      enlargedVideo.hidden = !isVideo;
+      viewerKind.textContent = isVideo ? "VIDEO VIEWER" : "IMAGE VIEWER";
+      imageViewer.setAttribute("aria-label", isVideo ? "Project video viewer" : "Enlarged project image");
 
-      enlargedImage.alt = button.dataset.imageAlt || image?.alt || "";
+      if (isVideo) {
+        // The video has no source until requested, so page load stays light.
+        enlargedVideo.src = source;
+        enlargedVideo.setAttribute("aria-label", button.dataset.videoCaption || "Project video");
+      } else {
+        // Optional data-full lets you supply a higher-resolution image.
+        enlargedImage.src = source;
+        enlargedImage.alt = button.dataset.imageAlt || image?.alt || "";
+      }
 
       const caption = button
         .closest("figure")
         ?.querySelector("figcaption");
 
       enlargedCaption.textContent =
-        button.dataset.imageCaption || caption?.textContent.trim() || enlargedImage.alt;
+        (isVideo ? button.dataset.videoCaption : button.dataset.imageCaption) ||
+        caption?.textContent.trim() || (isVideo ? "" : enlargedImage.alt);
 
       enlargedCaption.hidden = !enlargedCaption.textContent;
 
       imageViewer.showModal();
+
+      if (isVideo) {
+        // This is a user-initiated play request; native controls remain available.
+        enlargedVideo.play().catch(() => {});
+      }
+    });
+
+    enlargedVideo.addEventListener("error", () => {
+      if (!imageViewer.open || enlargedVideo.hidden || !enlargedVideo.hasAttribute("src")) return;
+      viewerError.textContent = "This video could not be loaded. The file may be unavailable or in an unsupported format.";
+      viewerError.hidden = false;
     });
 
     function closeImageViewer() {
@@ -3245,7 +4002,7 @@ THE SOFTWARE.
 
     closeImageButton.addEventListener("click", closeImageViewer);
 
-    // Dismiss the image viewer with its Close button, not Escape.
+    // Dismiss the media viewer with its Close button, not Escape.
     imageViewer.addEventListener("cancel", event => event.preventDefault());
 
     // Clicking the dark backdrop also closes the viewer.
@@ -3267,6 +4024,17 @@ THE SOFTWARE.
 
     // Restore focus and the write-up's scroll position.
     imageViewer.addEventListener("close", () => {
+      // Stop playback and release the video resource, including on backdrop close.
+      if (enlargedVideo.hasAttribute("src")) {
+        enlargedVideo.pause();
+        enlargedVideo.removeAttribute("src");
+        enlargedVideo.load();
+      }
+      enlargedVideo.hidden = true;
+      enlargedImage.hidden = false;
+      viewerError.hidden = true;
+      viewerError.textContent = "";
+
       if (imageOpener?.isConnected) {
         imageOpener.focus({ preventScroll: true });
       }
@@ -4239,13 +5007,13 @@ THE SOFTWARE.
               helping them debug breadboards, SystemVerilog designs, and embedded programs.
             </p>
             <h3>ECE 27000 - Introduction to Digital System Design</h3>
-            <p class="entry-meta">June - July 2025</p>
+            <p class="entry-meta">June - July 2025 · Breadboard Circuits · SystemVerilog</p>
             <ul>
               <li>Assisted with combinational and sequential logic labs.</li>
               <li>Helped students troubleshoot breadboard circuits and SystemVerilog designs on FPGAs.</li>
             </ul>
             <h3>ECE 36200 - Microprocessor Systems &amp; Interfacing</h3>
-            <p class="entry-meta">August - December 2025</p>
+            <p class="entry-meta">August - December 2025 · Raspberry Pi MCU · RISC-V Assembly</p>
             <ul>
               <li>Supported Embedded C labs on Raspberry Pi microcontrollers and work in RISC-V assembly.</li>
               <li>Helped with peripheral interfacing and runtime debugging.</li>
@@ -4295,7 +5063,7 @@ THE SOFTWARE.
             </p>
             <p>
               I also contributed to software aimed at distinguishing healthy
-              and unhealthy eggs for in-vitro fertilization.
+              and unhealthy eggs for In Vitro Fertilization (IVF).
             </p>
           </section>
 
