@@ -2564,7 +2564,7 @@ THE SOFTWARE.
           <ul>
             <li>I am ranked first on Logicode, a platform for hardware design challenges,
               as of November 17, 2026.</li>
-            <li>My 2-person team was one of the few to earn a 100% autograder score
+            <li>My two-person team was one of the few to earn a 100% autograder score
               for a 5-Stage Pipelined RISC-V CPU with Caches and MSI Coherence in my
               Computer Design and Prototyping course at Purdue.</li>
             <li>I was the first to finish the AHB FIR filter in my ASIC Design Lab course
@@ -4864,8 +4864,8 @@ HALT</code></pre>
     const archivePages = {
       personal: {
         html: `
-          <h1 id="chip-heading">Personal projects.</h1>
-          <p class="panel-lead">Independent builds and ways I explore computer engineering.</p>
+          <h1 id="chip-heading">Built from curiosity</h1>
+          <p class="panel-lead">Independent builds and ways I explore computer engineering. WARNING: INCOMPLETE</p>
 
           <section class="portfolio-entry">
             <h2>Custom 8-bit CPU &amp; compiler toolchain</h2>
@@ -4895,21 +4895,11 @@ HALT</code></pre>
               expandable images, with hardware themes carried through the interface.
             </p>
           </section>
-
-          <section class="portfolio-entry">
-            <h2>Hardware design challenges</h2>
-            <p class="entry-meta">Logicode</p>
-            <p>
-              Hardware challenges are another part of my design practice. As of
-              November 17, 2026, I ranked first on Logicode. The About Me chip
-              includes a snapshot of the leaderboard from that date.
-            </p>
-          </section>
         `
       },
       academic: {
         html: `
-          <h1 id="chip-heading">Academic projects.</h1>
+          <h1 id="chip-heading">From theory to working systems</h1>
           <p class="panel-lead">Processors, digital interfaces, and embedded systems built through coursework.</p>
 
           <section class="portfolio-entry">
@@ -4920,27 +4910,69 @@ HALT</code></pre>
               pipeline, then extended it with caches and dual-core support.
             </p>
             <ul>
-              <li>Designed and verified instruction support, including the atomic instructions <code>lr.w</code> and <code>sc.w</code>.</li>
-              <li>Implemented forwarding, stalling, and flush logic for data and control hazards, plus a 2-bit saturating-counter branch predictor.</li>
-              <li>Added separate L1 instruction and data caches, MSI cache coherence, and a bus controller to arbitrate memory transactions.</li>
+              <li>Designed and verified support for base RISC-V instructions and atomic instructions <code>lr.w</code> and <code>sc.w</code></li>
+              <li>Implemented forwarding, stalling, and flush logic for data and control hazards, plus a 2-bit saturating-counter branch predictor</li>
+              <li>Added separate L1 instruction and data caches, MSI cache coherence, and a bus controller to arbitrate memory transactions</li>
             </ul>
             <p>
               My two-person team was one of the few to earn a 100% autograder score
-              in the course.
+              in the Computer Design and Prototyping course.
             </p>
+
+            <figure>
+              <button type="button" class="image-expand"
+                      aria-label="Enlarge the single-cycle CPU design"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <img src="images/Singlecycle.png" alt="Single-cycle CPU design"
+                     loading="lazy" decoding="async" />
+              </button>
+              <figcaption>Single-cycle CPU design</figcaption>
+            </figure>
+
+            <figure>
+              <button type="button" class="image-expand"
+                      aria-label="Enlarge the pipelined CPU design"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <img src="images/Pipeline_BP.png" alt="Pipelined CPU design with branch prediction"
+                     loading="lazy" decoding="async" />
+              </button>
+              <figcaption>Pipelined CPU design with branch prediction</figcaption>
+            </figure>
           </section>
 
           <section class="portfolio-entry">
             <h2>AHB-USB transceiver</h2>
             <p class="entry-meta">November - December 2025 · SystemVerilog</p>
             <p>
-              I led a team developing a synthesizable transceiver, including an AHB
-              bus subordinate, receive and transmit modules, and a FIFO data buffer.
+              I led a three-person team in developing a synthesizable USB transceiver,
+              including an AHB bus subordinate, receiver and transmitter modules, and a
+              FIFO data buffer.
             </p>
             <ul>
-              <li>Supported AHB burst transfers.</li>
-              <li>Implemented USB bit-stuffing and CRC-based error detection.</li>
+              <li>Supported AHB burst transfers</li>
+              <li>Implemented USB bit-stuffing and CRC-based error detection</li>
+              <li>Formally presented overall design using timing waveforms and end-to-end testbench demonstrations</li>
             </ul>
+
+            <figure>
+              <button type="button" class="image-expand"
+                      aria-label="Enlarge the USB transceiver top-level design"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <img src="images/USB_toplevel.png" alt="USB transceiver top-level design"
+                     loading="lazy" decoding="async" />
+              </button>
+              <figcaption>USB transceiver top-level design</figcaption>
+            </figure>
+
+            <figure>
+              <button type="button" class="image-expand"
+                      aria-label="Enlarge the USB AHB interface - my domain"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <img src="images/USB_AHB.png" alt="AHB bus interface for the USB transceiver"
+                     loading="lazy" decoding="async" />
+              </button>
+              <figcaption><strong>My domain:</strong> the AHB bus interface for the USB transceiver</figcaption>
+            </figure>
           </section>
 
           <section class="portfolio-entry">
@@ -4948,26 +4980,57 @@ HALT</code></pre>
             <p class="entry-meta">August - December 2025 · STM32 · Embedded C</p>
             <p>
               I developed firmware for an autonomous tracked robot designed to
-              distribute wildflower seeds across varied terrain.
+              distribute wildflower seeds across varied terrain. I worked in a
+              four-person team.
             </p>
             <ul>
-              <li>Implemented PID closed-loop motor control with H-bridge drivers and PWM speed and direction control.</li>
-              <li>Integrated motor control with the power, movement, and sensor subsystems.</li>
-              <li>Collaborated on terrain, proximity, and GPS sensing for path following and obstacle avoidance.</li>
+              <li>Implemented PID closed-loop motor control with H-bridge drivers and PWM speed and direction control</li>
+              <li>Integrated motor control with the power, movement, and sensor subsystems</li>
+              <li>Collaborated on terrain, proximity, and GPS sensing for path following and obstacle avoidance</li>
             </ul>
+
+            <button type="button" class="video-expand"
+                    data-video-src="videos/seed.mp4"
+                    data-video-caption="Autonomous seed distributor - demo 1"
+                    aria-haspopup="dialog" aria-controls="image-viewer">
+              <svg class="cpu-demo-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M7 4v16l14-8z" />
+              </svg>
+              <span>Watch the seed distributor demo: moving around</span>
+            </button>
+
+            <button type="button" class="video-expand"
+                    data-video-src="videos/seed2.mp4"
+                    data-video-caption="Autonomous seed distributor - demo 2"
+                    aria-haspopup="dialog" aria-controls="image-viewer">
+              <svg class="cpu-demo-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M7 4v16l14-8z" />
+              </svg>
+              <span>Watch the seed distributor demo: shooting seeds</span>
+            </button>
           </section>
 
           <section class="portfolio-entry">
             <h2>Audio synthesizer drum machine</h2>
             <p class="entry-meta">March - May 2025 · STM32 · Embedded C</p>
             <p>
-              I built a 16-step drum-machine sequencer with programmable patterns,
+              I built a 16-step drum machine sequencer with programmable patterns,
               adjustable tempo and volume, and modular sample packs.
             </p>
             <ul>
-              <li>Added push-button recording and playback for interactive sequencing.</li>
-              <li>Used an LCD to display feedback while the user created and played patterns.</li>
+              <li>Added push-button recording and playback for interactive sequencing</li>
+              <li>Used an LCD to display feedback while the user created and played patterns</li>
             </ul>
+
+            <button type="button" class="video-expand"
+                    data-video-src="videos/drum.mp4"
+                    data-video-caption="Audio synthesizer drum machine demonstration"
+                    aria-haspopup="dialog" aria-controls="image-viewer">
+              <svg class="cpu-demo-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M7 4v16l14-8z" />
+              </svg>
+              <span>Watch the drum machine demo</span>
+            </button>
           </section>
 
           <section class="portfolio-entry">
@@ -4977,6 +5040,26 @@ HALT</code></pre>
               I was the first to finish the AHB FIR filter in my ASIC Design Lab
               course, passing all instructor test cases on my first submission.
             </p>
+
+            <figure>
+              <button type="button" class="image-expand"
+                      aria-label="Enlarge the AHB interface design"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <img src="images/AHB.png" alt="AHB interface design for the FIR filter project"
+                     loading="lazy" decoding="async" />
+              </button>
+              <figcaption>AHB interface design</figcaption>
+            </figure>
+
+            <figure>
+              <button type="button" class="image-expand"
+                      aria-label="Enlarge the FIR filter design"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <img src="images/FIR_FILTER.png" alt="FIR filter design"
+                     loading="lazy" decoding="async" />
+              </button>
+              <figcaption>FIR filter design</figcaption>
+            </figure>
           </section>
 
           <section class="portfolio-entry">
@@ -4997,7 +5080,7 @@ HALT</code></pre>
       partTime: {
         html: `
           <h1 id="chip-heading">Teaching as a Passion</h1>
-          <p class="panel-lead">Helping students turn digital-design concepts into working systems.</p>
+          <p class="panel-lead">Helping students turn digital design concepts into working systems.</p>
 
           <section class="portfolio-entry">
             <h2>Lab Teaching Assistant</h2>
@@ -5009,14 +5092,14 @@ HALT</code></pre>
             <h3>ECE 27000 - Introduction to Digital System Design</h3>
             <p class="entry-meta">June - July 2025 · Breadboard Circuits · SystemVerilog</p>
             <ul>
-              <li>Assisted with combinational and sequential logic labs.</li>
-              <li>Helped students troubleshoot breadboard circuits and SystemVerilog designs on FPGAs.</li>
+              <li>Assisted with combinational and sequential logic labs</li>
+              <li>Helped students troubleshoot breadboard circuits and SystemVerilog designs on FPGAs</li>
             </ul>
             <h3>ECE 36200 - Microprocessor Systems &amp; Interfacing</h3>
             <p class="entry-meta">August - December 2025 · Raspberry Pi MCU · RISC-V Assembly</p>
             <ul>
-              <li>Supported Embedded C labs on Raspberry Pi microcontrollers and work in RISC-V assembly.</li>
-              <li>Helped with peripheral interfacing and runtime debugging.</li>
+              <li>Supported Embedded C labs on Raspberry Pi microcontrollers and work in RISC-V assembly</li>
+              <li>Helped with peripheral interfacing and runtime debugging</li>
             </ul>
           </section>
         `
@@ -5035,8 +5118,8 @@ HALT</code></pre>
               manual verification.
             </p>
             <ul>
-              <li>Used pandas and fuzzy matching to handle typos, inconsistent formatting, and unstructured records.</li>
-              <li>Improved automated match rates by over 50% relative to the baseline.</li>
+              <li>Used pandas and fuzzy matching to handle typos, inconsistent formatting, and unstructured records</li>
+              <li>Improved automated match rates by over 50% relative to the baseline</li>
             </ul>
           </section>
 
@@ -5048,8 +5131,8 @@ HALT</code></pre>
               (PIL) and NumPy to support YOLOv8 object detection.
             </p>
             <ul>
-              <li>Implemented custom brightness, contrast, and sharpness adjustments.</li>
-              <li>Assisted with machine-learning pipelines and automation for inventory analytics and alcohol-bottle classification.</li>
+              <li>Implemented custom brightness, contrast, and sharpness adjustments</li>
+              <li>Assisted with machine-learning pipelines and automation for inventory analytics and alcohol-bottle classification</li>
             </ul>
           </section>
 
@@ -5080,7 +5163,7 @@ HALT</code></pre>
             <p>
               I contributed to the paper <cite>Comprehensive Habitability Index (CHI)</cite>,
               published through the Aspiring Scholars Directed Research Program
-              in <cite>ASDRP Communications</cite>, Volume 3, in 2020.
+              in <cite><a href="https://www.asdrp.org/asdrp-communications" target="_blank" rel="noopener noreferrer">ASDRP Communications</a></cite>, Volume 3, in 2020.
             </p>
           </section>
         `
@@ -5101,8 +5184,8 @@ HALT</code></pre>
         title: "EXPERIENCES", description: "Part-time jobs and internships",
         backLabel: "← Experiences", pages: experiencePages, last: "partTime",
         chips: [
-          ["partTime", "PART-TIME JOBS", "Roles & Responsibilities", "pc", "L1 CACHE"],
-          ["internships", "INTERNSHIPS", "Projects & Contributions", "rf", "L2 CACHE"]
+          ["partTime", "PART-TIME JOBS", "Teaching & Responsibilities", "pc", "L1 CACHE"],
+          ["internships", "INTERNSHIPS & RESEARCH", "Projects & Contributions", "rf", "L2 CACHE", ["INTERNSHIPS &", "RESEARCH"]]
         ]
       }
     };
@@ -5124,7 +5207,7 @@ HALT</code></pre>
         `ARNAV SRIVASTAVA / ${activeCollection.title}`;
       projectsBoard.setAttribute("aria-label", activeCollection.description);
       projectsSvg.setAttribute("aria-label", activeCollection.description);
-    for (const [id, title, subtitle, colorClass, alias] of activeCollection.chips) {
+    for (const [id, title, subtitle, colorClass, alias, titleLines = [title]] of activeCollection.chips) {
       const chip = chips[colorClass].cloneNode(true);
       chip.removeAttribute("id");
       chip.classList.remove("content-open", "is-current");
@@ -5141,10 +5224,18 @@ HALT</code></pre>
       }
       chip.querySelector(".chip-index").textContent = "ALIAS: " + alias;
       const name = chip.querySelector(".chip-name");
-      name.textContent = title;
+      name.replaceChildren();
       name.setAttribute("class", "chip-name");
-      name.setAttribute("y", "82");
+      name.setAttribute("y", titleLines.length > 1 ? "70" : "82");
       name.style.fontSize = title.length > 12 ? "21px" : "";
+      // SVG text needs explicit lines; the full title remains the accessible label.
+      titleLines.forEach((line, index) => {
+        const span = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+        span.setAttribute("x", "24");
+        span.setAttribute("dy", index === 0 ? "0" : "26");
+        span.textContent = line;
+        name.append(span);
+      });
       chip.querySelector(".chip-description").textContent = subtitle;
       chip.querySelector(".chip-description").style.fontSize = "9px";
       projectsSvg.append(chip);
