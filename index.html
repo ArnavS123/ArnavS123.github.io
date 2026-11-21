@@ -222,7 +222,15 @@ THE SOFTWARE.
     }
 
     .route-status {
-      display: none;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border: 0;
     }
 
     .circuit > g[role="button"]:focus {
@@ -501,6 +509,45 @@ THE SOFTWARE.
     .panel-content .video-expand {
       margin: 1.5em 0;
     }
+
+    /* Inline buttons navigate between write-ups without changing the text size. */
+    .circuit-link {
+      display: inline;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--panel-accent);
+      font: inherit;
+      text-align: inherit;
+      text-decoration: underline;
+      text-underline-offset: 0.18em;
+      cursor: pointer;
+    }
+
+    .circuit-demo-button {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 0.65em 1.2em;
+      border: 1px solid var(--panel-accent);
+      border-radius: 6px;
+      background: #ffffff08;
+      color: var(--panel-accent);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .circuit-link:not(:disabled):hover { color: #e0e3dc; }
+    .circuit-demo-button:not(:disabled):hover { background: #ffffff14; }
+    .circuit-link:focus-visible,
+    .circuit-demo-button:focus-visible {
+      outline: 2px solid var(--panel-accent);
+      outline-offset: 4px;
+    }
+    .circuit-link:disabled,
+    .circuit-demo-button:disabled { opacity: 0.6; cursor: wait; }
+    .content-link-target:focus { outline: none; }
 
     .chip-fact-trigger {
       padding: 0.2em 0.15em;
@@ -1239,6 +1286,27 @@ THE SOFTWARE.
       animation: chip-power-arrival 700ms ease-out;
     }
 
+    /* The RF demo holds this stronger glow until the reset wave arrives. */
+    .demo-chip-halo {
+      fill: none;
+      stroke: var(--chip-accent);
+      opacity: 0;
+      pointer-events: none;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .demo-chip-halo { transition: opacity 280ms ease-out; }
+      .circuit > g.demo-charged .demo-chip-halo { opacity: 1; }
+      .circuit > g[role="button"].demo-charged .chip-body {
+        stroke: #fff0ce;
+        stroke-width: 3.5;
+      }
+      /* macOS uses the layered halo without adding a heavier blur filter. */
+      html:not(.mac-effects) .circuit > g[role="button"].demo-charged .chip-body {
+        filter: brightness(1.25) drop-shadow(0 0 18px var(--chip-accent))
+          drop-shadow(0 0 8px var(--chip-accent));
+      }
+    }
+
     .board-effects {
       pointer-events: none;
     }
@@ -1770,6 +1838,7 @@ THE SOFTWARE.
       animation: none !important;
     }
     .performance-minimal .mac-chip-halo,
+    .performance-minimal .demo-chip-halo,
     .performance-minimal .board-effects {
       display: none !important;
     }
@@ -2471,9 +2540,10 @@ THE SOFTWARE.
 
     let openChipId = null;
     let cameraMoving = false;
+    let contentNavigationBusy = false;
 
     function navigationIsBusy() {
-      return travelling || cameraMoving || archiveBusy;
+      return travelling || cameraMoving || archiveBusy || contentNavigationBusy;
     }
 
     function syncPerformanceTriggers() {
@@ -2481,6 +2551,8 @@ THE SOFTWARE.
       for (const trigger of performanceTriggers) {
         trigger.disabled = disabled;
       }
+      panelContent.querySelectorAll("[data-circuit-chip], [data-circuit-demo]")
+        .forEach(button => { button.disabled = disabled; });
     }
 
     function openPerformanceSettings() {
@@ -2547,8 +2619,14 @@ THE SOFTWARE.
           <ul>
             <li>ASIC Design Laboratory</li>
             <li>Computer Design and Prototyping</li>
-            <li>Digital Systems Design - also served as a teaching assistant</li>
-            <li>Microprocessor Systems &amp; Interfacing - also served as a teaching assistant</li>
+            <li>Digital Systems Design - also served as a
+              <button type="button" class="circuit-link" data-circuit-chip="memory"
+                      data-circuit-collection="partTime" data-circuit-section="teaching-ece270"
+                      aria-label="Teaching assistant experience in Digital Systems Design">teaching assistant</button></li>
+            <li>Microprocessor Systems &amp; Interfacing - also served as a
+              <button type="button" class="circuit-link" data-circuit-chip="memory"
+                      data-circuit-collection="partTime" data-circuit-section="teaching-ece362"
+                      aria-label="Teaching assistant experience in Microprocessor Systems and Interfacing">teaching assistant</button></li>
             <li>Cybersecurity</li>
           </ul>
 
@@ -2561,12 +2639,12 @@ THE SOFTWARE.
           <h2>Recent achievements I’m proud to share</h2>
           <ul>
             <li>I am ranked first on Logicode, a platform for hardware design challenges,
-              as of November 17, 2026.</li>
+              as of November 17, 2026</li>
             <li>My two-person team was one of the few to earn a 100% autograder score
               for a 5-Stage Pipelined RISC-V CPU with Caches and MSI Coherence in my
-              Computer Design and Prototyping course at Purdue.</li>
+              Computer Design and Prototyping course at Purdue</li>
             <li>I was the first to finish the AHB FIR filter in my ASIC Design Lab course
-              at Purdue, passing all instructor test cases on my first submission.</li>
+              at Purdue, passing all instructor test cases on my first submission</li>
           </ul>
 
           <figure>
@@ -3712,7 +3790,7 @@ HALT</code></pre>
       positionSignal(signal.circle, point);
     }
 
-    function animateConnection(connection, reverse) {
+    function animateConnection(connection, reverse, duration = TRAVEL_TIME) {
       const signals = connection.paths.map(makePulse);
 
       // Position every pulse before displaying any of them.
@@ -3730,13 +3808,13 @@ HALT</code></pre>
             startTime = time;
           }
 
-          if (!EFFECTS.navigationPulses) {
+          if (!EFFECTS.navigationPulses || reducedMotion.matches) {
             signals.forEach(signal => signal.circle.remove());
             resolve();
             return;
           }
           const progress = Math.min(
-            (time - startTime) / TRAVEL_TIME,
+            (time - startTime) / duration,
             1
           );
 
@@ -3763,8 +3841,9 @@ HALT</code></pre>
       });
     }
 
-    async function travelTo(destination) {
-      if (travelling || cameraMoving || openChipId !== null) return;
+    async function travelTo(destination, { fromContentLink = false } = {}) {
+      if ((contentNavigationBusy && !fromContentLink) ||
+          travelling || cameraMoving || openChipId !== null) return;
 
       // Reopen the current chip without sending another pulse.
       if (destination === currentChip) {
@@ -3828,6 +3907,149 @@ HALT</code></pre>
     }
 
     showCurrentChip();
+
+    // Content links use the same close, route, and open animations as the circuit.
+    // Hold this lock across all stages so a second click cannot overlap them.
+    function setContentNavigationBusy(busy) {
+      contentNavigationBusy = busy;
+      syncPerformanceTriggers();
+    }
+
+    async function returnToMainCircuit() {
+      if (projectsBoard.open) {
+        await leaveProjectsBoard();
+      } else if (openChipId !== null) {
+        await closeChip();
+      }
+    }
+
+    function focusChipSection(sectionId) {
+      const target = sectionId
+        ? panelContent.querySelector(`#${CSS.escape(sectionId)}`)
+        : panelContent.querySelector("#chip-heading");
+      if (!target || !chipPanel.open) return;
+      target.classList.add("content-link-target");
+      target.setAttribute("tabindex", "-1");
+      target.focus({ preventScroll: true });
+      if (sectionId) {
+        const top = panelContent.scrollTop + target.getBoundingClientRect().top -
+          panelContent.getBoundingClientRect().top - 16;
+        panelContent.scrollTo({
+          top: Math.max(0, top),
+          behavior: reducedMotion.matches ? "auto" : "smooth"
+        });
+      }
+      updateScrollIndicator();
+    }
+
+    async function navigateToChipContent(destination, collectionId, sectionId) {
+      if (navigationIsBusy() || performanceDialog.open || imageViewer.open) return;
+      if (!Object.prototype.hasOwnProperty.call(chips, destination)) return;
+      if (collectionId && !Object.prototype.hasOwnProperty.call(
+        collectionBoards[destination]?.pages || {}, collectionId
+      )) return;
+
+      setContentNavigationBusy(true);
+      try {
+        await returnToMainCircuit();
+        await travelTo(destination, { fromContentLink: true });
+        if (collectionId) await openArchiveCollection(collectionId);
+        focusChipSection(sectionId);
+      } finally {
+        setContentNavigationBusy(false);
+      }
+    }
+
+    function setDemoCharge(id, charged) {
+      const chip = chips[id];
+      if (charged && !chip.querySelector(".demo-chip-halo")) {
+        const body = chip.querySelector(".chip-body");
+        const halo = document.createElementNS(SVG_NS, "g");
+        halo.setAttribute("class", "demo-chip-halo");
+        halo.setAttribute("aria-hidden", "true");
+        for (const [width, opacity] of [[28, 0.06], [18, 0.10], [10, 0.18], [4, 0.35]]) {
+          const outline = body.cloneNode(false);
+          outline.removeAttribute("class");
+          outline.setAttribute("fill", "none");
+          outline.setAttribute("stroke-width", width);
+          outline.setAttribute("opacity", opacity);
+          halo.append(outline);
+        }
+        chip.insertBefore(halo, body);
+      }
+      chip.classList.toggle("demo-charged", charged);
+    }
+
+    function clearDemoCharges() {
+      for (const chip of Object.values(chips)) {
+        chip.classList.remove("demo-charged");
+        chip.querySelector(".demo-chip-halo")?.remove();
+      }
+    }
+
+    async function runCircuitDemo() {
+      if (navigationIsBusy() || performanceDialog.open || imageViewer.open) return;
+      setContentNavigationBusy(true);
+      try {
+        await returnToMainCircuit();
+        currentChip = "rf";
+        showCurrentChip();
+
+        const broadcastTime = 1300; // All RF signals depart and arrive together.
+        const chargeHoldTime = 450; // Pause with all six chips brightly lit.
+        const canAnimate = () => EFFECTS.navigationPulses &&
+          !reducedMotion.matches && !document.hidden;
+        if (canAnimate()) {
+          setTravelling(true);
+          setDemoCharge("rf", true);
+          status.textContent = "RF is sending signals to every chip.";
+
+          // Include both CU and ALU routes even though they share part of a bus.
+          const outgoing = connections.filter(connection =>
+            connection.from === "rf" || connection.to === "rf"
+          );
+          const results = await Promise.allSettled(outgoing.map(async connection => {
+            const reverse = connection.to === "rf";
+            const destination = reverse ? connection.from : connection.to;
+            await animateConnection(connection, reverse, broadcastTime);
+            if (canAnimate()) setDemoCharge(destination, true);
+          }));
+          const failure = results.find(result => result.status === "rejected");
+          if (failure) throw failure.reason;
+
+          if (canAnimate()) {
+            await introWait(chargeHoldTime);
+            if (canAnimate()) {
+              status.textContent = "The wave is returning each chip to its normal glow.";
+              await playPowerWave({ resetDemoGlow: true });
+            }
+          }
+        }
+
+        showCurrentChip();
+        status.textContent = "Main circuit ready. Choose a chip to explore.";
+        chips.rf.focus({ preventScroll: true });
+      } finally {
+        pulseLayer.replaceChildren();
+        clearDemoCharges();
+        setTravelling(false);
+        setContentNavigationBusy(false);
+      }
+    }
+
+    panelContent.addEventListener("click", event => {
+      const button = event.target.closest("[data-circuit-chip], [data-circuit-demo]");
+      if (!button) return;
+      event.preventDefault();
+      const navigation = button.hasAttribute("data-circuit-demo")
+        ? runCircuitDemo()
+        : navigateToChipContent(button.dataset.circuitChip,
+            button.dataset.circuitCollection, button.dataset.circuitSection);
+      navigation.catch(error => {
+        console.error("Circuit content navigation failed:", error);
+        status.textContent = "Unable to open that section. Please use the circuit to navigate.";
+      });
+    });
 
     const chipFactTooltip = document.querySelector("#x7-fact-tooltip");
     let chipFactTrigger = null;
@@ -4351,11 +4573,11 @@ HALT</code></pre>
     // Separate from navigation pulses so they don't interfere.
     wires.after(ambientLayer);
 
-    function boardIsIdle() {
+    function boardIsIdle({ allowDemo = false } = {}) {
       return (
         !document.hidden &&
         !reducedMotion.matches &&
-        !travelling &&
+        (!travelling || (allowDemo && contentNavigationBusy)) &&
         !cameraMoving &&
         openChipId === null &&
         !chipPanel.open
@@ -4364,8 +4586,9 @@ HALT</code></pre>
 
     // ── Startup power wave ─────────────────────────────────────
 
-    function playPowerWave() {
-      if (!EFFECTS.startupWave || !boardIsIdle()) return;
+    function playPowerWave({ resetDemoGlow = false } = {}) {
+      const canPlay = () => EFFECTS.startupWave && boardIsIdle({ allowDemo: resetDemoGlow });
+      if (!canPlay()) return Promise.resolve(false);
 
       // Convert the visible SVG viewport into circuit coordinates.
       // This includes the extra space around the preserved viewBox.
@@ -4453,44 +4676,56 @@ HALT</code></pre>
         };
       });
 
-      const duration = 2000;
-      let start;
+      return new Promise(resolve => {
+        const duration = 2000;
+        let start;
 
-      function frame(now) {
-        if (start === undefined) start = now;
-        if (!EFFECTS.startupWave || !boardIsIdle()) {
+        function finish(completed) {
           layer.remove();
-          return;
+          if (resetDemoGlow) clearDemoCharges();
+          resolve(completed);
         }
 
-        const progress = Math.min((now - start) / duration, 1);
-        const bandX =
-          viewX - bandWidth + progress * (viewWidth + 2 * bandWidth);
+        function frame(now) {
+          if (start === undefined) start = now;
+          if (!canPlay()) {
+            finish(false);
+            return;
+          }
 
-        gradient.setAttribute(
-          "gradientTransform",
-          `translate(${bandX} 0)`
-        );
+          const progress = Math.min((now - start) / duration, 1);
+          const bandX =
+            viewX - bandWidth + progress * (viewWidth + 2 * bandWidth);
 
-        for (const item of chipCenters) {
-          if (!item.illuminated && bandX + bandWidth * 0.65 >= item.x) {
-            item.illuminated = true;
-            item.chip.classList.add("power-arrival");
+          gradient.setAttribute(
+            "gradientTransform",
+            `translate(${bandX} 0)`
+          );
 
-            setTimeout(() => {
-              item.chip.classList.remove("power-arrival");
-            }, 700);
+          for (const item of chipCenters) {
+            if (!item.illuminated && bandX + bandWidth * 0.65 >= item.x) {
+              item.illuminated = true;
+              if (resetDemoGlow) {
+                // Clear only this chip as the bright center of the wave hits it.
+                item.chip.classList.remove("demo-charged");
+              } else {
+                item.chip.classList.add("power-arrival");
+                setTimeout(() => {
+                  item.chip.classList.remove("power-arrival");
+                }, 700);
+              }
+            }
+          }
+
+          if (progress < 1) {
+            requestAnimationFrame(frame);
+          } else {
+            finish(true);
           }
         }
 
-        if (progress < 1) {
-          requestAnimationFrame(frame);
-        } else {
-          layer.remove();
-        }
-      }
-
-      requestAnimationFrame(frame);
+        requestAnimationFrame(frame);
+      });
     }
 
     // ── Occasional ambient wire signals ────────────────────────
@@ -4874,8 +5109,9 @@ HALT</code></pre>
               connects gate-level hardware with assembly and higher-level syntax.
             </p>
             <p>
-              The Control Unit chip contains the full write-up on the processor,
-              assembler, and NACAIS.
+              The <button type="button" class="circuit-link" data-circuit-chip="control">Control Unit chip</button>
+              contains the full write-up on the processor,
+              assembler, NACAIS, and the NACAIS optimizer.
             </p>
           </section>
 
@@ -4891,6 +5127,10 @@ HALT</code></pre>
             <p>
               The design includes responsive layouts, keyboard navigation, and
               expandable images, with hardware themes carried through the interface.
+            </p>
+            <p>
+              <button type="button" class="circuit-demo-button" data-circuit-demo
+                      aria-label="Try Me! Take a signal tour of the main circuit">Try Me!</button>
             </p>
           </section>
         `
@@ -4921,7 +5161,7 @@ HALT</code></pre>
               <button type="button" class="image-expand"
                       aria-label="Enlarge the single-cycle CPU design"
                       aria-haspopup="dialog" aria-controls="image-viewer">
-                <img src="images/Singlecycle.png" alt="Single-cycle CPU design"
+                <img src="images/Singlecycle_big.png" alt="Single-cycle CPU design"
                      loading="lazy" decoding="async" />
               </button>
               <figcaption>Single-cycle CPU design</figcaption>
@@ -4931,7 +5171,7 @@ HALT</code></pre>
               <button type="button" class="image-expand"
                       aria-label="Enlarge the pipelined CPU design"
                       aria-haspopup="dialog" aria-controls="image-viewer">
-                <img src="images/Pipeline_BP.png" alt="Pipelined CPU design with branch prediction"
+                <img src="images/Pipeline_BP_big.png" alt="Pipelined CPU design with branch prediction"
                      loading="lazy" decoding="async" />
               </button>
               <figcaption>Pipelined CPU design with branch prediction</figcaption>
@@ -4956,7 +5196,7 @@ HALT</code></pre>
               <button type="button" class="image-expand"
                       aria-label="Enlarge the USB transceiver top-level design"
                       aria-haspopup="dialog" aria-controls="image-viewer">
-                <img src="images/USB_toplevel.png" alt="USB transceiver top-level design"
+                <img src="images/USB_TL_big.png" alt="USB transceiver top-level design"
                      loading="lazy" decoding="async" />
               </button>
               <figcaption>USB transceiver top-level design</figcaption>
@@ -4966,7 +5206,7 @@ HALT</code></pre>
               <button type="button" class="image-expand"
                       aria-label="Enlarge the USB AHB interface - my domain"
                       aria-haspopup="dialog" aria-controls="image-viewer">
-                <img src="images/USB_AHB.png" alt="AHB bus interface for the USB transceiver"
+                <img src="images/USB_AHB_big.png" alt="AHB bus interface for the USB transceiver"
                      loading="lazy" decoding="async" />
               </button>
               <figcaption><strong>My domain:</strong> the AHB bus interface for the USB transceiver</figcaption>
@@ -5013,7 +5253,8 @@ HALT</code></pre>
             <p class="entry-meta">March - May 2025 · STM32 · Embedded C</p>
             <p>
               I built a 16-step drum machine sequencer with programmable patterns,
-              adjustable tempo and volume, and modular sample packs.
+              adjustable tempo and volume, and modular sample packs. I worked in a
+              four-person team.
             </p>
             <ul>
               <li>Added push-button recording and playback for interactive sequencing</li>
@@ -5043,7 +5284,7 @@ HALT</code></pre>
               <button type="button" class="image-expand"
                       aria-label="Enlarge the AHB interface design"
                       aria-haspopup="dialog" aria-controls="image-viewer">
-                <img src="images/AHB.png" alt="AHB interface design for the FIR filter project"
+                <img src="images/AHB_big.png" alt="AHB interface design for the FIR filter project"
                      loading="lazy" decoding="async" />
               </button>
               <figcaption>AHB interface design</figcaption>
@@ -5053,7 +5294,7 @@ HALT</code></pre>
               <button type="button" class="image-expand"
                       aria-label="Enlarge the FIR filter design"
                       aria-haspopup="dialog" aria-controls="image-viewer">
-                <img src="images/FIR_FILTER.png" alt="FIR filter design"
+                <img src="images/FIR_FILTER_big.png" alt="FIR filter design"
                      loading="lazy" decoding="async" />
               </button>
               <figcaption>FIR filter design</figcaption>
@@ -5087,13 +5328,13 @@ HALT</code></pre>
               I supported students in digital systems and microprocessor labs,
               helping them debug breadboards, SystemVerilog designs, and embedded programs.
             </p>
-            <h3>ECE 27000 - Introduction to Digital System Design</h3>
+            <h3 id="teaching-ece270">ECE 27000 - Introduction to Digital System Design</h3>
             <p class="entry-meta">June - July 2025 · Breadboard Circuits · SystemVerilog</p>
             <ul>
               <li>Assisted with combinational and sequential logic labs</li>
               <li>Helped students troubleshoot breadboard circuits and SystemVerilog designs on FPGAs</li>
             </ul>
-            <h3>ECE 36200 - Microprocessor Systems &amp; Interfacing</h3>
+            <h3 id="teaching-ece362">ECE 36200 - Microprocessor Systems &amp; Interfacing</h3>
             <p class="entry-meta">August - December 2025 · Raspberry Pi MCU · RISC-V Assembly</p>
             <ul>
               <li>Supported Embedded C labs on Raspberry Pi microcontrollers and work in RISC-V assembly</li>
