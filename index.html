@@ -2252,7 +2252,7 @@ THE SOFTWARE.
       <p>
         In an early version of my Digital Logic Sim CPU datapath, I had no NOP
         detector, so a NOP (all-zero instruction) could write to <code>x0</code>,
-        my original zero register. I moved the zero register to <code>x7</code>
+        the traditional zero register. I moved the zero register to <code>x7</code>
         in order to keep NOPs encoded as all zeros. My finalized CPU datapath can
         now detect NOPs, so this workaround is no longer necessary. However, I kept
         <code>x7</code> as my zero register because it makes the design feel more
