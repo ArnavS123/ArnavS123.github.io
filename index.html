@@ -343,7 +343,7 @@ THE SOFTWARE.
 
     /* Shared by every chip write-up, including nested chips and the fun fact. */
     .panel-content,
-    .chip-fact-tooltip {
+    .chip-tooltip {
       text-align: var(--chip-text-align, left);
       text-align-last: start;
     }
@@ -539,7 +539,9 @@ THE SOFTWARE.
     }
 
     .circuit-link:not(:disabled):hover { color: #e0e3dc; }
-    .circuit-demo-button:not(:disabled):hover { background: #ffffff14; }
+    .circuit-demo-button:not(:disabled):not([aria-disabled="true"]):hover {
+      background: #ffffff14;
+    }
     .circuit-link:focus-visible,
     .circuit-demo-button:focus-visible {
       outline: 2px solid var(--panel-accent);
@@ -547,6 +549,10 @@ THE SOFTWARE.
     }
     .circuit-link:disabled,
     .circuit-demo-button:disabled { opacity: 0.6; cursor: wait; }
+    .circuit-demo-button[aria-disabled="true"] {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
     .content-link-target:focus { outline: none; }
 
     .chip-fact-trigger {
@@ -573,9 +579,9 @@ THE SOFTWARE.
       outline-offset: 3px;
     }
 
-    /* This lives outside the scrolling text, with its position kept inside
-       the chip so the explanation stays readable near the panel edges. */
-    .chip-fact-tooltip {
+    /* Tooltips live outside the scrolling text, with their positions kept
+       inside the chip so explanations stay readable near the panel edges. */
+    .chip-tooltip {
       position: absolute;
       z-index: 4;
       box-sizing: border-box;
@@ -591,13 +597,13 @@ THE SOFTWARE.
       overscroll-behavior: contain;
     }
 
-    .chip-fact-tooltip[hidden] { display: none; }
-    .chip-fact-tooltip strong {
+    .chip-tooltip[hidden] { display: none; }
+    .chip-tooltip strong {
       display: block;
       margin-bottom: 0.5em;
       color: var(--panel-accent);
     }
-    .chip-fact-tooltip p { margin: 0; }
+    .chip-tooltip p { margin: 0; }
 
     /* Matching full-width controls for the code disclosure and video viewer. */
     .cpu-demo summary,
@@ -2211,8 +2217,8 @@ THE SOFTWARE.
 
       <text class="chip-index" x="24" y="35">ALIAS: CONTROL UNIT</text>
       <text class="chip-name chip-name-smallA" x="24" y="70">
-        <tspan x="24" dy="0" font-size="1.15em">CUSTOM CPU &amp;</tspan>
-        <tspan x="24" dy="26" font-size="0.8em">COMPILER TOOLCHAIN</tspan>
+        <tspan x="24" dy="0" font-size="1.25em">SIGNATURE</tspan>
+        <tspan x="24" dy="26" font-size="1.0em">PROJECT</tspan>
       </text>
       <text class="chip-description" x="24" y="119">
         CPU, Assembler, &amp; Compiler
@@ -2316,7 +2322,7 @@ THE SOFTWARE.
     </div>
 
     <div id="panel-content" class="panel-content"></div>
-    <aside id="x7-fact-tooltip" class="chip-fact-tooltip" role="tooltip" hidden>
+    <aside id="x7-fact-tooltip" class="chip-tooltip" role="tooltip" hidden>
       <strong>Why x7 instead of x0?</strong>
       <p>
         In an early version of my Digital Logic Sim CPU datapath, I had no NOP
@@ -2326,6 +2332,13 @@ THE SOFTWARE.
         now detect NOPs, so this workaround is no longer necessary. However, I kept
         <code>x7</code> as my zero register because it makes the design feel more
         unique and personal.
+      </p>
+    </aside>
+    <aside id="demo-disabled-tooltip" class="chip-tooltip" role="tooltip" hidden>
+      <strong>Disabled in Minimal mode</strong>
+      <p>
+        Choose the Normal or Reduced performance settings in “Experiencing Issues?”
+        to enable the circuit demo.
       </p>
     </aside>
     <button
@@ -2449,6 +2462,8 @@ THE SOFTWARE.
       performanceRadios.forEach(input => { input.checked = input.value === mode; });
       if (!refresh) return; // During startup, effect systems are not initialized yet.
 
+      hideChipTooltip();
+      syncPerformanceTriggers();
       updateBoardDecoration();
       syncPatchGlows();
       syncGridDepth();
@@ -2485,7 +2500,7 @@ THE SOFTWARE.
     // Visitors can still use the visible Back / Close buttons.
     document.addEventListener("keydown", event => {
       if (event.key === "Escape") {
-        hideChipFact();
+        hideChipTooltip();
         event.preventDefault();
         event.stopPropagation();
       }
@@ -2546,13 +2561,34 @@ THE SOFTWARE.
       return travelling || cameraMoving || archiveBusy || contentNavigationBusy;
     }
 
+    function isMinimalPerformance() {
+      return document.documentElement.classList.contains("performance-minimal");
+    }
+
     function syncPerformanceTriggers() {
       const disabled = navigationIsBusy();
       for (const trigger of performanceTriggers) {
         trigger.disabled = disabled;
       }
       panelContent.querySelectorAll("[data-circuit-chip], [data-circuit-demo]")
-        .forEach(button => { button.disabled = disabled; });
+        .forEach(button => {
+          button.disabled = disabled;
+          if (!button.hasAttribute("data-circuit-demo")) return;
+
+          // Keep the unavailable demo focusable so its explanation also works
+          // with a keyboard or a tap. Both click and action handlers guard it.
+          const minimal = isMinimalPerformance();
+          button.setAttribute("aria-disabled", String(minimal));
+          button.toggleAttribute("data-chip-tooltip", minimal);
+          if (minimal) {
+            button.setAttribute("aria-describedby", "demo-disabled-tooltip");
+            button.setAttribute("aria-controls", "demo-disabled-tooltip");
+          } else {
+            button.removeAttribute("aria-describedby");
+            button.removeAttribute("aria-controls");
+            button.removeAttribute("aria-expanded");
+          }
+        });
     }
 
     function openPerformanceSettings() {
@@ -2563,7 +2599,7 @@ THE SOFTWARE.
 
     function setCameraMoving(moving) {
       cameraMoving = moving;
-      if (moving) hideChipFact();
+      if (moving) hideChipTooltip();
       syncPerformanceTriggers();
     }
 
@@ -2749,7 +2785,7 @@ THE SOFTWARE.
             <li>
               <strong>Zero register:</strong> <code>x7</code>
               (<button type="button" class="chip-fact-trigger"
-                       data-chip-fact aria-controls="x7-fact-tooltip"
+                       data-chip-tooltip aria-controls="x7-fact-tooltip"
                        aria-describedby="x7-fact-tooltip" aria-expanded="false">fun fact</button>)
             </li>
           </ul>
@@ -3048,7 +3084,7 @@ HALT</code></pre>
     }
 
     function setChipPanelContent(chip, html) {
-      hideChipFact();
+      hideChipTooltip();
       panelLabel.textContent = readChipLabel(chip, ".chip-index")
         .replace(/^ALIAS\s*:\s*/i, "");
       panelContent.innerHTML = html;
@@ -3060,6 +3096,7 @@ HALT</code></pre>
       }
       eyebrow.textContent = readChipLabel(chip, ".chip-name");
       initializeIsaDemo();
+      syncPerformanceTriggers();
     }
 
     // ISA decoder: inverse of the encodings in assembler.py.
@@ -3988,7 +4025,8 @@ HALT</code></pre>
     }
 
     async function runCircuitDemo() {
-      if (navigationIsBusy() || performanceDialog.open || imageViewer.open) return;
+      if (isMinimalPerformance() || navigationIsBusy() ||
+          performanceDialog.open || imageViewer.open) return;
       setContentNavigationBusy(true);
       try {
         await returnToMainCircuit();
@@ -4041,6 +4079,8 @@ HALT</code></pre>
       const button = event.target.closest("[data-circuit-chip], [data-circuit-demo]");
       if (!button) return;
       event.preventDefault();
+      if (button.disabled ||
+          (button.hasAttribute("data-circuit-demo") && isMinimalPerformance())) return;
       const navigation = button.hasAttribute("data-circuit-demo")
         ? runCircuitDemo()
         : navigateToChipContent(button.dataset.circuitChip,
@@ -4051,23 +4091,26 @@ HALT</code></pre>
       });
     });
 
-    const chipFactTooltip = document.querySelector("#x7-fact-tooltip");
-    let chipFactTrigger = null;
-    let chipFactPinned = false;
-    let chipFactCloseTimer = null;
+    // Share the same positioning, keyboard, hover, and touch behavior between
+    // the x7 fun fact and the explanation for the unavailable circuit demo.
+    const chipTooltips = Array.from(chipPanel.querySelectorAll(".chip-tooltip"));
+    let chipTooltip = chipTooltips[0];
+    let chipTooltipTrigger = null;
+    let chipTooltipPinned = false;
+    let chipTooltipCloseTimer = null;
 
-    function hideChipFact() {
-      clearTimeout(chipFactCloseTimer);
-      chipFactTooltip.hidden = true;
-      chipFactTrigger?.setAttribute("aria-expanded", "false");
-      chipFactTrigger = null;
-      chipFactPinned = false;
+    function hideChipTooltip() {
+      clearTimeout(chipTooltipCloseTimer);
+      chipTooltip.hidden = true;
+      chipTooltipTrigger?.setAttribute("aria-expanded", "false");
+      chipTooltipTrigger = null;
+      chipTooltipPinned = false;
     }
 
-    function positionChipFact() {
+    function positionChipTooltip() {
       const panel = chipPanel.getBoundingClientRect();
       const content = panelContent.getBoundingClientRect();
-      const trigger = chipFactTrigger.getBoundingClientRect();
+      const trigger = chipTooltipTrigger.getBoundingClientRect();
       const gap = 8;
       const edge = 12;
       const originLeft = panel.left + chipPanel.clientLeft;
@@ -4078,74 +4121,79 @@ HALT</code></pre>
       const below = Math.max(0, maxBottom - (trigger.bottom - originTop + gap));
 
       // Measure at full height, then choose the side with enough room.
-      chipFactTooltip.style.maxHeight = "none";
-      const placeBelow = chipFactTooltip.offsetHeight <= below || below >= above;
-      chipFactTooltip.style.maxHeight = `${placeBelow ? below : above}px`;
-      const height = chipFactTooltip.offsetHeight;
+      chipTooltip.style.maxHeight = "none";
+      const placeBelow = chipTooltip.offsetHeight <= below || below >= above;
+      chipTooltip.style.maxHeight = `${placeBelow ? below : above}px`;
+      const height = chipTooltip.offsetHeight;
       const top = placeBelow
         ? trigger.bottom - originTop + gap
         : trigger.top - originTop - gap - height;
-      chipFactTooltip.style.top = `${Math.max(minTop, Math.min(top, maxBottom - height))}px`;
-      chipFactTooltip.style.left = `${Math.max(edge, Math.min(
+      chipTooltip.style.top = `${Math.max(minTop, Math.min(top, maxBottom - height))}px`;
+      chipTooltip.style.left = `${Math.max(edge, Math.min(
         trigger.left - originLeft,
-        chipPanel.clientWidth - chipFactTooltip.offsetWidth - edge
+        chipPanel.clientWidth - chipTooltip.offsetWidth - edge
       ))}px`;
     }
 
-    function showChipFact(trigger) {
+    function showChipTooltip(trigger) {
       if (!trigger || !chipPanel.open || navigationIsBusy()) return;
-      clearTimeout(chipFactCloseTimer);
-      if (chipFactTrigger !== trigger) hideChipFact();
-      chipFactTrigger = trigger;
+      const tooltip = document.getElementById(trigger.getAttribute("aria-controls"));
+      if (!chipTooltips.includes(tooltip)) return;
+      clearTimeout(chipTooltipCloseTimer);
+      if (chipTooltipTrigger !== trigger) hideChipTooltip();
+      chipTooltip = tooltip;
+      chipTooltipTrigger = trigger;
       trigger.setAttribute("aria-expanded", "true");
-      chipFactTooltip.hidden = false;
-      positionChipFact();
+      chipTooltip.hidden = false;
+      positionChipTooltip();
     }
 
-    function scheduleChipFactClose() {
-      clearTimeout(chipFactCloseTimer);
+    function scheduleChipTooltipClose() {
+      clearTimeout(chipTooltipCloseTimer);
       // Give the pointer time to cross the small gap into the explanation.
-      chipFactCloseTimer = setTimeout(() => {
-        if (chipFactPinned || document.activeElement === chipFactTrigger ||
-            chipFactTooltip.matches(":hover")) return;
-        hideChipFact();
+      chipTooltipCloseTimer = setTimeout(() => {
+        if (chipTooltipPinned || document.activeElement === chipTooltipTrigger ||
+            chipTooltip.matches(":hover")) return;
+        hideChipTooltip();
       }, 180);
     }
 
     panelContent.addEventListener("pointerover", event => {
-      if (event.pointerType !== "touch") showChipFact(event.target.closest("[data-chip-fact]"));
+      if (event.pointerType !== "touch") showChipTooltip(event.target.closest("[data-chip-tooltip]"));
     });
     panelContent.addEventListener("pointerout", event => {
-      if (!chipFactTrigger || !chipFactTrigger.contains(event.target)) return;
-      if (chipFactTrigger.contains(event.relatedTarget) || chipFactTooltip.contains(event.relatedTarget)) return;
-      scheduleChipFactClose();
+      if (!chipTooltipTrigger || !chipTooltipTrigger.contains(event.target)) return;
+      if (chipTooltipTrigger.contains(event.relatedTarget) || chipTooltip.contains(event.relatedTarget)) return;
+      scheduleChipTooltipClose();
     });
     panelContent.addEventListener("focusin", event => {
-      showChipFact(event.target.closest("[data-chip-fact]"));
+      showChipTooltip(event.target.closest("[data-chip-tooltip]"));
     });
     panelContent.addEventListener("click", event => {
-      const trigger = event.target.closest("[data-chip-fact]");
+      const trigger = event.target.closest("[data-chip-tooltip]");
       if (!trigger) return;
-      if (chipFactTrigger === trigger && chipFactPinned) {
-        hideChipFact();
+      if (chipTooltipTrigger === trigger && chipTooltipPinned) {
+        hideChipTooltip();
       } else {
-        showChipFact(trigger);
-        chipFactPinned = chipFactTrigger === trigger;
+        showChipTooltip(trigger);
+        chipTooltipPinned = chipTooltipTrigger === trigger;
       }
     });
-    chipFactTooltip.addEventListener("pointerenter", () => clearTimeout(chipFactCloseTimer));
-    chipFactTooltip.addEventListener("pointerleave", scheduleChipFactClose);
+    for (const tooltip of chipTooltips) {
+      tooltip.addEventListener("pointerenter", () => clearTimeout(chipTooltipCloseTimer));
+      tooltip.addEventListener("pointerleave", scheduleChipTooltipClose);
+    }
 
     // Tapping elsewhere or moving keyboard focus dismisses the explanation.
     for (const type of ["pointerdown", "focusin"]) {
       document.addEventListener(type, event => {
-        if (!chipFactTooltip.hidden && !chipFactTrigger?.contains(event.target) &&
-            !chipFactTooltip.contains(event.target)) hideChipFact();
+        if (!chipTooltip.hidden && !chipTooltipTrigger?.contains(event.target) &&
+            !chipTooltip.contains(event.target)) hideChipTooltip();
       });
     }
-    panelContent.addEventListener("scroll", hideChipFact, { passive: true });
-    window.addEventListener("resize", hideChipFact);
-    chipPanel.addEventListener("close", hideChipFact);
+    panelContent.addEventListener("scroll", hideChipTooltip, { passive: true });
+    window.addEventListener("resize", hideChipTooltip);
+    chipPanel.addEventListener("close", hideChipTooltip);
 
     const imageViewer = document.querySelector("#image-viewer");
     const enlargedImage = document.querySelector("#enlarged-image");
@@ -4270,7 +4318,8 @@ HALT</code></pre>
     const welcomeStatus = document.querySelector("#welcome-status");
 
     const WELCOME_TIME = 2000;
-    const CIRCUIT_PREVIEW_TIME = 3000;
+    const POWER_WAVE_TIME = 2000; // Shared by the startup and Try Me! waves.
+    const ABOUT_ME_DELAY = 1000; // Pause after the optional startup wave.
 
     const introWait = milliseconds =>
       new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -4434,8 +4483,8 @@ HALT</code></pre>
       // Switching to Normal later can then restart the grid glow.
       startBoardDecoration();
 
-      // Display the circuit before automatically entering PC.
-      await introWait(CIRCUIT_PREVIEW_TIME);
+      // Minimal skips the wave, so only the normal About Me pause remains.
+      await introWait(ABOUT_ME_DELAY + (EFFECTS.startupWave ? POWER_WAVE_TIME : 0));
 
       if (
         !travelling &&
@@ -4677,7 +4726,7 @@ HALT</code></pre>
       });
 
       return new Promise(resolve => {
-        const duration = 2000;
+        const duration = POWER_WAVE_TIME;
         let start;
 
         function finish(completed) {
