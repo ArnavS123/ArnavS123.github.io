@@ -2751,17 +2751,19 @@ THE SOFTWARE.
             understand how a complete computing system fits together. I wanted
             to explore how early computer engineers connected hardware with
             software, so I built both the processor and the software-based tools
-            needed to program it.
+            needed to program it. These software-based tools include: an assembler,
+            a compiler, and a compiler optimizer which sits directly atop the compiler.
           </p>
 
           <p>
-            Here’s how the overall 3-stage program execution structure looks:
+            Here’s how the overall 4-stage program execution structure looks:
           </p>
 
           <ol>
-            <li><code>NACAIS source code → NACAIS compiler → assembly</code></li>
-            <li><code>assembly → assembler → machine code</code></li>
-            <li><code>machine code → CPU → Output</code></li>
+            <li><code>NACAIS code → NACAIS optimizer → intermediate representation</code></li>
+            <li><code>Intermediate representation → NACAIS compiler → assembly</code></li>
+            <li><code>Assembly → assembler → machine code</code></li>
+            <li><code>Machine code → CPU → output</code></li>
           </ol>
 
           <h2>Building the hardware from NAND gates</h2>
@@ -2857,6 +2859,15 @@ THE SOFTWARE.
             </details>
           </section>
 
+          <h2>Program counter overflow: “it’s not a bug, it’s a feature”</h2>
+          <p>
+            To implement backward jumps, I deliberately used the
+            wraparound behavior of the 8-bit program-counter adder. An addition
+            that exceeds its range wraps modulo 256, allowing the CPU to return
+            to an earlier instruction without dedicating an additional bit to a
+            negative offset. This kept the instruction encoding compact.
+          </p>
+
           <h2>A two-pass assembler</h2>
           <p>
             My Python-based assembler uses regular expressions (regexes) to parse
@@ -2891,14 +2902,48 @@ THE SOFTWARE.
             mapping consistent.
           </p>
 
-          <h2>Program counter overflow: “it’s not a bug, it’s a feature”</h2>
+          <h2>NACAIS Optimizer</h2>
           <p>
-            To implement backward jumps, I deliberately used the
-            wraparound behavior of the 8-bit program-counter adder. An addition
-            that exceeds its range wraps modulo 256, allowing the CPU to return
-            to an earlier instruction without dedicating an additional bit to a
-            negative offset. This kept the instruction encoding compact.
+            The only thing left to do after building a CPU, assembler, and
+            compiler was to build an optimizer for said compiler. The difficulty
+            in creating an optimizer lies in identifying unnecessary operations
+            and eliminating them without altering the intended behavior of a
+            program. This becomes particularly challenging when dealing with
+            conditional statements, loops, and values (such as user inputs) that
+            are only known at runtime.
           </p>
+
+          <p>
+            To address this, I developed a basic optimizer for NACAIS that
+            analyzes and simplifies the source code before compilation.
+            Some of the optimizations include:
+          </p>
+
+          <ul>
+            <li>
+              <strong>Redundant conditional elimination:</strong>
+              Identifies repeated conditions within if/elif chains and attempts
+              to eliminate redundant branches that would otherwise generate
+              unnecessary instructions
+            </li>
+            <li>
+              <strong>Compile time conditional evaluation:</strong>
+              Evaluates conditional expressions whose outcomes can be
+              determined before execution, eliminating unnecessary branches
+              and their associated instructions
+            </li>
+            <li>
+              <strong>Unreachable code elimination:</strong>
+              Removes instructions appearing after a <code>stop</code> statement,
+              as these instructions would never be executed
+            </li>
+            <li>
+              <strong>Runtime-dependent condition handling:</strong>
+              Distinguishes conditions involving user input from those that
+              can be evaluated at compile time, preserving conditional
+              statements whose outcomes depend on runtime values
+            </li>
+          </ul>
 
           <h2>Putting it all together: Fibonacci sequence</h2>
           <p>
