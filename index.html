@@ -478,7 +478,9 @@ THE SOFTWARE.
       margin-bottom: 0.5em;
       font-size: 1em;
       line-height: 1.75;
-      max-width: 65ch;
+      max-width: none;
+      text-align: var(--chip-text-align, left);
+      text-align-last: start;
     }
 
     .panel-content .panel-lead {
@@ -492,7 +494,8 @@ THE SOFTWARE.
       font-size: calc(1.2rem + 1.2 * var(--panel-type-step));
     }
 
-    .panel-content .portfolio-entry + .portfolio-entry {
+    .panel-content .portfolio-entry + .portfolio-entry,
+    .panel-content .teaching-role + .teaching-role {
       margin-top: 2em;
       padding-top: 1em;
       border-top: 1px solid var(--panel-border);
@@ -662,6 +665,8 @@ THE SOFTWARE.
     .isa-demo {
       margin: 1.5em 0;
       padding: 1em;
+      min-width: 0;
+      max-width: 100%;
       border: 1px solid var(--panel-border);
       border-radius: 8px;
       background: #00000012;
@@ -674,7 +679,6 @@ THE SOFTWARE.
       font-size: 0.88em;
       line-height: 1.55;
     }
-    .isa-demo [hidden] { display: none; }
 
     .isa-bit-grid {
       display: grid;
@@ -713,7 +717,7 @@ THE SOFTWARE.
     .isa-controls {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
-      gap: 0.8em;
+      max-width: 24em;
     }
     .isa-controls label {
       display: grid;
@@ -722,7 +726,6 @@ THE SOFTWARE.
       color: var(--panel-accent);
       font-size: 0.85em;
     }
-    .isa-controls input,
     .isa-controls select {
       width: 100%;
       min-width: 0;
@@ -737,8 +740,7 @@ THE SOFTWARE.
       font-family: var(--font-mono);
       font-size: max(16px, 1em);
     }
-    .isa-controls input[aria-invalid="true"] { border-color: #c39583; }
-    .isa-demo :is(button, input, select, summary):focus-visible {
+    .isa-demo :is(button, select, summary):focus-visible {
       outline: 2px solid var(--panel-accent);
       outline-offset: 3px;
     }
@@ -763,8 +765,11 @@ THE SOFTWARE.
       font: 600 1.15em/1.5 var(--font-mono);
       overflow-wrap: anywhere;
     }
-    .panel-content .isa-kind { color: var(--panel-accent); }
-    .panel-content .isa-error { color: #e3b7a9; }
+    .panel-content .isa-kind {
+      color: var(--panel-accent);
+      font-family: var(--font-mono);
+      overflow-wrap: anywhere;
+    }
     .isa-fields { margin-top: 1em; font-size: 0.85em; }
     .isa-fields summary { color: var(--panel-accent); cursor: pointer; }
     .isa-field-grid {
@@ -781,9 +786,12 @@ THE SOFTWARE.
     .isa-field-grid dt { color: var(--panel-accent); font-size: 0.8em; }
     .isa-field-grid dt small { display: block; }
     .isa-field-grid dd { margin: 0.4em 0 0; font-family: var(--font-mono); }
+    @container (max-width: 420px) {
+      .isa-bit-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .isa-field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
     @container (min-width: 900px) {
       .isa-bit-grid { grid-template-columns: repeat(16, minmax(0, 1fr)); }
-      .isa-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .isa-field-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
     }
 
@@ -818,7 +826,9 @@ THE SOFTWARE.
       overflow-wrap: anywhere;
     }
 
-    .panel-content ul {
+    /* Match the paragraph width, including the list's marker indentation. */
+    .panel-content :is(ul, ol) {
+      max-width: 65ch;
       padding-left: 1.25em;
     }
 
@@ -888,6 +898,35 @@ THE SOFTWARE.
 
     #image-viewer::backdrop {
       background: rgba(0, 0, 0, 0.82);
+    }
+
+    /* Keep only static chip bodies and their normal glow visible behind the
+       media viewer. Animation loops remain suspended by mediaViewerPaused. */
+    body.media-viewer-open { background-image: none !important; }
+    body.media-viewer-open > :where(:not(#image-viewer)),
+    body.media-viewer-open > :where(:not(#image-viewer)) *,
+    body.media-viewer-open > :where(:not(#image-viewer))::before,
+    body.media-viewer-open > :where(:not(#image-viewer))::after,
+    body.media-viewer-open > :where(:not(#image-viewer)) *::before,
+    body.media-viewer-open > :where(:not(#image-viewer)) *::after,
+    body.media-viewer-open::before,
+    body.media-viewer-open::after {
+      visibility: hidden !important;
+      animation-play-state: paused !important;
+      transition: none !important;
+      backdrop-filter: none !important;
+      box-shadow: none !important;
+    }
+    body.media-viewer-open .circuit,
+    body.media-viewer-open .circuit .chip-body,
+    body.media-viewer-open .circuit .mac-chip-halo,
+    body.media-viewer-open .circuit .mac-chip-halo * {
+      visibility: visible !important;
+    }
+    /* Existing glow styles still respect Minimal mode and Mac optimizations.
+       The viewer's usual translucent backdrop lets the static glow show. */
+    body.media-viewer-open dialog:not(#image-viewer)::backdrop {
+      visibility: hidden;
     }
 
     .image-viewer-toolbar {
@@ -2436,6 +2475,7 @@ THE SOFTWARE.
       macChipHalos: false
     };
     const EFFECTS = { ...BASE_EFFECTS };
+    let mediaViewerPaused = false;
     const PERFORMANCE_PRESETS = {
       normal: {},
       reduced: { gridMovement: false, gridGlow: false, ambientPulses: false },
@@ -2496,13 +2536,14 @@ THE SOFTWARE.
       "click", () => performanceDialog.close()
     );
 
-    // Escape does not dismiss dialogs or interrupt chip transitions.
-    // Visitors can still use the visible Back / Close buttons.
+    // Escape closes only the media viewer. Consume it before the browser can
+    // cancel an underlying chip, collection, welcome, or settings dialog.
     document.addEventListener("keydown", event => {
       if (event.key === "Escape") {
-        hideChipTooltip();
         event.preventDefault();
         event.stopPropagation();
+        if (imageViewer.open) closeImageViewer();
+        else hideChipTooltip();
       }
     }, true);
     performanceDialog.addEventListener("cancel", event => event.preventDefault());
@@ -2677,7 +2718,7 @@ THE SOFTWARE.
             <li>I am ranked first on Logicode, a platform for hardware design challenges,
               as of November 17, 2026</li>
             <li>My two-person team was one of the few to earn a 100% autograder score
-              for a 5-Stage Pipelined RISC-V CPU with Caches and MSI Coherence in my
+              for a five-stage pipelined RISC-V CPU with caches and MSI coherence in my
               Computer Design and Prototyping course at Purdue</li>
             <li>I was the first to finish the AHB FIR filter in my ASIC Design Lab course
               at Purdue, passing all instructor test cases on my first submission</li>
@@ -2810,17 +2851,13 @@ THE SOFTWARE.
           <section class="isa-demo" data-isa-demo aria-labelledby="isa-demo-title">
             <h3 id="isa-demo-title">Decode a 16-bit instruction</h3>
             <p id="isa-demo-help">
-              Toggle a bit or paste a binary word to see its assembly instruction.
+              Toggle the bits or choose an example to see the corresponding assembly instruction.<br>
               Bit 15 is the most significant bit and bit 0 is the least significant.
             </p>
             <div class="isa-bit-grid" data-isa-bits role="group"
-                 aria-label="Instruction bits, from bit 15 to bit 0"></div>
+                 aria-label="Instruction bits, from bit 15 to bit 0"
+                 aria-describedby="isa-demo-help"></div>
             <div class="isa-controls">
-              <label for="isa-binary">16-bit binary word
-                <input id="isa-binary" data-isa-input type="text" inputmode="numeric"
-                       autocomplete="off" spellcheck="false" maxlength="40"
-                       aria-describedby="isa-demo-help isa-input-error" />
-              </label>
               <label for="isa-example">Try an example
                 <select id="isa-example" data-isa-example>
                   <option value="" disabled>Custom bits</option>
@@ -2835,7 +2872,6 @@ THE SOFTWARE.
                 </select>
               </label>
             </div>
-            <p id="isa-input-error" class="isa-error" data-isa-error hidden></p>
             <div class="isa-result" data-isa-result role="status" aria-live="polite" aria-atomic="true">
               <p class="isa-kind" data-isa-kind></p>
               <output data-isa-instruction aria-label="Decoded instruction"></output>
@@ -2849,7 +2885,7 @@ THE SOFTWARE.
                 <div><dt>RD / IMM<small>Bits 9-7</small></dt><dd data-isa-field="rd"></dd></div>
                 <div><dt>Misc<small>Bits 6-5</small></dt><dd data-isa-field="misc"></dd></div>
                 <div><dt>Type<small>Bits 4-3</small></dt><dd data-isa-field="type"></dd></div>
-                <div><dt>ALUOp / IMM<small>Bits 2-0</small></dt><dd data-isa-field="aluop"></dd></div>
+                <div><dt>ALUOp / IMM / BR<small>Bits 2-0</small></dt><dd data-isa-field="aluop"></dd></div>
               </dl>
               <p>
                 Some fields carry immediate values instead of register numbers.
@@ -3075,7 +3111,7 @@ HALT</code></pre>
 
           <p>
             I’m happy to talk about hardware, software, my projects, and opportunities
-            to build useful systems. Email and LinkedIn are a good way to get in touch.
+            to build useful systems. Email and LinkedIn are good ways to get in touch.
           </p>
           <ul class="contact-links">
             <li>
@@ -3227,9 +3263,7 @@ HALT</code></pre>
       const demo = panelContent.querySelector("[data-isa-demo]");
       if (!demo) return;
       const grid = demo.querySelector("[data-isa-bits]");
-      const input = demo.querySelector("[data-isa-input]");
       const examples = demo.querySelector("[data-isa-example]");
-      const error = demo.querySelector("[data-isa-error]");
       const output = demo.querySelector("[data-isa-instruction]");
       const description = demo.querySelector("[data-isa-description]");
       const kind = demo.querySelector("[data-isa-kind]");
@@ -3257,26 +3291,22 @@ HALT</code></pre>
         values.push(value);
       }
 
-      function render(word, syncInput = true) {
+      function render(word) {
         isaDemoWord = word;
         const decoded = decodeInstructionWord(word);
         const binary = word.toString(2).padStart(16, "0");
         const hex = word.toString(16).toUpperCase().padStart(4, "0");
-        if (syncInput) input.value = binary;
-        input.setAttribute("aria-invalid", "false");
-        error.hidden = true;
-        error.textContent = "";
+        const groupedBinary = binary.match(/.{4}/g).join("_");
+        examples.value = [...examples.options].some(option => option.value === hex) ? hex : "";
         buttons.forEach((button, index) => {
           const value = binary[index];
-          button.disabled = false;
           button.setAttribute("aria-pressed", String(value === "1"));
           button.setAttribute("aria-label", `Bit ${15 - index}, value ${value}`);
           values[index].textContent = value;
         });
-        examples.value = [...examples.options].some(option => option.value === hex) ? hex : "";
         result.dataset.valid = String(decoded.valid);
         output.textContent = decoded.assembly;
-        kind.textContent = `${decoded.family} · 0x${hex}`;
+        kind.textContent = `${decoded.family} · 0x${hex} · ${groupedBinary}`;
         description.textContent = decoded.description;
         fieldCells.forEach(cell => {
           const name = cell.dataset.isaField;
@@ -3289,25 +3319,6 @@ HALT</code></pre>
         const button = event.target.closest("button[data-isa-bit]");
         if (!button || button.disabled || !grid.contains(button)) return;
         render(isaDemoWord ^ (1 << Number(button.dataset.isaBit)));
-      });
-      input.addEventListener("input", () => {
-        const binary = input.value.replace(/\s/g, "");
-        if (!/^[01]{16}$/.test(binary)) {
-          input.setAttribute("aria-invalid", "true");
-          error.textContent = /^[01]*$/.test(binary)
-            ? `Enter exactly 16 bits; you currently have ${binary.length}.`
-            : "Use only 0 and 1; spaces between groups are allowed.";
-          error.hidden = false;
-          buttons.forEach(button => { button.disabled = true; });
-          examples.value = "";
-          result.dataset.valid = "false";
-          output.textContent = "Enter 16 valid bits";
-          kind.textContent = "Waiting for binary input";
-          description.textContent = "Complete the input or choose an example to continue.";
-          fieldCells.forEach(cell => { cell.textContent = "..."; });
-          return;
-        }
-        render(parseInt(binary, 2), false);
       });
       examples.addEventListener("change", () => {
         if (examples.value) render(parseInt(examples.value, 16));
@@ -3554,6 +3565,7 @@ HALT</code></pre>
       stopChipBackground();
 
       if (
+        mediaViewerPaused ||
         !EFFECTS.panelSignals ||
         reducedMotion.matches ||
         !chipPanel.open
@@ -3581,7 +3593,7 @@ HALT</code></pre>
       }
 
       function frame(time) {
-        if (!chipPanel.open) {
+        if (mediaViewerPaused || !EFFECTS.panelSignals || reducedMotion.matches || !chipPanel.open) {
           stopChipBackground();
           return;
         }
@@ -3890,7 +3902,7 @@ HALT</code></pre>
             startTime = time;
           }
 
-          if (!EFFECTS.navigationPulses || reducedMotion.matches) {
+          if (mediaViewerPaused || !EFFECTS.navigationPulses || reducedMotion.matches) {
             signals.forEach(signal => signal.circle.remove());
             resolve();
             return;
@@ -4251,10 +4263,36 @@ HALT</code></pre>
     let imageOpener = null;
     let savedPanelScroll = 0;
 
+    function setMediaViewerPaused(paused) {
+      if (paused === mediaViewerPaused) return;
+      mediaViewerPaused = paused;
+      document.body.classList.toggle("media-viewer-open", paused);
+
+      if (paused) {
+        hideChipTooltip();
+        stopChipBackground();
+        stopAmbientSignals();
+        stopPowerWave();
+        pulseLayer.replaceChildren();
+        projectsPulseLayer.replaceChildren();
+        clearDemoCharges();
+      }
+
+      updateBoardDecoration();
+      syncPatchGlows();
+      syncGridDepth();
+
+      if (!paused) {
+        if (chipPanel.open) startChipBackground();
+        if (boardEffectsStarted) scheduleAmbientSignals();
+        updateScrollIndicator();
+      }
+    }
+
     panelContent.addEventListener("click", event => {
       const button = event.target.closest(".image-expand, [data-image-src], [data-video-src]");
 
-      if (!button || imageViewer.open) return;
+      if (!button || imageViewer.open || navigationIsBusy()) return;
 
       const image = button.querySelector("img");
       const isVideo = Boolean(button.dataset.videoSrc);
@@ -4265,6 +4303,8 @@ HALT</code></pre>
 
       imageOpener = button;
       savedPanelScroll = panelContent.scrollTop;
+      // Stop any smooth scroll still finishing behind the enlarged media.
+      panelContent.scrollTo({ top: savedPanelScroll, behavior: "instant" });
 
       viewerError.hidden = true;
       viewerError.textContent = "";
@@ -4294,6 +4334,7 @@ HALT</code></pre>
       enlargedCaption.hidden = !enlargedCaption.textContent;
 
       imageViewer.showModal();
+      setMediaViewerPaused(true);
 
       if (isVideo) {
         // This is a user-initiated play request; native controls remain available.
@@ -4315,8 +4356,11 @@ HALT</code></pre>
 
     closeImageButton.addEventListener("click", closeImageViewer);
 
-    // Dismiss the media viewer with its Close button, not Escape.
-    imageViewer.addEventListener("cancel", event => event.preventDefault());
+    imageViewer.addEventListener("cancel", event => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeImageViewer();
+    });
 
     // Clicking the dark backdrop also closes the viewer.
     imageViewer.addEventListener("click", event => {
@@ -4348,6 +4392,7 @@ HALT</code></pre>
       viewerError.hidden = true;
       viewerError.textContent = "";
 
+      setMediaViewerPaused(false);
       if (imageOpener?.isConnected) {
         imageOpener.focus({ preventScroll: true });
       }
@@ -4585,6 +4630,7 @@ HALT</code></pre>
     panelContent.setAttribute("tabindex", "-1");
 
     function updateScrollIndicator() {
+      if (mediaViewerPaused) return;
       const remaining =
         panelContent.scrollHeight -
         panelContent.clientHeight -
@@ -4669,6 +4715,7 @@ HALT</code></pre>
 
     function boardIsIdle({ allowDemo = false } = {}) {
       return (
+        !mediaViewerPaused &&
         !document.hidden &&
         !reducedMotion.matches &&
         (!travelling || (allowDemo && contentNavigationBusy)) &&
@@ -4680,9 +4727,23 @@ HALT</code></pre>
 
     // ── Startup power wave ─────────────────────────────────────
 
+    let cancelPowerWave = null;
+    const powerArrivalTimers = new Map();
+
+    function stopPowerWave() {
+      cancelPowerWave?.();
+      cancelPowerWave = null;
+      for (const [chip, timer] of powerArrivalTimers) {
+        clearTimeout(timer);
+        chip.classList.remove("power-arrival");
+      }
+      powerArrivalTimers.clear();
+    }
+
     function playPowerWave({ resetDemoGlow = false } = {}) {
       const canPlay = () => EFFECTS.startupWave && boardIsIdle({ allowDemo: resetDemoGlow });
       if (!canPlay()) return Promise.resolve(false);
+      stopPowerWave();
 
       // Convert the visible SVG viewport into circuit coordinates.
       // This includes the extra space around the preserved viewBox.
@@ -4773,14 +4834,23 @@ HALT</code></pre>
       return new Promise(resolve => {
         const duration = POWER_WAVE_TIME;
         let start;
+        let waveFrame = null;
+        let finished = false;
 
         function finish(completed) {
+          if (finished) return;
+          finished = true;
+          if (waveFrame !== null) cancelAnimationFrame(waveFrame);
+          if (cancelPowerWave === cancel) cancelPowerWave = null;
           layer.remove();
           if (resetDemoGlow) clearDemoCharges();
           resolve(completed);
         }
+        const cancel = () => finish(false);
+        cancelPowerWave = cancel;
 
         function frame(now) {
+          waveFrame = null;
           if (start === undefined) start = now;
           if (!canPlay()) {
             finish(false);
@@ -4804,21 +4874,24 @@ HALT</code></pre>
                 item.chip.classList.remove("demo-charged");
               } else {
                 item.chip.classList.add("power-arrival");
-                setTimeout(() => {
+                clearTimeout(powerArrivalTimers.get(item.chip));
+                const timer = setTimeout(() => {
                   item.chip.classList.remove("power-arrival");
+                  powerArrivalTimers.delete(item.chip);
                 }, 700);
+                powerArrivalTimers.set(item.chip, timer);
               }
             }
           }
 
           if (progress < 1) {
-            requestAnimationFrame(frame);
+            waveFrame = requestAnimationFrame(frame);
           } else {
             finish(true);
           }
         }
 
-        requestAnimationFrame(frame);
+        waveFrame = requestAnimationFrame(frame);
       });
     }
 
@@ -4826,6 +4899,7 @@ HALT</code></pre>
 
     function playAmbientSignals() {
       if (!EFFECTS.ambientPulses || !boardIsIdle() || connections.length === 0) return;
+      if (ambientFrame !== null) return;
 
       const connection =
         connections[Math.floor(Math.random() * connections.length)];
@@ -4853,6 +4927,7 @@ HALT</code></pre>
       const start = performance.now();
 
       function frame(now) {
+        ambientFrame = null;
         // Immediately clear ambient signals if navigation begins.
         if (!EFFECTS.ambientPulses || !boardIsIdle()) {
           signals.forEach(signal => signal.dot.remove());
@@ -4879,23 +4954,25 @@ HALT</code></pre>
         }
 
         if (progress < 1) {
-          requestAnimationFrame(frame);
+          ambientFrame = requestAnimationFrame(frame);
         } else {
           signals.forEach(signal => signal.dot.remove());
         }
       }
 
-      requestAnimationFrame(frame);
+      ambientFrame = requestAnimationFrame(frame);
     }
 
     let ambientScheduleTimer = null;
+    let ambientFrame = null;
+    let archiveAmbientFrame = null;
 
     function scheduleAmbientSignals() {
       // A single 4-7 second timer; no background wakeups in lighter modes.
-      if (!EFFECTS.ambientPulses || ambientScheduleTimer !== null) return;
+      if (mediaViewerPaused || !EFFECTS.ambientPulses || ambientScheduleTimer !== null) return;
       ambientScheduleTimer = setTimeout(() => {
         ambientScheduleTimer = null;
-        if (!EFFECTS.ambientPulses) return;
+        if (mediaViewerPaused || !EFFECTS.ambientPulses) return;
         if (projectsBoard.open) playArchiveAmbientSignals();
         else playAmbientSignals();
         scheduleAmbientSignals();
@@ -4905,6 +4982,9 @@ HALT</code></pre>
     function stopAmbientSignals() {
       clearTimeout(ambientScheduleTimer);
       ambientScheduleTimer = null;
+      if (ambientFrame !== null) cancelAnimationFrame(ambientFrame);
+      if (archiveAmbientFrame !== null) cancelAnimationFrame(archiveAmbientFrame);
+      ambientFrame = archiveAmbientFrame = null;
       ambientLayer.replaceChildren();
       archiveAmbientLayer.replaceChildren();
     }
@@ -4985,10 +5065,11 @@ HALT</code></pre>
     let patchGlowsRunning = false;
 
     function schedulePatchGlow(state, delay) {
+      if (mediaViewerPaused) return;
       state.timer = setTimeout(() => {
         state.timer = null;
 
-        if (!patchGlowsRunning) return;
+        if (mediaViewerPaused || !patchGlowsRunning) return;
 
         // Move only while invisible, so patches never jump mid-glow.
         randomizePatch(state.patch);
@@ -5010,7 +5091,7 @@ HALT</code></pre>
         animation.onfinish = () => {
           state.animation = null;
 
-          if (patchGlowsRunning) {
+          if (patchGlowsRunning && !mediaViewerPaused) {
             schedulePatchGlow(
               state,
               randomPatchValue(PATCH_PAUSE_MIN, PATCH_PAUSE_MAX)
@@ -5022,7 +5103,7 @@ HALT</code></pre>
 
     function syncPatchGlows() {
       const visible = gridPatchLayer.classList.contains("visible");
-      const shouldRun = visible && EFFECTS.gridGlow && !reducedMotion.matches;
+      const shouldRun = !mediaViewerPaused && visible && EFFECTS.gridGlow && !reducedMotion.matches;
 
       if (shouldRun === patchGlowsRunning) return;
       patchGlowsRunning = shouldRun;
@@ -5056,6 +5137,7 @@ HALT</code></pre>
     function updateBoardDecoration() {
       const visible =
         boardDecorationStarted &&
+        !mediaViewerPaused &&
         !document.hidden;
 
       gridPatchLayer.classList.toggle("visible", visible && EFFECTS.gridGlow);
@@ -5086,6 +5168,7 @@ HALT</code></pre>
 
     function depthIsEnabled() {
       return (
+        !mediaViewerPaused &&
         EFFECTS.gridMovement &&
         depthPointer.matches &&
         !reducedMotion.matches &&
@@ -5101,6 +5184,7 @@ HALT</code></pre>
 
     function animateGridDepth() {
       depthFrame = null;
+      if (!depthIsEnabled()) { resetGridDepth(); return; }
 
       // Ease toward the pointer instead of snapping.
       depthX += (depthTargetX - depthX) * 0.08;
@@ -5123,6 +5207,7 @@ HALT</code></pre>
     }
 
     function setGridDepthTarget(x, y) {
+      if (!depthIsEnabled()) return;
       depthTargetX = x;
       depthTargetY = y;
 
@@ -5224,7 +5309,7 @@ HALT</code></pre>
             </p>
             <p>
               <button type="button" class="circuit-demo-button" data-circuit-demo
-                      aria-label="Try Me! Take a signal tour of the main circuit">Supercharge Me!</button>
+                      aria-label="Supercharge Me! Take a signal tour of the main circuit">Supercharge Me!</button>
             </p>
           </section>
         `
@@ -5422,18 +5507,22 @@ HALT</code></pre>
               I supported students in digital systems and microprocessor labs,
               helping them debug breadboards, SystemVerilog designs, and embedded programs.
             </p>
-            <h3 id="teaching-ece270">ECE 27000 - Introduction to Digital System Design</h3>
-            <p class="entry-meta">June - July 2025 · Breadboard Circuits · SystemVerilog</p>
-            <ul>
-              <li>Assisted with combinational and sequential logic labs</li>
-              <li>Helped students troubleshoot breadboard circuits and SystemVerilog designs on FPGAs</li>
-            </ul>
-            <h3 id="teaching-ece362">ECE 36200 - Microprocessor Systems &amp; Interfacing</h3>
-            <p class="entry-meta">August - December 2025 · Raspberry Pi MCU · RISC-V Assembly</p>
-            <ul>
-              <li>Supported Embedded C labs on Raspberry Pi microcontrollers and work in RISC-V assembly</li>
-              <li>Helped with peripheral interfacing and runtime debugging</li>
-            </ul>
+            <section class="teaching-role" aria-labelledby="teaching-ece270">
+              <h3 id="teaching-ece270">ECE 27000 - Introduction to Digital System Design</h3>
+              <p class="entry-meta">June - July 2025 · Breadboard Circuits · SystemVerilog</p>
+              <ul>
+                <li>Assisted with combinational and sequential logic labs</li>
+                <li>Helped students troubleshoot breadboard circuits and SystemVerilog designs on FPGAs</li>
+              </ul>
+            </section>
+            <section class="teaching-role" aria-labelledby="teaching-ece362">
+              <h3 id="teaching-ece362">ECE 36200 - Microprocessor Systems &amp; Interfacing</h3>
+              <p class="entry-meta">August - December 2025 · Raspberry Pi MCU · RISC-V Assembly</p>
+              <ul>
+                <li>Supported Embedded C labs on Raspberry Pi microcontrollers and work in RISC-V assembly</li>
+                <li>Helped with peripheral interfacing and runtime debugging</li>
+              </ul>
+            </section>
           </section>
         `
       },
@@ -5696,14 +5785,14 @@ HALT</code></pre>
     }
 
     async function pulseArchiveWires(reverse) {
-      if (!EFFECTS.navigationPulses || reducedMotion.matches) return;
+      if (mediaViewerPaused || !EFFECTS.navigationPulses || reducedMotion.matches) return;
       // Reuse the main board's gold, copper and blue glowing signals.
       const signals = [...projectsSvg.querySelectorAll("#projects-wires path")].map(makePulse);
       await new Promise(resolve => {
         const start = performance.now();
         function frame(now) {
           // A performance change must also stop a pulse already in flight.
-          if (!EFFECTS.navigationPulses || reducedMotion.matches) {
+          if (mediaViewerPaused || !EFFECTS.navigationPulses || reducedMotion.matches) {
             signals.forEach(({circle}) => circle.remove());
             resolve();
             return;
@@ -5823,12 +5912,13 @@ HALT</code></pre>
     projectsPulseLayer.before(archiveAmbientLayer);
 
     function archiveIsIdle() {
-      return EFFECTS.ambientPulses && projectsBoard.open && !chipPanel.open && !archiveBusy &&
+      return !mediaViewerPaused && EFFECTS.ambientPulses && projectsBoard.open && !chipPanel.open && !archiveBusy &&
         !cameraMoving && !document.hidden && !reducedMotion.matches;
     }
 
     function playArchiveAmbientSignals() {
       if (!archiveIsIdle()) return;
+      if (archiveAmbientFrame !== null) return;
       const reverse = Math.random() < 0.5;
       const colors = ["#a5b99e", "#b9a17b", "#91bfd3"];
       const signals = [...projectsSvg.querySelectorAll("#projects-wires path")].map((path, i) => {
@@ -5841,6 +5931,7 @@ HALT</code></pre>
       });
       let start;
       function frame(now) {
+        archiveAmbientFrame = null;
         if (!archiveIsIdle()) {
           signals.forEach(({circle}) => circle.remove());
           return;
@@ -5854,10 +5945,10 @@ HALT</code></pre>
           circle.style.opacity = 0.55 * Math.sin(Math.PI * progress);
           if (!circle.parentNode) archiveAmbientLayer.append(circle);
         }
-        if (progress < 1) requestAnimationFrame(frame);
+        if (progress < 1) archiveAmbientFrame = requestAnimationFrame(frame);
         else signals.forEach(({circle}) => circle.remove());
       }
-      requestAnimationFrame(frame);
+      archiveAmbientFrame = requestAnimationFrame(frame);
     }
 
 
