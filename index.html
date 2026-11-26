@@ -495,7 +495,8 @@ THE SOFTWARE.
     }
 
     .panel-content .portfolio-entry + .portfolio-entry,
-    .panel-content .teaching-role + .teaching-role {
+    .panel-content .teaching-role + .teaching-role,
+    .panel-content .logic-project-entry + .logic-project-entry {
       margin-top: 2em;
       padding-top: 1em;
       border-top: 1px solid var(--panel-border);
@@ -793,6 +794,112 @@ THE SOFTWARE.
     @container (min-width: 900px) {
       .isa-bit-grid { grid-template-columns: repeat(16, minmax(0, 1fr)); }
       .isa-field-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    }
+
+    /* These small logic demos update only in response to visitor input. */
+    .logic-demo {
+      margin: 1.25em 0;
+      padding: 1em;
+      min-width: 0;
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      background: #00000012;
+    }
+    .logic-demo h4 { margin: 0 0 0.5em; font-size: 1em; }
+    .panel-content .logic-demo p {
+      max-width: none;
+      margin: 0.65em 0;
+      font-size: 0.88em;
+      line-height: 1.55;
+    }
+    .logic-demo [hidden] { display: none; }
+    .logic-bit-bank {
+      display: grid;
+      gap: 0.3em;
+      margin: 1em 0;
+    }
+    .lfsr-registers { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+    .hamming-bits { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    .logic-bit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3em;
+      min-width: 0;
+      min-height: 44px;
+      padding: 0.55em 0;
+      border: 1px solid var(--panel-border);
+      border-radius: 5px;
+      background: transparent;
+      color: #c0c4c0;
+      font: inherit;
+      font-family: var(--font-mono);
+      text-align: center;
+    }
+    button.logic-bit { cursor: pointer; }
+    .logic-bit-label { color: var(--panel-accent); font-size: 0.65em; }
+    .logic-bit-value { font-size: 1.1em; font-weight: 600; }
+    .logic-bit.is-one { background: #ffffff0c; color: #e0e3dc; border-color: var(--panel-accent); }
+    .logic-bit.is-error { border-color: #d2b783; outline: 1px solid #d2b783; }
+    .logic-demo-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 0.6em;
+      margin: 0.8em 0;
+      text-align: left;
+    }
+    .logic-seed-label {
+      display: grid;
+      gap: 0.4em;
+      max-width: 100%;
+      color: var(--panel-accent);
+      font-size: 0.85em;
+    }
+    .logic-seed-input,
+    .logic-action {
+      min-height: 44px;
+      padding: 0.55em 0.8em;
+      border: 1px solid var(--panel-border);
+      border-radius: 5px;
+      background: var(--panel-fill);
+      color: #e0e3dc;
+      font: inherit;
+    }
+    .logic-seed-input {
+      width: 12ch;
+      max-width: 100%;
+      font-family: var(--font-mono);
+      font-size: max(16px, 1em);
+      letter-spacing: 0.08em;
+    }
+    .logic-seed-input[aria-invalid="true"] { border-color: #d2b783; }
+    .logic-action { cursor: pointer; color: var(--panel-accent); font-size: 0.85em; }
+    .logic-action:hover { background: #ffffff0d; }
+    .logic-demo :is(button, input):focus-visible {
+      outline: 2px solid var(--panel-accent);
+      outline-offset: 3px;
+    }
+    .logic-demo-result {
+      padding: 0.75em;
+      border-left: 3px solid var(--panel-accent);
+      border-radius: 0 5px 5px 0;
+      background: #ffffff05;
+      overflow-wrap: anywhere;
+      text-align: left;
+      text-align-last: auto;
+    }
+    .logic-output { font: 600 1.15em/1.5 var(--font-mono); color: #e0e3dc; }
+    .hamming-outputs { display: flex; flex-wrap: wrap; gap: 0.75em 2em; }
+    .hamming-outputs > div { display: grid; gap: 0.2em; }
+    .logic-output-label { font-size: 0.8em; color: var(--panel-accent); }
+    .logic-demo-result[data-error="true"] { border-left-color: #d2b783; }
+    .panel-content .logic-demo-error,
+    .panel-content .logic-demo-warning { color: #d2b783; }
+    @container (max-width: 420px) {
+      .hamming-bits { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .lfsr-registers { gap: 0.2em; font-size: 0.85em; }
     }
 
     .panel-content .contact-links {
@@ -3003,7 +3110,7 @@ THE SOFTWARE.
               <svg class="cpu-demo-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M7 4v16l14-8z" />
               </svg>
-              <span>View the Fibonacci assembly</span>
+              <span>View the Fibonacci assembly instructions</span>
             </summary>
             <pre tabindex="0" aria-label="Fibonacci assembly program"><code>ADDI x3, x7, 15
 MUL  x2, x3, x3
@@ -3033,7 +3140,7 @@ HALT</code></pre>
             <svg class="cpu-demo-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M7 4v16l14-8z" />
             </svg>
-            <span>Watch the Fibonacci program</span>
+            <span>Watch the Fibonacci program execute</span>
           </button>
 
           <h2>What I learned</h2>
@@ -3177,6 +3284,7 @@ HALT</code></pre>
       }
       eyebrow.textContent = readChipLabel(chip, ".chip-name");
       initializeIsaDemo();
+      initializeLogicProjectDemos();
       syncPerformanceTriggers();
     }
 
@@ -3324,6 +3432,177 @@ HALT</code></pre>
         if (examples.value) render(parseInt(examples.value, 16));
       });
       render(isaDemoWord);
+    }
+
+    // Interactive logic projects: no timers, animation loops, or downloads.
+    // Tap indices use Q7..Q0 (stages 8..1), with feedback shifted into Q0.
+    const LFSR_TAPS = [7, 5, 4, 3];
+    const HAMMING_LABELS = ["P1", "P2", "D1", "P3", "D2", "D3", "D4"];
+    const logicDemoState = {
+      lfsr: { seed: 1, word: 1, clocks: 0 },
+      hammingWord: 0b1011010 // XOR parity; initial data is 1010.
+    };
+
+    function lfsrFeedback(word) {
+      return LFSR_TAPS.reduce((feedback, bit) => feedback ^ ((word >>> bit) & 1), 0);
+    }
+
+    function stepLfsr8(word) {
+      if (!Number.isInteger(word) || word < 0 || word > 255) {
+        throw new RangeError("The LFSR state must be an unsigned 8-bit word.");
+      }
+      return ((word << 1) & 255) | lfsrFeedback(word);
+    }
+
+    function decodeHamming74(word) {
+      if (!Number.isInteger(word) || word < 0 || word > 127) {
+        throw new RangeError("The Hamming input must be an unsigned 7-bit word.");
+      }
+      // Left to right: P1, P2, D1, P3, D2, D3, D4 (positions 1..7).
+      const bits = Array.from({ length: 7 }, (_, i) => (word >>> (6 - i)) & 1);
+      const s1 = bits[0] ^ bits[2] ^ bits[4] ^ bits[6];
+      const s2 = bits[1] ^ bits[2] ^ bits[5] ^ bits[6];
+      const s4 = bits[3] ^ bits[4] ^ bits[5] ^ bits[6];
+      const errorPosition = s1 | (s2 << 1) | (s4 << 2);
+      const corrected = [...bits];
+      if (errorPosition) corrected[errorPosition - 1] ^= 1;
+      return {
+        data: [corrected[2], corrected[4], corrected[5], corrected[6]].join(""),
+        errorBit: Number(errorPosition !== 0),
+        errorPosition,
+        corrected,
+        bits
+      };
+    }
+
+    function createLogicBit(label, interactive = false) {
+      const node = document.createElement(interactive ? "button" : "div");
+      node.className = "logic-bit";
+      if (interactive) node.type = "button";
+      const caption = document.createElement("span");
+      caption.className = "logic-bit-label";
+      caption.textContent = label;
+      const value = document.createElement("span");
+      value.className = "logic-bit-value";
+      node.append(caption, value);
+      return { node, value };
+    }
+
+    function initializeLfsrDemo() {
+      const demo = panelContent.querySelector("[data-lfsr-demo]");
+      if (!demo) return;
+      const bank = demo.querySelector("[data-lfsr-registers]");
+      const form = demo.querySelector("[data-lfsr-form]");
+      const seedInput = demo.querySelector("[data-lfsr-seed]");
+      const error = demo.querySelector("[data-lfsr-error]");
+      const warning = demo.querySelector("[data-lfsr-warning]");
+      const readout = demo.querySelector("[data-lfsr-readout]");
+      const feedback = demo.querySelector("[data-lfsr-feedback]");
+      const state = logicDemoState.lfsr;
+      const registers = Array.from({ length: 8 }, (_, i) => createLogicBit(`Q${7 - i}`));
+      bank.replaceChildren(...registers.map(register => register.node));
+
+      function clearError() {
+        error.hidden = true;
+        error.textContent = "";
+        seedInput.setAttribute("aria-invalid", "false");
+      }
+
+      function render() {
+        const binary = state.word.toString(2).padStart(8, "0");
+        registers.forEach((register, i) => {
+          register.value.textContent = binary[i];
+          register.node.classList.toggle("is-one", binary[i] === "1");
+        });
+        readout.textContent = `State: ${binary.slice(0, 4)}_${binary.slice(4)} · Clock pulses: ${state.clocks}`;
+        feedback.textContent = `Next feedback: ${LFSR_TAPS.map(bit => `Q${bit}`).join(" XOR ")} = ${lfsrFeedback(state.word)}. Shift left; feedback enters Q0.`;
+        warning.hidden = state.word !== 0;
+      }
+
+      form.addEventListener("submit", event => {
+        event.preventDefault();
+        const seed = seedInput.value.trim();
+        if (!/^[01]{8}$/.test(seed)) {
+          seedInput.setAttribute("aria-invalid", "true");
+          error.textContent = "Enter exactly eight bits using only 0 and 1.";
+          error.hidden = false;
+          seedInput.focus();
+          return;
+        }
+        clearError();
+        state.seed = state.word = parseInt(seed, 2);
+        state.clocks = 0;
+        seedInput.value = seed;
+        render();
+      });
+      seedInput.addEventListener("input", clearError);
+      demo.querySelector("[data-lfsr-clock]").addEventListener("click", () => {
+        state.word = stepLfsr8(state.word);
+        state.clocks += 1;
+        render();
+      });
+      demo.querySelector("[data-lfsr-reset]").addEventListener("click", () => {
+        state.word = state.seed;
+        state.clocks = 0;
+        seedInput.value = state.seed.toString(2).padStart(8, "0");
+        clearError();
+        render();
+      });
+      seedInput.value = state.seed.toString(2).padStart(8, "0");
+      render();
+    }
+
+    function initializeHammingDemo() {
+      const demo = panelContent.querySelector("[data-hamming-demo]");
+      if (!demo) return;
+      const bank = demo.querySelector("[data-hamming-bits]");
+      const result = demo.querySelector("[data-hamming-result]");
+      const data = demo.querySelector("[data-hamming-data]");
+      const error = demo.querySelector("[data-hamming-error]");
+      const explanation = demo.querySelector("[data-hamming-explanation]");
+      const inputs = HAMMING_LABELS.map((label, i) => {
+        const input = createLogicBit(label, true);
+        input.node.dataset.hammingBit = i;
+        input.node.setAttribute("aria-controls", "hamming-result");
+        return input;
+      });
+      bank.replaceChildren(...inputs.map(input => input.node));
+
+      function render() {
+        const decoded = decodeHamming74(logicDemoState.hammingWord);
+        inputs.forEach((input, i) => {
+          const value = decoded.bits[i];
+          input.value.textContent = String(value);
+          input.node.setAttribute("aria-pressed", String(value === 1));
+          input.node.setAttribute("aria-label", `${HAMMING_LABELS[i]}, position ${i + 1}, value ${value}`);
+          input.node.classList.toggle("is-one", value === 1);
+          input.node.classList.toggle("is-error", decoded.errorPosition === i + 1);
+        });
+        data.textContent = decoded.data;
+        error.textContent = String(decoded.errorBit);
+        result.dataset.error = String(decoded.errorBit === 1);
+        explanation.textContent = decoded.errorPosition
+          ? `Parity checks point to ${HAMMING_LABELS[decoded.errorPosition - 1]} (position ${decoded.errorPosition}). That bit is corrected before extracting D1, D2, D3, D4.`
+          : "All parity checks pass. The data is read directly from D1, D2, D3, D4.";
+      }
+
+      bank.addEventListener("click", event => {
+        const button = event.target.closest("button[data-hamming-bit]");
+        if (!button || !bank.contains(button)) return;
+        const index = Number(button.dataset.hammingBit);
+        logicDemoState.hammingWord ^= 1 << (6 - index);
+        render();
+      });
+      demo.querySelector("[data-hamming-reset]").addEventListener("click", () => {
+        logicDemoState.hammingWord = 0b1011010;
+        render();
+      });
+      render();
+    }
+
+    function initializeLogicProjectDemos() {
+      initializeLfsrDemo();
+      initializeHammingDemo();
     }
 
     function getChipView(id) {
@@ -5280,21 +5559,6 @@ HALT</code></pre>
           <p class="panel-lead">Independent builds and ways I explore the world of computer engineering.</p>
 
           <section class="portfolio-entry">
-            <h2>Custom 8-bit CPU &amp; compiler toolchain</h2>
-            <p class="entry-meta">May - June 2026 · Python · Digital Logic Sim</p>
-            <p>
-              I designed an 8-bit CPU with a custom 16-bit instruction set, then built
-              a Python assembler and the NACAIS frontend to program it. The project
-              connects gate-level hardware with assembly and higher-level syntax.
-            </p>
-            <p>
-              The <button type="button" class="circuit-link" data-circuit-chip="control">Control Unit chip</button>
-              contains the full write-up on the processor,
-              assembler, NACAIS, and the NACAIS optimizer.
-            </p>
-          </section>
-
-          <section class="portfolio-entry">
             <h2>This circuit portfolio</h2>
             <p class="entry-meta">November 2026 · HTML · CSS · JavaScript · SVG</p>
             <p>
@@ -5311,6 +5575,308 @@ HALT</code></pre>
               <button type="button" class="circuit-demo-button" data-circuit-demo
                       aria-label="Supercharge Me! Take a signal tour of the main circuit">Supercharge Me!</button>
             </p>
+          </section>
+
+          <section class="portfolio-entry logic-projects" aria-labelledby="digital-logic-heading">
+            <h2 id="digital-logic-heading">Digital Logic Sim Circuit Design Projects</h2>
+            <p>
+              Digital Logic Sim lets me build systems from logic gates and reusable chips.
+              These projects involve planning the circuit, actually creating it, debugging
+              its behavior, and keeping each design neat and compact.
+            </p>
+
+            <section class="logic-project-entry" aria-labelledby="logic-ringcounter-heading">
+              <h3 id="logic-ringcounter-heading">4-bit Ring Counter</h3>
+              <p>One active bit rotates through four flip-flops, making the count visible as a repeating pattern.</p>
+
+              <figure>
+                <button type="button" class="image-expand"
+                        aria-label="Enlarge the 4-bit Ring Counter design"
+                        aria-haspopup="dialog" aria-controls="image-viewer">
+                  <img src="images/ringcounter.png" alt="4-bit Ring Counter design in Digital Logic Sim"
+                       loading="lazy" decoding="async" />
+                </button>
+                <figcaption>4-bit Ring Counter circuit</figcaption>
+              </figure>
+
+              <button type="button" class="video-expand"
+                      data-video-src="videos/ringcounter.mp4"
+                      data-video-caption="4-bit Ring Counter demonstration"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <svg class="cpu-demo-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M7 4v16l14-8z" />
+                </svg>
+                <span>Watch the 4-bit Ring Counter demo</span>
+              </button>
+            </section>
+
+            <section class="logic-project-entry" aria-labelledby="logic-asynccounter-heading">
+              <h3 id="logic-asynccounter-heading">8-bit Asynchronous (Ripple) Counter</h3>
+              <p>An 8-bit counter whose changes ripple from one stage to the next. The videos compare a slow clock with a fast clock that does not leave enough time for the ripple to settle.</p>
+
+              <figure>
+                <button type="button" class="image-expand"
+                        aria-label="Enlarge the 8-bit Asynchronous Counter design"
+                        aria-haspopup="dialog" aria-controls="image-viewer">
+                  <img src="images/asynccounter.png" alt="8-bit Asynchronous Counter design in Digital Logic Sim"
+                       loading="lazy" decoding="async" />
+                </button>
+                <figcaption>8-bit Asynchronous Counter circuit</figcaption>
+              </figure>
+
+              <button type="button" class="video-expand"
+                      data-video-src="videos/asynccounter-slow.mp4"
+                      data-video-caption="8-bit Asynchronous Counter - slow clock"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <svg class="cpu-demo-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M7 4v16l14-8z" />
+                </svg>
+                <span>Watch the 8-bit Asynchronous Counter demo: slow clock</span>
+              </button>
+
+              <button type="button" class="video-expand"
+                      data-video-src="videos/asynccounter-fast.mp4"
+                      data-video-caption="8-bit Asynchronous Counter - fast clock"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <svg class="cpu-demo-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M7 4v16l14-8z" />
+                </svg>
+                <span>Watch the 8-bit Asynchronous Counter demo: fast clock</span>
+              </button>
+            </section>
+
+            <section class="logic-project-entry" aria-labelledby="logic-synccounter-heading">
+              <h3 id="logic-synccounter-heading">4-bit Synchronous Counter</h3>
+              <p>All four flip-flops share the same clock, with combinational logic determining which bits change on each clock edge.</p>
+
+              <figure>
+                <button type="button" class="image-expand"
+                        aria-label="Enlarge the 4-bit Synchronous Counter design"
+                        aria-haspopup="dialog" aria-controls="image-viewer">
+                  <img src="images/synccounter.png" alt="4-bit Synchronous Counter design in Digital Logic Sim"
+                       loading="lazy" decoding="async" />
+                </button>
+                <figcaption>4-bit Synchronous Counter circuit</figcaption>
+              </figure>
+
+              <button type="button" class="video-expand"
+                      data-video-src="videos/synccounter.mp4"
+                      data-video-caption="4-bit Synchronous Counter demonstration"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <svg class="cpu-demo-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M7 4v16l14-8z" />
+                </svg>
+                <span>Watch the 4-bit Synchronous Counter demo</span>
+              </button>
+            </section>
+
+            <section class="logic-project-entry" aria-labelledby="logic-fiblfsr-heading">
+              <h3 id="logic-fiblfsr-heading">8-bit Fibonacci LFSR</h3>
+              <p>An 8-bit shift register uses XOR feedback to generate a deterministic sequence of bit patterns.</p>
+
+              <section class="logic-demo" data-lfsr-demo aria-labelledby="lfsr-demo-heading">
+                <h4 id="lfsr-demo-heading">Clock the LFSR</h4>
+                <p id="lfsr-help">Enter an 8-bit seed, choose Load seed, then press Clock to advance one step.</p>
+                <div class="logic-bit-bank lfsr-registers" data-lfsr-registers aria-hidden="true"></div>
+                <form class="logic-demo-controls" data-lfsr-form novalidate>
+                  <label class="logic-seed-label" for="lfsr-seed">8-bit seed
+                    <input class="logic-seed-input" id="lfsr-seed" data-lfsr-seed type="text"
+                           inputmode="numeric" maxlength="8" autocomplete="off" spellcheck="false"
+                           aria-describedby="lfsr-help lfsr-seed-error" aria-invalid="false" />
+                  </label>
+                  <button type="submit" class="logic-action">Load seed</button>
+                  <button type="button" class="logic-action" data-lfsr-clock>Clock</button>
+                  <button type="button" class="logic-action" data-lfsr-reset>Reset to seed</button>
+                </form>
+                <p class="logic-demo-error" id="lfsr-seed-error" data-lfsr-error role="alert" hidden></p>
+                <div class="logic-demo-result" role="status" aria-live="polite" aria-atomic="true">
+                  <p class="logic-output" data-lfsr-readout></p>
+                  <p data-lfsr-feedback></p>
+                  <p class="logic-demo-warning" data-lfsr-warning hidden>
+                    An all-zero seed stays at zero with XOR feedback. Load a nonzero seed to explore the sequence.
+                  </p>
+                </div>
+              </section>
+
+              <figure>
+                <button type="button" class="image-expand"
+                        aria-label="Enlarge the 8-bit Fibonacci LFSR design"
+                        aria-haspopup="dialog" aria-controls="image-viewer">
+                  <img src="images/fiblfsr.png" alt="8-bit Fibonacci LFSR design in Digital Logic Sim"
+                       loading="lazy" decoding="async" />
+                </button>
+                <figcaption>8-bit Fibonacci LFSR circuit</figcaption>
+              </figure>
+
+              <button type="button" class="video-expand"
+                      data-video-src="videos/fiblfsr.mp4"
+                      data-video-caption="8-bit Fibonacci LFSR demonstration"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <svg class="cpu-demo-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M7 4v16l14-8z" />
+                </svg>
+                <span>Watch the 8-bit Fibonacci LFSR demo</span>
+              </button>
+            </section>
+
+            <section class="logic-project-entry" aria-labelledby="logic-flexcounter-heading">
+              <h3 id="logic-flexcounter-heading">Flex Counter</h3>
+              <p>A counter built around a configurable count limit and rollover behavior.</p>
+
+              <figure>
+                <button type="button" class="image-expand"
+                        aria-label="Enlarge the Flex Counter design"
+                        aria-haspopup="dialog" aria-controls="image-viewer">
+                  <img src="images/flexcounter.png" alt="Flex Counter design in Digital Logic Sim"
+                       loading="lazy" decoding="async" />
+                </button>
+                <figcaption>Flex Counter circuit</figcaption>
+              </figure>
+
+              <button type="button" class="video-expand"
+                      data-video-src="videos/flexcounter.mp4"
+                      data-video-caption="Flex Counter demonstration"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <svg class="cpu-demo-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M7 4v16l14-8z" />
+                </svg>
+                <span>Watch the Flex Counter demo</span>
+              </button>
+            </section>
+
+            <section class="logic-project-entry" aria-labelledby="logic-traffic-heading">
+              <h3 id="logic-traffic-heading">Traffic Light Controller</h3>
+              <p>Sequential control logic coordinates a repeating sequence of traffic-light states.</p>
+
+              <figure>
+                <button type="button" class="image-expand"
+                        aria-label="Enlarge the Traffic Light Controller design"
+                        aria-haspopup="dialog" aria-controls="image-viewer">
+                  <img src="images/traffic.png" alt="Traffic Light Controller design in Digital Logic Sim"
+                       loading="lazy" decoding="async" />
+                </button>
+                <figcaption>Traffic Light Controller circuit</figcaption>
+              </figure>
+
+              <button type="button" class="video-expand"
+                      data-video-src="videos/traffic.mp4"
+                      data-video-caption="Traffic Light Controller demonstration"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <svg class="cpu-demo-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M7 4v16l14-8z" />
+                </svg>
+                <span>Watch the Traffic Light Controller demo</span>
+              </button>
+            </section>
+
+            <section class="logic-project-entry" aria-labelledby="logic-hamming-heading">
+              <h3 id="logic-hamming-heading">7-4 Hamming Decoder</h3>
+              <p>Parity checks locate and correct a single-bit error in a seven-bit codeword to recover four data bits.</p>
+
+              <section class="logic-demo" data-hamming-demo aria-labelledby="hamming-demo-heading">
+                <h4 id="hamming-demo-heading">Try the Hamming decoder</h4>
+                <p id="hamming-help">Toggle any input bit. The decoder uses XOR parity checks to locate a single-bit error and recover the data.</p>
+                <div class="logic-bit-bank hamming-bits" data-hamming-bits role="group"
+                     aria-label="Received bits: P1, P2, D1, P3, D2, D3, D4"
+                     aria-describedby="hamming-help"></div>
+                <div class="logic-demo-result" id="hamming-result" data-hamming-result
+                     role="status" aria-live="polite" aria-atomic="true">
+                  <div class="hamming-outputs">
+                    <div><span class="logic-output-label">Corrected data: {D1, D2, D3, D4}</span><span class="logic-output" data-hamming-data></span></div>
+                    <div><span class="logic-output-label">Error bit</span><span class="logic-output" data-hamming-error></span></div>
+                  </div>
+                  <p data-hamming-explanation></p>
+                </div>
+                <p>Error bit: 1 means a parity check failed; 0 means all parity checks passed.</p>
+                <p>Assumes at most one flipped bit. Hamming(7,4) cannot distinguish a double-bit error from a single-bit error.</p>
+                <button type="button" class="logic-action" data-hamming-reset>Reset example</button>
+              </section>
+
+              <figure>
+                <button type="button" class="image-expand"
+                        aria-label="Enlarge the 7-4 Hamming Decoder design"
+                        aria-haspopup="dialog" aria-controls="image-viewer">
+                  <img src="images/hamming.png" alt="7-4 Hamming Decoder design in Digital Logic Sim"
+                       loading="lazy" decoding="async" />
+                </button>
+                <figcaption>7-4 Hamming Decoder circuit</figcaption>
+              </figure>
+
+              <button type="button" class="video-expand"
+                      data-video-src="videos/hamming.mp4"
+                      data-video-caption="7-4 Hamming Decoder demonstration"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <svg class="cpu-demo-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M7 4v16l14-8z" />
+                </svg>
+                <span>Watch the 7-4 Hamming Decoder demo</span>
+              </button>
+            </section>
+
+            <section class="logic-project-entry" aria-labelledby="logic-militaryclock-heading">
+              <h3 id="logic-militaryclock-heading">Military Clock</h3>
+              <p>Counters work together to keep time in a 24-hour format.</p>
+
+              <figure>
+                <button type="button" class="image-expand"
+                        aria-label="Enlarge the Military Clock design"
+                        aria-haspopup="dialog" aria-controls="image-viewer">
+                  <img src="images/militaryclock.png" alt="Military Clock design in Digital Logic Sim"
+                       loading="lazy" decoding="async" />
+                </button>
+                <figcaption>Military Clock circuit</figcaption>
+              </figure>
+
+              <button type="button" class="video-expand"
+                      data-video-src="videos/militaryclock.mp4"
+                      data-video-caption="Military Clock demonstration"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <svg class="cpu-demo-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M7 4v16l14-8z" />
+                </svg>
+                <span>Watch the Military Clock demo</span>
+              </button>
+            </section>
+
+            <section class="logic-project-entry" aria-labelledby="logic-fifo-heading">
+              <h3 id="logic-fifo-heading">FIFO</h3>
+              <p>A first-in, first-out buffer stores values and returns them in the order they arrived.</p>
+
+              <figure>
+                <button type="button" class="image-expand"
+                        aria-label="Enlarge the FIFO design"
+                        aria-haspopup="dialog" aria-controls="image-viewer">
+                  <img src="images/fifo.png" alt="FIFO design in Digital Logic Sim"
+                       loading="lazy" decoding="async" />
+                </button>
+                <figcaption>FIFO circuit</figcaption>
+              </figure>
+
+              <button type="button" class="video-expand"
+                      data-video-src="videos/fifo.mp4"
+                      data-video-caption="FIFO demonstration"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <svg class="cpu-demo-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M7 4v16l14-8z" />
+                </svg>
+                <span>Watch the FIFO demo</span>
+              </button>
+            </section>
+
+            <section class="logic-project-entry" aria-labelledby="logic-cpu-heading">
+              <h3 id="logic-cpu-heading">Custom 8-bit CPU &amp; compiler toolchain</h3>
+              <p class="entry-meta">May - June 2026 · Python · Digital Logic Sim</p>
+              <p>
+                I designed an 8-bit CPU with a custom 16-bit instruction set, then built
+                a Python assembler and the NACAIS frontend to program it. The project
+                connects gate-level hardware with assembly and higher-level syntax.
+              </p>
+              <p>
+                The <button type="button" class="circuit-link" data-circuit-chip="control">Control Unit chip</button>
+                contains the full write-up on the processor,
+                assembler, NACAIS, and the NACAIS optimizer.
+              </p>
+            </section>
           </section>
         `
       },
@@ -5393,6 +5959,35 @@ HALT</code></pre>
           </section>
 
           <section class="portfolio-entry">
+            <h2>AHB FIR filter</h2>
+            <p class="entry-meta">August - December 2025 · SystemVerilog</p>
+            <p>
+              I was the first to finish the AHB FIR filter in my ASIC Design Lab
+              course, passing all instructor test cases on my first submission.
+            </p>
+
+            <figure>
+              <button type="button" class="image-expand"
+                      aria-label="Enlarge the AHB interface design"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <img src="images/AHB_big.png" alt="AHB interface design for the FIR filter project"
+                     loading="lazy" decoding="async" />
+              </button>
+              <figcaption>AHB interface design</figcaption>
+            </figure>
+
+            <figure>
+              <button type="button" class="image-expand"
+                      aria-label="Enlarge the FIR filter design"
+                      aria-haspopup="dialog" aria-controls="image-viewer">
+                <img src="images/FIR_FILTER_big.png" alt="FIR filter design"
+                     loading="lazy" decoding="async" />
+              </button>
+              <figcaption>FIR filter design</figcaption>
+            </figure>
+          </section>
+
+          <section class="portfolio-entry">
             <h2>Autonomous seed distributor</h2>
             <p class="entry-meta">August - December 2025 · STM32 · Embedded C</p>
             <p>
@@ -5449,35 +6044,6 @@ HALT</code></pre>
               </svg>
               <span>Watch the drum machine demo</span>
             </button>
-          </section>
-
-          <section class="portfolio-entry">
-            <h2>AHB FIR filter</h2>
-            <p class="entry-meta">August - December 2025 · SystemVerilog</p>
-            <p>
-              I was the first to finish the AHB FIR filter in my ASIC Design Lab
-              course, passing all instructor test cases on my first submission.
-            </p>
-
-            <figure>
-              <button type="button" class="image-expand"
-                      aria-label="Enlarge the AHB interface design"
-                      aria-haspopup="dialog" aria-controls="image-viewer">
-                <img src="images/AHB_big.png" alt="AHB interface design for the FIR filter project"
-                     loading="lazy" decoding="async" />
-              </button>
-              <figcaption>AHB interface design</figcaption>
-            </figure>
-
-            <figure>
-              <button type="button" class="image-expand"
-                      aria-label="Enlarge the FIR filter design"
-                      aria-haspopup="dialog" aria-controls="image-viewer">
-                <img src="images/FIR_FILTER_big.png" alt="FIR filter design"
-                     loading="lazy" decoding="async" />
-              </button>
-              <figcaption>FIR filter design</figcaption>
-            </figure>
           </section>
 
           <section class="portfolio-entry">
