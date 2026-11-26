@@ -45,6 +45,29 @@ THE SOFTWARE.
   -->
 
   <style>
+    /* CIRCUIT CURSORS: static 32px SVGs, embedded to avoid extra asset requests.
+       Native fallbacks are retained. No pointer-tracking JS or animation loop.
+       Delete this block to restore native cursors; existing rules have fallbacks. */
+    @media (any-hover: hover) and (any-pointer: fine) and (forced-colors: none) {
+      :root, dialog::backdrop {
+        --circuit-cursor-idle: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20d%3D%22M3%202V26L9%2020L14%2030L19%2028L14%2018H25Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%2309110d%22%20stroke-width%3D%223%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M3%202V26L9%2020L14%2030L19%2028L14%2018H25Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%23c4d5bd%22%20stroke-width%3D%221.2%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M7%209V17H10L14%2025%22%20fill%3D%22none%22%20stroke%3D%22%23dbb574%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M10%2011L18%2016H13%22%20fill%3D%22none%22%20stroke%3D%22%238fb7c9%22%20stroke-width%3D%221.1%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cg%20fill%3D%22%23dbb574%22%3E%3Ccircle%20cx%3D%227%22%20cy%3D%229%22%20r%3D%221%22%2F%3E%3Ccircle%20cx%3D%2214%22%20cy%3D%2225%22%20r%3D%221%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") 3 2, default;
+        --circuit-cursor-interactive: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20d%3D%22M10%2018V5C10%201%2016%201%2016%205V12C16%209%2021%209%2021%2013C21%2010%2026%2011%2026%2015C26%2012%2030%2013%2030%2017V22C30%2026%2026%2030%2022%2030H16C13%2030%2011%2028%209%2025L4%2019C2%2016%205%2014%207%2016Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%2309110d%22%20stroke-width%3D%223%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M10%2018V5C10%201%2016%201%2016%205V12C16%209%2021%209%2021%2013C21%2010%2026%2011%2026%2015C26%2012%2030%2013%2030%2017V22C30%2026%2026%2030%2022%2030H16C13%2030%2011%2028%209%2025L4%2019C2%2016%205%2014%207%2016Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%23c4d5bd%22%20stroke-width%3D%221.2%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M13%207V20L18%2025H23%22%20fill%3D%22none%22%20stroke%3D%22%23dbb574%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M19%2014V19M24%2015V20%22%20stroke%3D%22%238fb7c9%22%20stroke-width%3D%221.1%22%20stroke-linecap%3D%22round%22%2F%3E%3Cg%20fill%3D%22%23dbb574%22%3E%3Ccircle%20cx%3D%2213%22%20cy%3D%227%22%20r%3D%221%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2225%22%20r%3D%221%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") 13 2, pointer;
+        --circuit-cursor-busy: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20d%3D%22M4%206H9M23%206H28M4%2026H9M23%2026H28%22%20stroke%3D%22%2309110d%22%20stroke-width%3D%223.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M4%206H9M23%206H28M4%2026H9M23%2026H28%22%20stroke%3D%22%238fb7c9%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M9%207H23V10L17%2016L23%2022V25H9V22L15%2016L9%2010Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%2309110d%22%20stroke-width%3D%223%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M9%207H23V10L17%2016L23%2022V25H9V22L15%2016L9%2010Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%23c4d5bd%22%20stroke-width%3D%221.2%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M11%209H21L16%2014ZM11%2023H21L16%2018Z%22%20fill%3D%22%23dbb574%22%2F%3E%3Cpath%20d%3D%22M7%203H25V7H7ZM7%2025H25V29H7Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%2309110d%22%20stroke-width%3D%223%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M7%203H25V7H7ZM7%2025H25V29H7Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%238fb7c9%22%20stroke-width%3D%221.2%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cg%20fill%3D%22%23dbb574%22%3E%3Ccircle%20cx%3D%224%22%20cy%3D%226%22%20r%3D%221%22%2F%3E%3Ccircle%20cx%3D%2228%22%20cy%3D%226%22%20r%3D%221%22%2F%3E%3Ccircle%20cx%3D%224%22%20cy%3D%2226%22%20r%3D%221%22%2F%3E%3Ccircle%20cx%3D%2228%22%20cy%3D%2226%22%20r%3D%221%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%220.7%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") 16 16, wait;
+      }
+    }
+    html, body, dialog::backdrop { cursor: var(--circuit-cursor-idle, default); }
+    :where(a[href], button:not(:disabled), summary, select:not(:disabled),
+           input[type="radio"]:not(:disabled), input[type="checkbox"]:not(:disabled)) {
+      cursor: var(--circuit-cursor-interactive, pointer);
+    }
+    :where(input[type="text"], textarea, [contenteditable="true"]) { cursor: text; }
+    body.circuit-cursor-busy,
+    body.circuit-cursor-busy *,
+    body.circuit-cursor-busy dialog::backdrop {
+      cursor: var(--circuit-cursor-busy, wait) !important;
+    }
+    /* END CIRCUIT CURSORS */
+
     /* Canonical base styles. Responsive and motion overrides follow below. */
 
     * {
@@ -183,7 +206,7 @@ THE SOFTWARE.
     }
 
     .circuit > g[role="button"] {
-      cursor: pointer;
+      cursor: var(--circuit-cursor-interactive, pointer);
       outline: none;
     }
 
@@ -309,7 +332,7 @@ THE SOFTWARE.
       background: transparent;
       color: #d4d8cf;
       font: calc(12px + 0.75 * var(--panel-type-step)) monospace;
-      cursor: pointer;
+      cursor: var(--circuit-cursor-interactive, pointer);
       font-family: var(--font-mono);
       min-height: calc(44px + 2.75 * var(--panel-type-step));
       flex-shrink: 0;
@@ -339,6 +362,75 @@ THE SOFTWARE.
       font-size: calc(1rem + var(--panel-type-step));
       padding: calc(clamp(1rem, 3vw, 3rem) + 3 * var(--panel-type-step));
       overflow-wrap: anywhere;
+    }
+
+    /* Styled scrollbar parts can use the circuit cursor in Chromium.
+       Keep native scrolling, including dragging, wheel and keyboard behavior.
+       Touch devices, forced-color mode and unsupported browsers keep native bars. */
+    @media (any-hover: hover) and (any-pointer: fine) and (forced-colors: none) {
+      @supports selector(::-webkit-scrollbar) {
+        /* A non-auto scrollbar-color would select the native scrollbar instead. */
+        .panel-content { scrollbar-color: auto; }
+
+        ::-webkit-scrollbar,
+        ::-webkit-scrollbar-track,
+        ::-webkit-scrollbar-track-piece,
+        ::-webkit-scrollbar-thumb,
+        ::-webkit-scrollbar-button,
+        ::-webkit-scrollbar-corner {
+          cursor: var(--scrollbar-circuit-cursor, var(--circuit-cursor-interactive, pointer));
+        }
+        body.circuit-cursor-busy {
+          --scrollbar-circuit-cursor: var(--circuit-cursor-busy, wait);
+        }
+        ::-webkit-scrollbar {
+          width: 14px;
+          height: 14px;
+          background: var(--panel-fill, #111713);
+        }
+        ::-webkit-scrollbar-track,
+        ::-webkit-scrollbar-corner {
+          background: var(--panel-fill, #111713);
+        }
+        ::-webkit-scrollbar-thumb {
+          min-height: 24px;
+          min-width: 24px;
+          border: 2px solid var(--panel-fill, #111713);
+          border-radius: 8px;
+          background: var(--panel-border, #526d5c);
+        }
+        ::-webkit-scrollbar-thumb:hover,
+        ::-webkit-scrollbar-thumb:active {
+          background: var(--panel-accent, #94aa98);
+        }
+        ::-webkit-scrollbar-button {
+          display: block;
+          width: 14px;
+          height: 14px;
+          background-color: var(--panel-fill, #111713);
+          background-position: center;
+          background-size: 8px 8px;
+          background-repeat: no-repeat;
+        }
+        ::-webkit-scrollbar-button:vertical:decrement {
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M1 6L4 2L7 6Z' fill='%2394aa98'/%3E%3C/svg%3E");
+        }
+        ::-webkit-scrollbar-button:vertical:increment {
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M1 2L4 6L7 2Z' fill='%2394aa98'/%3E%3C/svg%3E");
+        }
+        ::-webkit-scrollbar-button:horizontal:decrement {
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M6 1L2 4L6 7Z' fill='%2394aa98'/%3E%3C/svg%3E");
+        }
+        ::-webkit-scrollbar-button:horizontal:increment {
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M2 1L6 4L2 7Z' fill='%2394aa98'/%3E%3C/svg%3E");
+        }
+        /* Show one arrow at each end, matching the usual desktop arrangement. */
+        ::-webkit-scrollbar-button:decrement:end,
+        ::-webkit-scrollbar-button:increment:start {
+          display: none;
+        }
+        ::-webkit-scrollbar-button:disabled { opacity: 0.4; }
+      }
     }
 
     /* Shared by every chip write-up, including nested chips and the fun fact. */
@@ -380,7 +472,7 @@ THE SOFTWARE.
       font: inherit;
       letter-spacing: inherit;
       white-space: nowrap;
-      cursor: zoom-in;
+      cursor: var(--circuit-cursor-interactive, zoom-in);
     }
 
     .intro-name:focus-visible {
@@ -525,7 +617,7 @@ THE SOFTWARE.
       text-align: inherit;
       text-decoration: underline;
       text-underline-offset: 0.18em;
-      cursor: pointer;
+      cursor: var(--circuit-cursor-interactive, pointer);
     }
 
     .circuit-demo-button {
@@ -539,7 +631,7 @@ THE SOFTWARE.
       color: var(--panel-accent);
       font: inherit;
       font-weight: 600;
-      cursor: pointer;
+      cursor: var(--circuit-cursor-interactive, pointer);
     }
 
     .circuit-link:not(:disabled):hover { color: #e0e3dc; }
@@ -552,7 +644,7 @@ THE SOFTWARE.
       outline-offset: 4px;
     }
     .circuit-link:disabled,
-    .circuit-demo-button:disabled { opacity: 0.6; cursor: wait; }
+    .circuit-demo-button:disabled { opacity: 0.6; cursor: var(--circuit-cursor-busy, wait); }
     .circuit-demo-button[aria-disabled="true"] {
       opacity: 0.45;
       cursor: not-allowed;
@@ -569,7 +661,7 @@ THE SOFTWARE.
       text-decoration: underline dotted;
       text-decoration-thickness: 1px;
       text-underline-offset: 0.22em;
-      cursor: help;
+      cursor: var(--circuit-cursor-interactive, help);
     }
 
     .chip-fact-trigger:hover,
@@ -626,7 +718,7 @@ THE SOFTWARE.
       font-weight: 600;
       line-height: 1.5;
       text-align: left;
-      cursor: pointer;
+      cursor: var(--circuit-cursor-interactive, pointer);
     }
 
     .cpu-demo summary { list-style: none; }
@@ -703,7 +795,7 @@ THE SOFTWARE.
       color: #bbc0b9;
       font: inherit;
       font-family: var(--font-mono);
-      cursor: pointer;
+      cursor: var(--circuit-cursor-interactive, pointer);
     }
 
     .isa-bit[aria-pressed="true"] {
@@ -711,7 +803,7 @@ THE SOFTWARE.
       color: #eee3f5;
       border-color: var(--panel-accent);
     }
-    .isa-bit:disabled { opacity: 0.4; cursor: default; }
+    .isa-bit:disabled { opacity: 0.4; cursor: var(--circuit-cursor-idle, default); }
     .isa-bit-index { font-size: 0.6em; color: var(--panel-accent); }
     .isa-bit-value { font-size: 1.1em; font-weight: 600; }
 
@@ -772,7 +864,7 @@ THE SOFTWARE.
       overflow-wrap: anywhere;
     }
     .isa-fields { margin-top: 1em; font-size: 0.85em; }
-    .isa-fields summary { color: var(--panel-accent); cursor: pointer; }
+    .isa-fields summary { color: var(--panel-accent); cursor: var(--circuit-cursor-interactive, pointer); }
     .isa-field-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -837,7 +929,7 @@ THE SOFTWARE.
       font-family: var(--font-mono);
       text-align: center;
     }
-    button.logic-bit { cursor: pointer; }
+    button.logic-bit { cursor: var(--circuit-cursor-interactive, pointer); }
     .logic-bit-label { color: var(--panel-accent); font-size: 0.65em; }
     .logic-bit-value { font-size: 1.1em; font-weight: 600; }
     .logic-bit.is-one { background: #ffffff0c; color: #e0e3dc; border-color: var(--panel-accent); }
@@ -875,7 +967,7 @@ THE SOFTWARE.
       letter-spacing: 0.08em;
     }
     .logic-seed-input[aria-invalid="true"] { border-color: #d2b783; }
-    .logic-action { cursor: pointer; color: var(--panel-accent); font-size: 0.85em; }
+    .logic-action { cursor: var(--circuit-cursor-interactive, pointer); color: var(--panel-accent); font-size: 0.85em; }
     .logic-action:hover { background: #ffffff0d; }
     .logic-demo :is(button, input):focus-visible {
       outline: 2px solid var(--panel-accent);
@@ -941,7 +1033,7 @@ THE SOFTWARE.
       font-size: 0.85em;
       line-height: 1.4;
       text-align: left;
-      cursor: pointer;
+      cursor: var(--circuit-cursor-interactive, pointer);
     }
     .project-trivia-option span { min-width: 0; overflow-wrap: anywhere; }
     .project-trivia-option input {
@@ -950,7 +1042,7 @@ THE SOFTWARE.
       height: 1em;
       margin: 0;
       accent-color: var(--panel-accent);
-      cursor: pointer;
+      cursor: var(--circuit-cursor-interactive, pointer);
     }
     .project-trivia-option:hover { background: #ffffff0a; }
     .project-trivia-option.is-selected {
@@ -1041,7 +1133,7 @@ THE SOFTWARE.
       border: none;
       border-radius: 6px;
       background: transparent;
-      cursor: zoom-in;
+      cursor: var(--circuit-cursor-interactive, zoom-in);
     }
 
     .image-expand:focus-visible {
@@ -1124,7 +1216,7 @@ THE SOFTWARE.
       background: transparent;
       color: #d4d8cf;
       font: 12px monospace;
-      cursor: pointer;
+      cursor: var(--circuit-cursor-interactive, pointer);
       font-family: var(--font-mono);
       min-height: 44px;
       flex-shrink: 0;
@@ -1309,7 +1401,7 @@ THE SOFTWARE.
       background: #080b09;
       color: #ffffff;
       box-shadow: 0 3px 12px #00000040;
-      cursor: pointer;
+      cursor: var(--circuit-cursor-interactive, pointer);
       width: 30px;
       height: 30px;
       min-width: 0;
@@ -1404,7 +1496,7 @@ THE SOFTWARE.
       font-weight: 700;
       letter-spacing: 0.16em;
       box-shadow: 0 5px 22px #97701e25;
-      cursor: pointer;
+      cursor: var(--circuit-cursor-interactive, pointer);
       visibility: hidden;
       opacity: 0;
       transform: translateY(12px);
@@ -1427,7 +1519,7 @@ THE SOFTWARE.
     }
 
     #synthesize-button:disabled {
-      cursor: default;
+      cursor: var(--circuit-cursor-idle, default);
     }
 
     #welcome-status {
@@ -1680,13 +1772,13 @@ THE SOFTWARE.
       color: #d4d8cf;
       border: 1px solid #526d5c;
       border-radius: 5px;
-      cursor: pointer;
+      cursor: var(--circuit-cursor-interactive, pointer);
       font-family: var(--font-mono);
     }
 
     #leave-projects:disabled,
     #close-chip:disabled {
-      cursor: wait;
+      cursor: var(--circuit-cursor-busy, wait);
     }
 
     #leave-projects:focus-visible {
@@ -1695,7 +1787,7 @@ THE SOFTWARE.
     }
 
     #projects-circuit [role=button] {
-      cursor: pointer;
+      cursor: var(--circuit-cursor-interactive, pointer);
       outline: none;
     }
 
@@ -1935,7 +2027,7 @@ THE SOFTWARE.
       font: 12px var(--font-mono);
       text-decoration: underline;
       text-underline-offset: 4px;
-      cursor: pointer;
+      cursor: var(--circuit-cursor-interactive, pointer);
       opacity: 1;
       /* Change 900ms to adjust both the dimming and brightening speed. */
       transition: opacity 900ms ease-in-out, color 600ms ease-in-out;
@@ -1943,7 +2035,7 @@ THE SOFTWARE.
     .performance-trigger:not(:disabled):hover { color: #e1e9df; }
     .performance-trigger:disabled {
       opacity: 0.45;
-      cursor: wait;
+      cursor: var(--circuit-cursor-busy, wait);
     }
     .performance-trigger:focus-visible {
       outline: 2px solid #91bfd3;
@@ -1989,7 +2081,7 @@ THE SOFTWARE.
       border-radius: 5px;
       background: transparent;
       color: #dfe6dd;
-      cursor: pointer;
+      cursor: var(--circuit-cursor-interactive, pointer);
       font-size: 18px;
     }
     #performance-close:hover { background: #ffffff12; }
@@ -2018,7 +2110,7 @@ THE SOFTWARE.
       padding: 12px;
       border: 1px solid #4a5b4e;
       border-radius: 7px;
-      cursor: pointer;
+      cursor: var(--circuit-cursor-interactive, pointer);
     }
     .performance-choice:hover { background: #ffffff09; }
     .performance-choice:has(input:checked) {
@@ -2772,9 +2864,14 @@ THE SOFTWARE.
     let openChipId = null;
     let cameraMoving = false;
     let contentNavigationBusy = false;
+    let introCursorBusy = false;
 
     function navigationIsBusy() {
       return travelling || cameraMoving || archiveBusy || contentNavigationBusy;
+    }
+
+    function syncCircuitCursor() {
+      document.body.classList.toggle("circuit-cursor-busy", introCursorBusy || navigationIsBusy());
     }
 
     function isMinimalPerformance() {
@@ -2783,6 +2880,7 @@ THE SOFTWARE.
 
     function syncPerformanceTriggers() {
       const disabled = navigationIsBusy();
+      syncCircuitCursor();
       for (const trigger of performanceTriggers) {
         trigger.disabled = disabled;
       }
@@ -3079,6 +3177,16 @@ THE SOFTWARE.
             negative offset. This kept the instruction encoding compact.
           </p>
 
+          <figure>
+            <button type="button" class="image-expand"
+                    aria-label="Enlarge the Custom 8-bit CPU design"
+                    aria-haspopup="dialog" aria-controls="image-viewer">
+              <img src="images/cpu.png" alt="Custom 8-bit CPU design in Digital Logic Sim"
+                   loading="lazy" decoding="async" />
+            </button>
+            <figcaption>Custom 8-bit CPU</figcaption>
+          </figure>
+
           <h2>A two-pass assembler</h2>
           <p>
             My Python-based assembler uses regular expressions (regexes) to parse
@@ -3113,7 +3221,7 @@ THE SOFTWARE.
             mapping consistent.
           </p>
 
-          <h2>NACAIS Optimizer</h2>
+          <h2>NACAIS optimizer</h2>
           <p>
             The only thing left to do after building a CPU, assembler, and
             compiler was to build an optimizer for said compiler. The difficulty
@@ -4942,19 +5050,25 @@ HALT</code></pre>
     synthesizeButton.addEventListener("click", async () => {
       // Prevent repeated clicks during the countdown.
       synthesizeButton.disabled = true;
+      introCursorBusy = true;
+      syncCircuitCursor();
       synthesizeButton.textContent = "SYNTHESIZING...";
       welcomeStatus.querySelector(".welcome-sr-only").textContent =
         "Synthesizing the circuit.";
 
       welcomeStatus.classList.add("building");
 
-      // This timer starts only when the button is clicked.
-      await introWait(WELCOME_TIME);
-
-      await zoomIntoSynthesizedChip();
-
-      welcomeScreen.close();
-      welcomeScreen.remove();
+      try {
+        // This timer starts only when the button is clicked.
+        await introWait(WELCOME_TIME);
+        await zoomIntoSynthesizedChip();
+        welcomeScreen.close();
+        welcomeScreen.remove();
+      } finally {
+        // The board is interactive once revealed; later navigation uses its own flags.
+        introCursorBusy = false;
+        syncCircuitCursor();
+      }
 
       startBoardEffects();
 
@@ -5669,7 +5783,7 @@ HALT</code></pre>
           <p class="panel-lead">Independent builds and ways I explore the world of computer engineering.</p>
 
           <section class="portfolio-entry">
-            <h2>This circuit portfolio</h2>
+            <h2>This Circuit Portfolio</h2>
             <p class="entry-meta">November 2026 · HTML · CSS · JavaScript · SVG</p>
             <p>
               This portfolio presents my work as an interactive circuit. Each chip
@@ -6089,7 +6203,7 @@ HALT</code></pre>
             </section>
 
             <section class="logic-project-entry" aria-labelledby="logic-cpu-heading">
-              <h3 id="logic-cpu-heading">Custom 8-bit CPU &amp; compiler toolchain</h3>
+              <h3 id="logic-cpu-heading">Custom 8-bit CPU &amp; Compiler Toolchain</h3>
               <p class="entry-meta">May - June 2026 · Python · Digital Logic Sim</p>
               <p>
                 I designed an 8-bit CPU with a custom 16-bit instruction set, then built
@@ -6136,7 +6250,7 @@ HALT</code></pre>
           <p class="panel-lead">Processors, digital interfaces, and embedded systems built through coursework.</p>
 
           <section class="portfolio-entry">
-            <h2>Five-stage RISC-V CPU with caches &amp; MSI coherence</h2>
+            <h2>Pipelined RISC-V CPU with Caches &amp; MSI Coherence</h2>
             <p class="entry-meta">January - April 2026 · SystemVerilog</p>
             <p>
               I implemented a synthesizable RISC-V processor with a five-stage
@@ -6166,15 +6280,15 @@ HALT</code></pre>
               <button type="button" class="image-expand"
                       aria-label="Enlarge the pipelined CPU design"
                       aria-haspopup="dialog" aria-controls="image-viewer">
-                <img src="images/Pipeline_BP_big.png" alt="Pipelined CPU design with branch prediction"
+                <img src="images/Pipeline_BP_big.png" alt="Pipelined CPU with branch prediction design"
                      loading="lazy" decoding="async" />
               </button>
-              <figcaption>Pipelined CPU design with branch prediction</figcaption>
+              <figcaption>Pipelined CPU with branch prediction design</figcaption>
             </figure>
           </section>
 
           <section class="portfolio-entry">
-            <h2>AHB-USB transceiver</h2>
+            <h2>AHB-USB Transceiver</h2>
             <p class="entry-meta">November - December 2025 · SystemVerilog</p>
             <p>
               I led a three-person team in developing a synthesizable USB transceiver,
@@ -6209,7 +6323,7 @@ HALT</code></pre>
           </section>
 
           <section class="portfolio-entry">
-            <h2>AHB FIR filter</h2>
+            <h2>AHB FIR Filter</h2>
             <p class="entry-meta">August - December 2025 · SystemVerilog</p>
             <p>
               I was the first to finish the AHB FIR filter in my ASIC Design Lab
@@ -6230,15 +6344,15 @@ HALT</code></pre>
               <button type="button" class="image-expand"
                       aria-label="Enlarge the FIR filter design"
                       aria-haspopup="dialog" aria-controls="image-viewer">
-                <img src="images/FIR_FILTER_big.png" alt="FIR filter design"
+                <img src="images/FIR_FILTER_big.png" alt="FIR filter state machine design"
                      loading="lazy" decoding="async" />
               </button>
-              <figcaption>FIR filter design</figcaption>
+              <figcaption>FIR filter state machine design</figcaption>
             </figure>
           </section>
 
           <section class="portfolio-entry">
-            <h2>Autonomous seed distributor</h2>
+            <h2>Autonomous Seed Distributor</h2>
             <p class="entry-meta">August - December 2025 · STM32 · Embedded C</p>
             <p>
               I developed firmware for an autonomous tracked robot designed to
@@ -6273,7 +6387,7 @@ HALT</code></pre>
           </section>
 
           <section class="portfolio-entry">
-            <h2>Audio synthesizer drum machine</h2>
+            <h2>Audio Synthesizer Drum Machine</h2>
             <p class="entry-meta">March - May 2025 · STM32 · Embedded C</p>
             <p>
               I built a 16-step drum machine sequencer with programmable patterns,
