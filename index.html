@@ -907,6 +907,74 @@ THE SOFTWARE.
       padding-left: 0;
     }
 
+    /* Native radio buttons keep the trivia usable by keyboard and touch. */
+    .project-trivia fieldset {
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+    .project-trivia legend {
+      padding: 0;
+      max-width: 100%;
+      color: #e0e3dc;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+    .project-trivia-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.6em;
+      margin: 1em 0;
+    }
+    .project-trivia-option {
+      display: flex;
+      align-items: center;
+      gap: 0.65em;
+      min-width: 0;
+      min-height: 44px;
+      padding: 0.7em 0.9em;
+      border: 1px solid var(--panel-border);
+      border-radius: 1.4em;
+      background: #ffffff04;
+      color: #c0c4c0;
+      font-size: 0.85em;
+      line-height: 1.4;
+      text-align: left;
+      cursor: pointer;
+    }
+    .project-trivia-option span { min-width: 0; overflow-wrap: anywhere; }
+    .project-trivia-option input {
+      flex: 0 0 auto;
+      width: 1em;
+      height: 1em;
+      margin: 0;
+      accent-color: var(--panel-accent);
+      cursor: pointer;
+    }
+    .project-trivia-option:hover { background: #ffffff0a; }
+    .project-trivia-option.is-selected {
+      border-color: var(--panel-accent);
+      background: #ffffff10;
+      color: #e0e3dc;
+    }
+    .project-trivia-option:focus-within {
+      outline: 2px solid var(--panel-accent);
+      outline-offset: 3px;
+    }
+    .project-trivia-feedback {
+      padding: 0.7em 1em;
+      border-left: 3px solid var(--panel-border);
+      border-radius: 0 6px 6px 0;
+      background: #ffffff05;
+    }
+    .project-trivia-feedback[data-result="correct"] { border-left-color: var(--panel-accent); }
+    .panel-content .project-trivia-feedback p { margin: 0.4em 0; }
+    .project-trivia [hidden] { display: none; }
+    @container (max-width: 560px) {
+      .project-trivia-options { grid-template-columns: minmax(0, 1fr); }
+    }
+
     .contact-links .contact-label {
       display: inline-flex;
       align-items: center;
@@ -3285,6 +3353,7 @@ HALT</code></pre>
       eyebrow.textContent = readChipLabel(chip, ".chip-name");
       initializeIsaDemo();
       initializeLogicProjectDemos();
+      initializeProjectTrivia();
       syncPerformanceTriggers();
     }
 
@@ -3603,6 +3672,47 @@ HALT</code></pre>
     function initializeLogicProjectDemos() {
       initializeLfsrDemo();
       initializeHammingDemo();
+    }
+
+    // Remember only the current guess for this visit. Every answer stays selectable.
+    let projectTriviaSelection = null;
+
+    function initializeProjectTrivia() {
+      const trivia = panelContent.querySelector("[data-project-trivia]");
+      if (!trivia) return;
+      const options = [...trivia.querySelectorAll('input[name="first-circuit"]')];
+      const feedback = trivia.querySelector("[data-trivia-feedback]");
+      const message = trivia.querySelector("[data-trivia-message]");
+      const fact = trivia.querySelector("[data-trivia-fact]");
+      const starterProjects = new Set([
+        "ringcounter", "asynccounter", "synccounter", "fiblfsr", "flexcounter", "traffic"
+      ]);
+
+      function render() {
+        for (const option of options) {
+          option.checked = option.value === projectTriviaSelection;
+          option.closest("label").classList.toggle("is-selected", option.checked);
+        }
+        const correct = projectTriviaSelection === "cpu";
+        fact.hidden = !correct;
+        feedback.dataset.result = correct ? "correct" : projectTriviaSelection ? "retry" : "unanswered";
+        if (correct) {
+          message.textContent = "You got it! The 8-bit CPU came first. Straight into the deep end :)";
+        } else if (starterProjects.has(projectTriviaSelection)) {
+          message.textContent = "Good guess! That would make a sensible first project. Mine was a little more ambitious - try another bubble :)";
+        } else if (projectTriviaSelection) {
+          message.textContent = "Not quite! That wasn't my first circuit, but no worries - pick another bubble :)";
+        } else {
+          message.textContent = "Make a guess - no pressure :)";
+        }
+      }
+
+      trivia.addEventListener("change", event => {
+        if (!options.includes(event.target) || !event.target.checked) return;
+        projectTriviaSelection = event.target.value;
+        render();
+      });
+      render();
     }
 
     function getChipView(id) {
@@ -5579,6 +5689,7 @@ HALT</code></pre>
 
           <section class="portfolio-entry logic-projects" aria-labelledby="digital-logic-heading">
             <h2 id="digital-logic-heading">Digital Logic Sim Circuit Design Projects</h2>
+            <p class="entry-meta">May - November 2026 · Digital Logic Sim</p>
             <p>
               Digital Logic Sim lets me build systems from logic gates and reusable chips.
               These projects involve planning the circuit, actually creating it, debugging
@@ -5587,7 +5698,13 @@ HALT</code></pre>
 
             <section class="logic-project-entry" aria-labelledby="logic-ringcounter-heading">
               <h3 id="logic-ringcounter-heading">4-bit Ring Counter</h3>
-              <p>One active bit rotates through four flip-flops, making the count visible as a repeating pattern.</p>
+              <p>
+                One active bit rotates through four D flip-flops, producing a repeating
+                one-hot pattern: <code>1000</code>, <code>0100</code>, <code>0010</code>,
+                and <code>0001</code>. The <code>EN</code> input starts and stops the
+                circuit. Switching <code>EN</code> on resets the counter to
+                <code>1000</code>, so each run begins the same way.
+              </p>
 
               <figure>
                 <button type="button" class="image-expand"
@@ -5612,7 +5729,15 @@ HALT</code></pre>
 
             <section class="logic-project-entry" aria-labelledby="logic-asynccounter-heading">
               <h3 id="logic-asynccounter-heading">8-bit Asynchronous (Ripple) Counter</h3>
-              <p>An 8-bit counter whose changes ripple from one stage to the next. The videos compare a slow clock with a fast clock that does not leave enough time for the ripple to settle.</p>
+              <p>
+                This 8-bit counter passes state changes from one flip-flop to the next,
+                with <code>EN</code> starting or stopping the count. Because the stages
+                respond one after another, their propagation delays accumulate: the
+                output can briefly pass through intermediate values before the full
+                count settles. If the clock is too fast, the next transition can arrive
+                before that ripple has finished, making the count unreliable.
+              </p>
+              <p>I demonstrate both a slow clock that lets the ripple settle and a fast clock that reveals this timing problem.</p>
 
               <figure>
                 <button type="button" class="image-expand"
@@ -5647,7 +5772,18 @@ HALT</code></pre>
 
             <section class="logic-project-entry" aria-labelledby="logic-synccounter-heading">
               <h3 id="logic-synccounter-heading">4-bit Synchronous Counter</h3>
-              <p>All four flip-flops share the same clock, with combinational logic determining which bits change on each clock edge.</p>
+              <p>
+                All four D flip-flops share the same clock, so they update on the same
+                clock edge instead of waiting for a change to ripple through the chain.
+                The <code>EN</code> input starts and stops the count. Combinational logic
+                calculates each flip-flop's next input before the clock edge.
+              </p>
+              <p>
+                This removes the ripple counter's stage-by-stage clocking delay, at
+                the cost of more hardware. My circuit uses 2-to-1 multiplexers and
+                AND gates to control the D flip-flop inputs. The clock still needs to
+                leave enough time for this next-state logic to settle.
+              </p>
 
               <figure>
                 <button type="button" class="image-expand"
@@ -5672,7 +5808,29 @@ HALT</code></pre>
 
             <section class="logic-project-entry" aria-labelledby="logic-fiblfsr-heading">
               <h3 id="logic-fiblfsr-heading">8-bit Fibonacci LFSR</h3>
-              <p>An 8-bit shift register uses XOR feedback to generate a deterministic sequence of bit patterns.</p>
+              <p>
+                A linear feedback shift register (LFSR) shifts stored bits on each
+                clock pulse and calculates a new input bit from selected positions,
+                called taps. My 8-bit design XORs stages 4, 5, 6, and 8 to generate
+                a pseudo-random sequence with very little hardware. Pseudo-random
+                number generators are useful for repeatable simulations and for
+                generating varied test patterns that exercise digital circuits.
+              </p>
+              <p>
+                The Fibonacci name comes from the recurrence idea: new values depend
+                on earlier values, much like the Fibonacci sequence. Here, tapped
+                bits are combined with XOR and fed back into one end of the register;
+                the output is not the familiar sequence of Fibonacci numbers.
+                It is deterministic because the same seed and feedback rule always
+                produce the same sequence.
+              </p>
+              <p>
+                <code>EN</code> starts and stops the circuit, while <code>RST</code>
+                clears all eight D flip-flops to zero. The 8-bit <code>Seed</code>
+                input supplies a starting state, and <code>VALID</code> loads that seed
+                into the register. Since XOR feedback leaves an all-zero state stuck
+                at zero, a nonzero seed is needed after reset to begin the sequence.
+              </p>
 
               <section class="logic-demo" data-lfsr-demo aria-labelledby="lfsr-demo-heading">
                 <h4 id="lfsr-demo-heading">Clock the LFSR</h4>
@@ -5721,7 +5879,21 @@ HALT</code></pre>
 
             <section class="logic-project-entry" aria-labelledby="logic-flexcounter-heading">
               <h3 id="logic-flexcounter-heading">Flex Counter</h3>
-              <p>A counter built around a configurable count limit and rollover behavior.</p>
+              <p>
+                This counter lets me choose both the step size and the rollover
+                threshold. <code>COUNT_EN</code> starts and stops counting,
+                <code>RESET</code> clears the count to zero, <code>INCREMENT</code>
+                sets how much to add on each enabled clock pulse, and
+                <code>ROLLOVER_VAL</code> sets the threshold. The <code>COUNT</code>
+                output shows the current value.
+              </p>
+              <p>
+                A comparator checks whether <code>COUNT &gt;= ROLLOVER_VAL</code>.
+                When that condition is reached, <code>ROLLOVER_FLAG</code> is asserted
+                and the rollover logic resets the count to zero. Both
+                <code>ROLLOVER_VAL</code> and <code>INCREMENT</code> can be changed
+                while the circuit is enabled, so its behavior can be adjusted as it runs.
+              </p>
 
               <figure>
                 <button type="button" class="image-expand"
@@ -5746,7 +5918,19 @@ HALT</code></pre>
 
             <section class="logic-project-entry" aria-labelledby="logic-traffic-heading">
               <h3 id="logic-traffic-heading">Traffic Light Controller</h3>
-              <p>Sequential control logic coordinates a repeating sequence of traffic-light states.</p>
+              <p>
+                Two D flip-flops store the state of a traffic-light controller,
+                with timing logic deciding when to move to the next light. The
+                circuit asserts <code>RED</code> for 12 clock cycles,
+                <code>YELLOW</code> for 3 clock cycles, and <code>GREEN</code> for
+                8 clock cycles. These outputs indicate which light is active.
+              </p>
+              <p>
+                <code>EN</code> starts and stops the controller, while
+                <code>RST</code> clears its state and timing registers to restart
+                the sequence. This combines a small finite state machine with
+                counters that determine how long each state lasts.
+              </p>
 
               <figure>
                 <button type="button" class="image-expand"
@@ -5771,7 +5955,22 @@ HALT</code></pre>
 
             <section class="logic-project-entry" aria-labelledby="logic-hamming-heading">
               <h3 id="logic-hamming-heading">7-4 Hamming Decoder</h3>
-              <p>Parity checks locate and correct a single-bit error in a seven-bit codeword to recover four data bits.</p>
+              <p>
+                A Hamming decoder uses extra parity bits to recover data when a bit
+                has flipped during storage or transmission. Hamming(7,4) packages
+                four data bits with three parity bits. My circuit receives them in
+                the order <code>P1, P2, D1, P3, D2, D3, D4</code> and uses XOR parity
+                checks to identify a single-bit error, correct it, and output
+                <code>D1, D2, D3, D4</code> along with an error flag.
+              </p>
+              <p>
+                This demonstrates the idea behind error-correcting codes: adding
+                a little redundancy allows hardware to recover useful data instead
+                of simply reporting that something went wrong. It is relevant to
+                reliable memory and communication systems. This seven-bit code
+                corrects one flipped bit; it cannot reliably distinguish a double-bit
+                error from a single-bit error.
+              </p>
 
               <section class="logic-demo" data-hamming-demo aria-labelledby="hamming-demo-heading">
                 <h4 id="hamming-demo-heading">Try the Hamming decoder</h4>
@@ -5815,7 +6014,12 @@ HALT</code></pre>
 
             <section class="logic-project-entry" aria-labelledby="logic-militaryclock-heading">
               <h3 id="logic-militaryclock-heading">Military Clock</h3>
-              <p>Counters work together to keep time in a 24-hour format.</p>
+              <p>
+                Counters track hours, minutes, and seconds, with 7-segment displays
+                showing the time in 24-hour format. <code>EN</code> starts and stops
+                the clock, and <code>RST</code> clears the time to <code>00:00:00</code>.
+                After <code>23:59:59</code>, the clock rolls over to <code>00:00:00</code>.
+              </p>
 
               <figure>
                 <button type="button" class="image-expand"
@@ -5839,8 +6043,29 @@ HALT</code></pre>
             </section>
 
             <section class="logic-project-entry" aria-labelledby="logic-fifo-heading">
-              <h3 id="logic-fifo-heading">FIFO</h3>
-              <p>A first-in, first-out buffer stores values and returns them in the order they arrived.</p>
+              <h3 id="logic-fifo-heading">8-bit, 8-register FIFO</h3>
+              <p>
+                This first-in, first-out buffer holds up to eight 8-bit values and
+                returns them in the order they were written. <code>DATA_IN</code>
+                supplies the next value, <code>WRITE</code> requests a write, and
+                <code>READ</code> requests a read. <code>RESET</code> resets the
+                pointer and control state so the FIFO starts empty.
+              </p>
+              <p>
+                <code>DATA_OUT</code> presents the value being read.
+                <code>WRITING</code> and <code>READING</code> indicate when their
+                respective operations are active, while <code>EMPTY</code> and
+                <code>FULL</code> indicate whether the FIFO has no queued data or
+                all eight registers are occupied.
+              </p>
+              <p>
+                The read and write pointers each use a state machine built from
+                three D flip-flops to select among the eight registers. A T flip-flop
+                supplies an extra wrap-tracking bit for the <code>EMPTY</code>/<code>FULL</code>
+                logic, allowing it to distinguish an empty FIFO from a full one when
+                the pointer addresses match. This is control information; each stored
+                data value remains 8 bits wide.
+              </p>
 
               <figure>
                 <button type="button" class="image-expand"
@@ -5874,9 +6099,34 @@ HALT</code></pre>
               <p>
                 The <button type="button" class="circuit-link" data-circuit-chip="control">Control Unit chip</button>
                 contains the full write-up on the processor,
-                assembler, NACAIS, and the NACAIS optimizer.
+                assembler, NACAIS, and NACAIS optimizer.
               </p>
             </section>
+          </section>
+
+          <section class="portfolio-entry project-trivia" data-project-trivia aria-labelledby="project-trivia-heading">
+            <h2 id="project-trivia-heading">A little circuit trivia</h2>
+            <fieldset aria-describedby="project-trivia-help">
+              <legend>Which of these circuits did I build first?</legend>
+              <p id="project-trivia-help">Select a bubble. You can change your guess as often as you like.</p>
+              <div class="project-trivia-options">
+                <label class="project-trivia-option"><input type="radio" name="first-circuit" value="ringcounter" /><span>4-bit Ring Counter</span></label>
+                <label class="project-trivia-option"><input type="radio" name="first-circuit" value="asynccounter" /><span>8-bit Asynchronous (Ripple) Counter</span></label>
+                <label class="project-trivia-option"><input type="radio" name="first-circuit" value="synccounter" /><span>4-bit Synchronous Counter</span></label>
+                <label class="project-trivia-option"><input type="radio" name="first-circuit" value="fiblfsr" /><span>8-bit Fibonacci LFSR</span></label>
+                <label class="project-trivia-option"><input type="radio" name="first-circuit" value="flexcounter" /><span>Flex Counter</span></label>
+                <label class="project-trivia-option"><input type="radio" name="first-circuit" value="traffic" /><span>Traffic Light Controller</span></label>
+                <label class="project-trivia-option"><input type="radio" name="first-circuit" value="hamming" /><span>7-4 Hamming Decoder</span></label>
+                <label class="project-trivia-option"><input type="radio" name="first-circuit" value="militaryclock" /><span>Military Clock</span></label>
+                <label class="project-trivia-option"><input type="radio" name="first-circuit" value="fifo" /><span>8-bit, 8-register FIFO</span></label>
+                <label class="project-trivia-option"><input type="radio" name="first-circuit" value="cpu" /><span>Custom 8-bit CPU &amp; compiler toolchain</span></label>
+              </div>
+            </fieldset>
+            <div class="project-trivia-feedback" data-trivia-feedback data-result="unanswered"
+                 role="status" aria-live="polite" aria-atomic="true">
+              <p data-trivia-message>Make a guess - no pressure :)</p>
+              <p data-trivia-fact hidden><strong>Fun fact:</strong> I began using Digital Logic Sim specifically to build my own CPU. The smaller circuits came later!</p>
+            </div>
           </section>
         `
       },
