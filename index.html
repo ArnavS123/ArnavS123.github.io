@@ -3074,8 +3074,8 @@ THE SOFTWARE.
           </p>
 
           <ol>
-            <li><code>NACAIS code → NACAIS optimizer → intermediate representation</code></li>
-            <li><code>Intermediate representation → NACAIS compiler → assembly</code></li>
+            <li><code>NACAIS code → NACAIS optimizer → simplified NACAIS code</code></li>
+            <li><code>Simplified NACAIS code → NACAIS compiler → assembly</code></li>
             <li><code>Assembly → assembler → machine code</code></li>
             <li><code>Machine code → CPU → output</code></li>
           </ol>
@@ -5795,10 +5795,92 @@ HALT</code></pre>
               The design includes responsive layouts, keyboard navigation, and
               expandable images, with hardware themes carried through the interface.
             </p>
+
             <p>
               <button type="button" class="circuit-demo-button" data-circuit-demo
                       aria-label="Supercharge Me! Take a signal tour of the main circuit">Supercharge Me!</button>
             </p>
+
+            <section class="circuit-design-tour" aria-labelledby="circuit-design-heading">
+              <h3 id="circuit-design-heading">Why this portfolio is a circuit</h3>
+              <p>
+                This site borrows the layout of a CPU datapath: the chips, their
+                placement, and the wiring all have a purpose. As you move between
+                sections, you become the signal travelling through the circuit.
+                Here is what each stop means.
+              </p>
+
+              <h4>Program Counter: Every visit needs a starting address</h4>
+              <p>
+                The program counter tells a CPU where to fetch an instruction,
+                making it a natural home for About Me. After the startup sequence,
+                you automatically land here to learn about my background and
+                interests before exploring the rest of the circuit. Consider your
+                first instruction to be <em>get to know Arnav</em>.
+              </p>
+
+              <h4>Register File: Projects worth keeping close</h4>
+              <p>
+                A register file keeps working values within quick reach of the CPU.
+                Mine keeps a collection of projects ready for you to inspect, explore,
+                and revisit. The collection is split into Personal and Academic projects.
+              </p>
+              <p>
+                Personal projects occupy the High Registers because they have had
+                the greatest influence on my growth as a digital logic designer.
+                Academic projects sit right next door in the Low Registers, another
+                important part of my foundation. I borrowed the high/low idea from
+                the more- and less-significant portions of a binary word: personal
+                projects get the MSB side, and academic projects get the LSB side.
+                This MSB-first representation puts personal projects on the left,
+                where your first visit starts, before you move toward academic projects.
+              </p>
+
+              <h4>Control Unit: The project that started it all</h4>
+              <p>
+                The control unit coordinates how a CPU executes instructions, so it
+                gets the top spot in my layout. It houses my signature project:
+                the custom CPU, assembler, and NACAIS compiler toolchain. That project
+                helped give this portfolio its direction and was a major reason for
+                building the website in the first place. It seemed fair to let this
+                project run the show inside its own CPU-inspired portfolio.
+              </p>
+
+              <h4>ALU: My toolbox, with pins</h4>
+              <p>
+                The arithmetic logic unit performs arithmetic and logical operations
+                for the CPU, turning inputs into useful results. That makes it a fitting
+                home for my skills: the tools and techniques I can put to work when a
+                problem comes in. This chip shows the capabilities I bring to a design,
+                from reasoning about the hardware to making it work in practice.
+              </p>
+
+              <h4>Cache Hierarchy: Experiences worth retrieving</h4>
+              <p>
+                Caches connect a processor to the larger memory system, keeping
+                copies of data nearby for faster access. Here, they hold experiences
+                I can draw on. The project collection in the register file focuses on
+                what I have built; while this experiences collection adds the larger
+                context: contributing to teams, classrooms, and organizations, where
+                my work fits into something bigger than myself.
+              </p>
+              <p>
+                Your first visit starts at L1, which holds my part-time and teaching
+                roles. L2 holds my internships and research experiences. In a typical
+                cache hierarchy, L1 is smaller and faster than L2. The mapping fits
+                my content, too: I have taken on more internship roles than part-time
+                jobs, so L2 has more to store. You start with the smaller, closer cache,
+                then explore the next level for more of the story.
+              </p>
+
+              <h4>I/O Controller: Send a friendly interrupt</h4>
+              <p>
+                An I/O controller helps a system communicate with the outside world.
+                Mine is the Connect page, where you can find my contact information
+                and links. If you want to talk about hardware, projects, or
+                opportunities, this is the place.
+              </p>
+            </section>
           </section>
 
           <section class="portfolio-entry logic-projects" aria-labelledby="digital-logic-heading">
@@ -6514,7 +6596,7 @@ HALT</code></pre>
             </p>
             <p>
               I contributed to the paper <cite>Comprehensive Habitability Index (CHI)</cite>,
-              published through the Aspiring Scholars Directed Research Program
+              published through the Aspiring Scholars Directed Research Program (ASDRP)
               in <cite><a href="https://www.asdrp.org/asdrp-communications" target="_blank" rel="noopener noreferrer">ASDRP Communications</a></cite>, Volume 3, in 2020.
             </p>
           </section>
