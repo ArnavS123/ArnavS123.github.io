@@ -2281,7 +2281,7 @@ THE SOFTWARE.
     viewBox="-24 -12 1224 812"
     preserveAspectRatio="xMidYMid meet"
     role="group"
-    aria-label="Arnav's interactive portfolio"
+    aria-label="Arnav’s interactive portfolio"
     aria-describedby="circuit-description"
   >
     <desc id="circuit-description">
@@ -3809,7 +3809,7 @@ HALT</code></pre>
         } else if (starterProjects.has(projectTriviaSelection)) {
           message.textContent = "Good guess! That would make a sensible first project. Mine was a little more ambitious - try another bubble :)";
         } else if (projectTriviaSelection) {
-          message.textContent = "Not quite! That wasn't my first circuit, but no worries - pick another bubble :)";
+          message.textContent = "Not quite! That wasn’t my first circuit, but no worries - pick another bubble :)";
         } else {
           message.textContent = "Make a guess - no pressure :)";
         }
@@ -5804,7 +5804,7 @@ HALT</code></pre>
             <section class="circuit-design-tour" aria-labelledby="circuit-design-heading">
               <h3 id="circuit-design-heading">Why this portfolio is a circuit</h3>
               <p>
-                This site borrows the layout of a CPU datapath: the chips, their
+                This site resembles the layout of a CPU datapath: the chips, their
                 placement, and the wiring all have a purpose. As you move between
                 sections, you become the signal travelling through the circuit.
                 Here is what each stop means.
@@ -5813,17 +5813,17 @@ HALT</code></pre>
               <h4>Program Counter: Every visit needs a starting address</h4>
               <p>
                 The program counter tells a CPU where to fetch an instruction,
-                making it a natural home for About Me. After the startup sequence,
+                making it a natural About Me page. After the startup sequence,
                 you automatically land here to learn about my background and
-                interests before exploring the rest of the circuit. Consider your
+                interests before exploring the rest of the circuit. Consider the
                 first instruction to be <em>get to know Arnav</em>.
               </p>
 
               <h4>Register File: Projects worth keeping close</h4>
               <p>
                 A register file keeps working values within quick reach of the CPU.
-                Mine keeps a collection of projects ready for you to inspect, explore,
-                and revisit. The collection is split into Personal and Academic projects.
+                Mine keeps a collection of projects ready for you to explore
+                and revisit. This collection is split into Personal and Academic projects.
               </p>
               <p>
                 Personal projects occupy the High Registers because they have had
@@ -5840,43 +5840,44 @@ HALT</code></pre>
               <p>
                 The control unit coordinates how a CPU executes instructions, so it
                 gets the top spot in my layout. It houses my signature project:
-                the custom CPU, assembler, and NACAIS compiler toolchain. That project
-                helped give this portfolio its direction and was a major reason for
-                building the website in the first place. It seemed fair to let this
-                project run the show inside its own CPU-inspired portfolio.
+                the custom CPU, assembler, and NACAIS compiler and optimizer. That
+                project helped shape my portfolio’s direction and was a major reason
+                for creating this website. It seemed only fair to let this project
+                run the show inside its own CPU-inspired portfolio.
               </p>
 
-              <h4>ALU: My toolbox, with pins</h4>
+              <h4>ALU: My ECE toolbox</h4>
               <p>
                 The arithmetic logic unit performs arithmetic and logical operations
                 for the CPU, turning inputs into useful results. That makes it a fitting
-                home for my skills: the tools and techniques I can put to work when a
-                problem comes in. This chip shows the capabilities I bring to a design,
-                from reasoning about the hardware to making it work in practice.
+                home for my skills: the tools and techniques I can put to work to solve a
+                problem. This chip shows the capabilities I bring to a design, from
+                reasoning about the hardware to making it work in practice.
               </p>
 
               <h4>Cache Hierarchy: Experiences worth retrieving</h4>
               <p>
                 Caches connect a processor to the larger memory system, keeping
                 copies of data nearby for faster access. Here, they hold experiences
-                I can draw on. The project collection in the register file focuses on
-                what I have built; while this experiences collection adds the larger
-                context: contributing to teams, classrooms, and organizations, where
-                my work fits into something bigger than myself.
+                I can draw on. The Past Project collection in the register file focuses on
+                what I have built. Meanwhile this Experiences collection focuses on my
+                contribution to teams, both in the classroom and in larger organizations,
+                where my work became part of something bigger than myself.
               </p>
               <p>
-                Your first visit starts at L1, which holds my part-time and teaching
-                roles. L2 holds my internships and research experiences. In a typical
-                cache hierarchy, L1 is smaller and faster than L2. The mapping fits
-                my content, too: I have taken on more internship roles than part-time
-                jobs, so L2 has more to store. You start with the smaller, closer cache,
-                then explore the next level for more of the story.
+                Your first visit starts at the L1 cache, which holds my part-time teaching
+                roles. The L2 cache holds my internships and research experiences. In a
+                typical cache hierarchy, the L1 cache is smaller and faster than the L2 cache.
+                The mapping fits my content as well: I have taken on more internship roles
+                than part-time jobs, which is why the L2 cache is larger. This is also why you
+                start with the smaller, closer L1 cache and then explore the next level for
+                more information.
               </p>
 
               <h4>I/O Controller: Send a friendly interrupt</h4>
               <p>
                 An I/O controller helps a system communicate with the outside world.
-                Mine is the Connect page, where you can find my contact information
+                Here, it is my Connect page, where you can find my contact information
                 and links. If you want to talk about hardware, projects, or
                 opportunities, this is the place.
               </p>
@@ -5972,10 +5973,10 @@ HALT</code></pre>
                 All four D flip-flops share the same clock, so they update on the same
                 clock edge instead of waiting for a change to ripple through the chain.
                 The <code>EN</code> input starts and stops the count. Combinational logic
-                calculates each flip-flop's next input before the clock edge.
+                calculates each flip-flop’s next input before the clock edge.
               </p>
               <p>
-                This removes the ripple counter's stage-by-stage clocking delay, at
+                This removes the ripple counter’s stage-by-stage clocking delay, at
                 the cost of more hardware. My circuit uses 2-to-1 multiplexers and
                 AND gates to control the D flip-flop inputs. The clock still needs to
                 leave enough time for this next-state logic to settle.
