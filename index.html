@@ -1,11 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <script>
     // TEXT ALIGNMENT: change to false for left-aligned chip text, then reload.
     const JUSTIFY_CHIP_TEXT = true;
     document.documentElement.style.setProperty(
       "--chip-text-align", JUSTIFY_CHIP_TEXT ? "justify" : "left"
+    );
+
+    // PULSE SETTINGS: edit these values, then reload the page.
+    // Existing performance, reduced-motion, and media-viewer rules still apply.
+    const PULSE_SETTINGS = {
+      // Random weak signals on wires in the main circuit AND both inner circuits.
+      ambient: {
+        opacity: 0.85,      // Peak strength: 0 = invisible, 1 = fully opaque.
+        minDelayMs: 1500,   // Random interval between launches. Lower = more frequent.
+        maxDelayMs: 3000,   // 1000 ms = 1 second. Keep this >= minDelayMs.
+        durationMs: 2200,   // Travel time, separate from the launch frequency.
+        radius: 2.0         // Dot radius in SVG units. Larger = more prominent.
+      },
+      // Moving lines and faint stationary paths INSIDE an opened chip.
+      background: {
+        opacity: 0.22,      // Moving line strength, from 0 to 1.
+        trackOpacity: 0.045 // Stationary path strength, from 0 to 1.
+      }
+    };
+    document.documentElement.style.setProperty(
+      "--chip-background-pulse-opacity", PULSE_SETTINGS.background.opacity
+    );
+    document.documentElement.style.setProperty(
+      "--chip-background-track-opacity", PULSE_SETTINGS.background.trackOpacity
     );
 
     // Best-effort macOS detection; exclude iPads reporting a Mac platform.
@@ -16,7 +41,6 @@
       }
     })();
   </script>
-  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Arnav Srivastava - Inside the Chip</title>
 
@@ -52,6 +76,7 @@ THE SOFTWARE.
       :root, dialog::backdrop {
         --circuit-cursor-idle: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20d%3D%22M3%202V26L9%2020L14%2030L19%2028L14%2018H25Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%2309110d%22%20stroke-width%3D%223%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M3%202V26L9%2020L14%2030L19%2028L14%2018H25Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%23c4d5bd%22%20stroke-width%3D%221.2%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M7%209V17H10L14%2025%22%20fill%3D%22none%22%20stroke%3D%22%23dbb574%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M10%2011L18%2016H13%22%20fill%3D%22none%22%20stroke%3D%22%238fb7c9%22%20stroke-width%3D%221.1%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cg%20fill%3D%22%23dbb574%22%3E%3Ccircle%20cx%3D%227%22%20cy%3D%229%22%20r%3D%221%22%2F%3E%3Ccircle%20cx%3D%2214%22%20cy%3D%2225%22%20r%3D%221%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") 3 2, default;
         --circuit-cursor-interactive: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20d%3D%22M10%2018V5C10%201%2016%201%2016%205V12C16%209%2021%209%2021%2013C21%2010%2026%2011%2026%2015C26%2012%2030%2013%2030%2017V22C30%2026%2026%2030%2022%2030H16C13%2030%2011%2028%209%2025L4%2019C2%2016%205%2014%207%2016Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%2309110d%22%20stroke-width%3D%223%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M10%2018V5C10%201%2016%201%2016%205V12C16%209%2021%209%2021%2013C21%2010%2026%2011%2026%2015C26%2012%2030%2013%2030%2017V22C30%2026%2026%2030%2022%2030H16C13%2030%2011%2028%209%2025L4%2019C2%2016%205%2014%207%2016Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%23c4d5bd%22%20stroke-width%3D%221.2%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M13%207V20L18%2025H23%22%20fill%3D%22none%22%20stroke%3D%22%23dbb574%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M19%2014V19M24%2015V20%22%20stroke%3D%22%238fb7c9%22%20stroke-width%3D%221.1%22%20stroke-linecap%3D%22round%22%2F%3E%3Cg%20fill%3D%22%23dbb574%22%3E%3Ccircle%20cx%3D%2213%22%20cy%3D%227%22%20r%3D%221%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2225%22%20r%3D%221%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") 13 2, pointer;
+        --circuit-cursor-unavailable: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20d%3D%22M2%2016H8M27%2016H30%22%20fill%3D%22none%22%20stroke%3D%22%2309110d%22%20stroke-width%3D%223.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M2%2016H8M27%2016H30%22%20fill%3D%22none%22%20stroke%3D%22%238fb7c9%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%206V26L23%2016Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%2309110d%22%20stroke-width%3D%223%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%206V26L23%2016Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%23c4d5bd%22%20stroke-width%3D%221.3%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2225%22%20cy%3D%2216%22%20r%3D%222.2%22%20fill%3D%22%23172b23%22%20stroke%3D%22%2309110d%22%20stroke-width%3D%223%22%2F%3E%3Ccircle%20cx%3D%2225%22%20cy%3D%2216%22%20r%3D%222.2%22%20fill%3D%22%23172b23%22%20stroke%3D%22%23dbb574%22%20stroke-width%3D%221.3%22%2F%3E%3Cpath%20d%3D%22M11%2012V20L16%2016Z%22%20fill%3D%22%23dbb574%22%20opacity%3D%220.7%22%2F%3E%3Ccircle%20cx%3D%222%22%20cy%3D%2216%22%20r%3D%221%22%20fill%3D%22%23dbb574%22%2F%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2216%22%20r%3D%221%22%20fill%3D%22%238fb7c9%22%2F%3E%3C%2Fsvg%3E") 2 16, not-allowed;
         --circuit-cursor-busy: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20d%3D%22M4%206H9M23%206H28M4%2026H9M23%2026H28%22%20stroke%3D%22%2309110d%22%20stroke-width%3D%223.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M4%206H9M23%206H28M4%2026H9M23%2026H28%22%20stroke%3D%22%238fb7c9%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M9%207H23V10L17%2016L23%2022V25H9V22L15%2016L9%2010Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%2309110d%22%20stroke-width%3D%223%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M9%207H23V10L17%2016L23%2022V25H9V22L15%2016L9%2010Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%23c4d5bd%22%20stroke-width%3D%221.2%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M11%209H21L16%2014ZM11%2023H21L16%2018Z%22%20fill%3D%22%23dbb574%22%2F%3E%3Cpath%20d%3D%22M7%203H25V7H7ZM7%2025H25V29H7Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%2309110d%22%20stroke-width%3D%223%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M7%203H25V7H7ZM7%2025H25V29H7Z%22%20fill%3D%22%23172b23%22%20stroke%3D%22%238fb7c9%22%20stroke-width%3D%221.2%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cg%20fill%3D%22%23dbb574%22%3E%3Ccircle%20cx%3D%224%22%20cy%3D%226%22%20r%3D%221%22%2F%3E%3Ccircle%20cx%3D%2228%22%20cy%3D%226%22%20r%3D%221%22%2F%3E%3Ccircle%20cx%3D%224%22%20cy%3D%2226%22%20r%3D%221%22%2F%3E%3Ccircle%20cx%3D%2228%22%20cy%3D%2226%22%20r%3D%221%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%220.7%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") 16 16, wait;
       }
     }
@@ -647,7 +672,7 @@ THE SOFTWARE.
     .circuit-demo-button:disabled { opacity: 0.6; cursor: var(--circuit-cursor-busy, wait); }
     .circuit-demo-button[aria-disabled="true"] {
       opacity: 0.45;
-      cursor: not-allowed;
+      cursor: var(--circuit-cursor-unavailable, not-allowed);
     }
     .content-link-target:focus { outline: none; }
 
@@ -1338,7 +1363,7 @@ THE SOFTWARE.
       stroke-linejoin: round;
       vector-effect: non-scaling-stroke;
       stroke-width: 1;
-      opacity: 0.045;
+      opacity: var(--chip-background-track-opacity);
     }
 
     .background-signal {
@@ -1347,7 +1372,7 @@ THE SOFTWARE.
       stroke-linejoin: round;
       vector-effect: non-scaling-stroke;
       stroke-width: 2;
-      opacity: 0.22;
+      opacity: var(--chip-background-pulse-opacity);
     }
 
     :root {
@@ -1624,7 +1649,8 @@ THE SOFTWARE.
     }
 
     .ambient-signal {
-      opacity: 0.55;
+      /* JS sets the fade using PULSE_SETTINGS.ambient.opacity before display. */
+      opacity: 0;
       filter: drop-shadow(0 0 3px currentColor);
     }
 
@@ -5415,7 +5441,7 @@ HALT</code></pre>
         const color = colors[index % colors.length];
 
         dot.classList.add("ambient-signal");
-        dot.setAttribute("r", "1.8");
+        dot.setAttribute("r", PULSE_SETTINGS.ambient.radius);
         dot.setAttribute("fill", color);
         dot.style.color = color;
 
@@ -5426,7 +5452,7 @@ HALT</code></pre>
         };
       });
 
-      const duration = 2200;
+      const duration = PULSE_SETTINGS.ambient.durationMs;
       const start = performance.now();
 
       function frame(now) {
@@ -5449,7 +5475,7 @@ HALT</code></pre>
 
           // Fade gently at both ends.
           signal.dot.style.opacity =
-            0.55 * Math.sin(Math.PI * progress);
+            PULSE_SETTINGS.ambient.opacity * Math.sin(Math.PI * progress);
 
           if (!signal.dot.parentNode) {
             ambientLayer.append(signal.dot);
@@ -5471,15 +5497,20 @@ HALT</code></pre>
     let archiveAmbientFrame = null;
 
     function scheduleAmbientSignals() {
-      // A single 4-7 second timer; no background wakeups in lighter modes.
+      // One shared timer; no background wakeups in lighter modes.
       if (mediaViewerPaused || !EFFECTS.ambientPulses || ambientScheduleTimer !== null) return;
+      // Allow the previous trio to finish, even if a shorter interval is entered.
+      const minDelay = Math.max(
+        PULSE_SETTINGS.ambient.minDelayMs, PULSE_SETTINGS.ambient.durationMs + 50
+      );
+      const maxDelay = Math.max(minDelay, PULSE_SETTINGS.ambient.maxDelayMs);
       ambientScheduleTimer = setTimeout(() => {
         ambientScheduleTimer = null;
         if (mediaViewerPaused || !EFFECTS.ambientPulses) return;
         if (projectsBoard.open) playArchiveAmbientSignals();
         else playAmbientSignals();
         scheduleAmbientSignals();
-      }, 4000 + Math.random() * 3000);
+      }, randomBetween(minDelay, maxDelay));
     }
 
     function stopAmbientSignals() {
@@ -5519,7 +5550,7 @@ HALT</code></pre>
     const PATCH_PAUSE_MAX = 1500;
 
     // Maximum brightness: 0 = invisible, 1 = fully opaque.
-    const PATCH_BRIGHTNESS = 0.75;
+    const PATCH_BRIGHTNESS = 0.60;
 
     const patchColors = [
       "#91bfd3", // Light blue
@@ -6918,7 +6949,7 @@ HALT</code></pre>
     projectsBoard.addEventListener("cancel", event => event.preventDefault());
 
 
-    // Ambient traffic uses its own layer and the existing 4-7 second scheduler.
+    // Ambient traffic uses its own layer and the shared PULSE_SETTINGS scheduler.
     const archiveAmbientLayer = document.createElementNS(SVG_NS, "g");
     archiveAmbientLayer.setAttribute("aria-hidden", "true");
     archiveAmbientLayer.style.pointerEvents = "none";
@@ -6937,7 +6968,7 @@ HALT</code></pre>
       const signals = [...projectsSvg.querySelectorAll("#projects-wires path")].map((path, i) => {
         const circle = document.createElementNS(SVG_NS, "circle");
         circle.setAttribute("class", "ambient-signal");
-        circle.setAttribute("r", "1.8");
+        circle.setAttribute("r", PULSE_SETTINGS.ambient.radius);
         circle.setAttribute("fill", colors[i]);
         circle.style.color = colors[i];
         return {path, circle: withMacSignalGlow(circle)};
@@ -6950,12 +6981,12 @@ HALT</code></pre>
           return;
         }
         if (start === undefined) start = now;
-        const progress = Math.min((now - start) / 2200, 1);
+        const progress = Math.min((now - start) / PULSE_SETTINGS.ambient.durationMs, 1);
         for (const {path, circle} of signals) {
           // Re-read the length so rotation during a pulse keeps it on the wire.
           const point = path.getPointAtLength(path.getTotalLength() * (reverse ? 1 - progress : progress));
           positionSignal(circle, point);
-          circle.style.opacity = 0.55 * Math.sin(Math.PI * progress);
+          circle.style.opacity = PULSE_SETTINGS.ambient.opacity * Math.sin(Math.PI * progress);
           if (!circle.parentNode) archiveAmbientLayer.append(circle);
         }
         if (progress < 1) archiveAmbientFrame = requestAnimationFrame(frame);
